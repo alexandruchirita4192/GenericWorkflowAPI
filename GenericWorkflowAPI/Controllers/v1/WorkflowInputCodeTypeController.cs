@@ -1,0 +1,83 @@
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
+using GenericWorkflowAPI.Domain.DTOs;
+using GenericWorkflowAPI.Domain.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Serilog;
+
+namespace GenericWorkflowAPI.Controllers.v1
+{
+    [ApiController]
+    [ApiVersion("1.0")]
+    public class WorkflowInputCodeTypeController : GenericCRUDController<WorkflowInputCodeType, WorkflowInputCodeTypeDto>
+    {
+        public WorkflowInputCodeTypeController(ILogger loggerManager, IMediator mediator)
+            : base(loggerManager, mediator,
+                  new List<string> {
+                      $"{nameof(WorkflowInputCodeType.Workflow)}",
+                      $"{nameof(WorkflowInputCodeType.ChangedByUser)}"
+                  })
+        {
+        }
+
+        //[EnableQuery]
+        [HttpGet("{code}")]
+        public async Task<IActionResult> Get(string code, CancellationToken cancellationToken)
+        {
+            return await base.GetItem(code, cancellationToken);
+        }
+
+        //[EnableQuery]
+        [HttpGet]
+        public new Task<IActionResult> Get(CancellationToken cancellationToken)
+        {
+            return base.GetCollection(cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpPost("{code}")]
+        public async Task<IActionResult> Create([FromBody] WorkflowInputCodeTypeDto item, CancellationToken cancellationToken)
+        {
+            return await base.CreateItem(item, cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Collection<WorkflowInputCodeTypeDto> collection, CancellationToken cancellationToken)
+        {
+            return await base.CreateCollection(collection, cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpPut("{code}")]
+        public async Task<IActionResult> Update([FromBody] WorkflowInputCodeTypeDto item, CancellationToken cancellationToken)
+        {
+            return await base.UpdateItem(item, cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] Collection<WorkflowInputCodeTypeDto> collection, CancellationToken cancellationToken)
+        {
+            return await base.UpdateCollection(collection, cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpDelete("{code}")]
+        public async Task<IActionResult> Delete(string code, CancellationToken cancellationToken)
+        {
+            return await base.DeleteItem(code, cancellationToken);
+        }
+
+        //[ValidateAntiForgeryToken]
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromBody] Collection<string> codes, CancellationToken cancellationToken)
+        {
+            return await base.DeleteCollection(codes, cancellationToken);
+        }
+    }
+}

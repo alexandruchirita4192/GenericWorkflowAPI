@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using GenericWorkflowAPI.AutoMapper;
+using GenericWorkflowAPI.Core.Extensions;
+using GenericWorkflowAPI.Core.Services;
+using GenericWorkflowAPI.Domain;
+using GenericWorkflowAPI.Domain.DTOs;
+using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
+namespace GenericWorkflowAPI.Extensions
+{
+    public static class ServicesExtensions
+    {
+        public static void AddDatabaseGenericCodeRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+            where TDbContext : DbContext
+        {
+            // Mapping Example:
+            //services.AddScoped(typeof(IGenericCodeRepository<Workflow>), typeof(GenericCodeRepository<Workflow, ApplicationDbContext>));
+
+            services.AddServices<ICodeEntity, IBaseDto>(mappings, logger,
+
+                // IGenericCodeRepository<Workflow>
+                (map) => typeof(IGenericCodeRepository<>).MakeGenericType(map.Key),
+
+                // GenericCodeRepository<Workflow, ApplicationDbContext>
+                (map) => typeof(GenericCodeRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)));
+        }
+
+        public static void AddDatabaseGenericRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+            where TDbContext : DbContext
+        {
+            // Mapping Example:
+            //services.AddScoped(typeof(IGenericRepository<Workflow>), typeof(GenericRepository<Workflow, ApplicationDbContext>));
+
+            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+
+                // IGenericRepository<Workflow>
+                (map) => typeof(IGenericRepository<>).MakeGenericType(map.Key),
+
+                // GenericRepository<Workflow, ApplicationDbContext>
+                (map) => typeof(GenericRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)));
+        }
+
+        public static void AddEntityService(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        {
+            // Mapping Example:
+            //services.AddScoped(typeof(IEntityService<Workflow>), typeof(EntityService<Workflow>));
+
+            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+
+                // IEntityService<Workflow>
+                (mapping) => typeof(IEntityService<>).MakeGenericType(mapping.Key),
+
+                // EntityService<Workflow>
+                (mapping) => typeof(EntityService<>).MakeGenericType(mapping.Key));
+        }
+
+        public static void AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        {
+            // Mapping Example:
+            //services.AddScoped(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
+
+            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+
+                // IMappingHelper<Workflow, WorkflowDto>
+                (mapping) => typeof(IMappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+
+                // MappingHelper<Workflow, WorkflowDto>
+                (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value));
+        }
+
+        public static void AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
+        {
+            if (services == null || mappings == null || mappings.Count == 0)
+            {
+                logger.Error("MediatR mappings null or empty");
+                return;
+            }
+
+            foreach (var mapping in mappings)
+            {
+                services.AddScoped(mapping.Interface, mapping.Implementation);
+            }
+        }
+    }
+}
