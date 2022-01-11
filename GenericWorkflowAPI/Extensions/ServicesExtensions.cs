@@ -15,76 +15,119 @@ namespace GenericWorkflowAPI.Extensions
 {
     public static class ServicesExtensions
     {
-        public static void AddDatabaseGenericCodeRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddDatabaseGenericCodeRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
             where TDbContext : DbContext
         {
             // Mapping Example:
             //services.AddScoped(typeof(IGenericCodeRepository<Workflow>), typeof(GenericCodeRepository<Workflow, ApplicationDbContext>));
 
-            services.AddServices<ICodeEntity, IBaseDto>(mappings, logger,
+            return services.AddServices<ICodeEntity, ICodeDto>(mappings, logger,
 
                 // IGenericCodeRepository<Workflow>
                 (map) => typeof(IGenericCodeRepository<>).MakeGenericType(map.Key),
 
                 // GenericCodeRepository<Workflow, ApplicationDbContext>
-                (map) => typeof(GenericCodeRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)));
+                (map) => typeof(GenericCodeRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
+                
+                nameof(AddDatabaseGenericCodeRepositories));
         }
 
-        public static void AddDatabaseGenericRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddDatabaseGenericRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
             where TDbContext : DbContext
         {
             // Mapping Example:
             //services.AddScoped(typeof(IGenericRepository<Workflow>), typeof(GenericRepository<Workflow, ApplicationDbContext>));
 
-            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
                 // IGenericRepository<Workflow>
                 (map) => typeof(IGenericRepository<>).MakeGenericType(map.Key),
 
                 // GenericRepository<Workflow, ApplicationDbContext>
-                (map) => typeof(GenericRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)));
+                (map) => typeof(GenericRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
+                
+                nameof(AddDatabaseGenericRepositories));
         }
 
-        public static void AddEntityService(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddEntityService(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
             //services.AddScoped(typeof(IEntityService<Workflow>), typeof(EntityService<Workflow>));
 
-            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
                 // IEntityService<Workflow>
                 (mapping) => typeof(IEntityService<>).MakeGenericType(mapping.Key),
 
                 // EntityService<Workflow>
-                (mapping) => typeof(EntityService<>).MakeGenericType(mapping.Key));
+                (mapping) => typeof(EntityService<>).MakeGenericType(mapping.Key),
+                
+                nameof(AddEntityService));
         }
 
-        public static void AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
             //services.AddScoped(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
 
-            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
                 // IMappingHelper<Workflow, WorkflowDto>
                 (mapping) => typeof(IMappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
 
                 // MappingHelper<Workflow, WorkflowDto>
-                (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value));
+                (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+                
+                nameof(AddMappingHelpers));
         }
 
-        public static void AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
+        public static IServiceCollection AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
         {
             if (services == null || mappings == null || mappings.Count == 0)
             {
                 logger.Error("MediatR mappings null or empty");
-                return;
+                return services;
             }
 
             foreach (var mapping in mappings)
             {
                 services.AddScoped(mapping.Interface, mapping.Implementation);
             }
+
+            return services;
         }
+
+        //private static void AddIdentityRoleToMappings(Dictionary<Type, Type> mappings, ILogger logger)
+        //{
+        //    if (mappings == null)
+        //    {
+        //        logger.Warning(
+        //            new ArgumentNullException(nameof(mappings)),
+        //            "Missing argument {argumentName} in method {methodName}",
+        //            nameof(mappings),
+        //            nameof(AddIdentityRoleToMappings));
+        //        return;
+        //    }
+        //    mappings.Add(typeof(IdentityRole), typeof(IdentityRole));
+        //}
+
+        //private static void RemoveIdentityRoleFromMappings(Dictionary<Type, Type> mappings, ILogger logger)
+        //{
+        //    if (mappings == null)
+        //    {
+        //        logger.Warning(
+        //            new ArgumentNullException(nameof(mappings)),
+        //            "Missing argument {argumentName} in method {methodName}",
+        //            nameof(mappings),
+        //            nameof(RemoveIdentityRoleFromMappings));
+        //        return;
+        //    }
+        //    if (!mappings.Remove(typeof(IdentityRole)))
+        //    {
+        //        logger.Warning("Cannot remove {entityTypeName} added beforehand. This might make some other {IServiceCollectionTypeName} extensions log some warnings.",
+        //            typeof(IdentityRole).Name,
+        //            typeof(IServiceCollection).Name);
+        //    }
+        //}
     }
 }

@@ -86,7 +86,9 @@ namespace GenericWorkflowAPI.Services
             if (workflow == null)
                 throw new InvalidOperationException($"Invalid {nameof(workflowCode)} {workflowCode} received. No workflow exists with that code.");
 
-            if (string.IsNullOrWhiteSpace(workflowInstanceCode))
+            // Try to get workflow instance by code
+            var workflowInstance = await workflowInstanceRepository.GetByCodeAsync(workflowInstanceCode, new List<string>(), cancellationToken);
+            if (workflowInstance == null) // If workflow instance doesn't exist then a new one must be created
             {
                 // Try to create a new instance if all input codes for the first state are provided
                 var firstWorkflowState = await workflowStateRepository.DbSet.FirstOrDefaultAsync(ws => ws.WorkflowId == workflow.Id && (ws.IsFirstState ?? false) && !ws.IsDeleted);
@@ -98,7 +100,7 @@ namespace GenericWorkflowAPI.Services
                     await GetValidWorkflowInputCodeTypesAndValidateReceivedValues(workflow, firstWorkflowState, workflowInputCodeTypeXvalue,
                     createWorkflowInstance: true, cancellationToken);
 
-                var workflowInstance = new WorkflowInstance
+                workflowInstance = new WorkflowInstance
                 {
                     WorkflowId = workflow.Id,
                     CurrentStateId = firstWorkflowState.Id,
@@ -129,15 +131,9 @@ namespace GenericWorkflowAPI.Services
                 // Also, because of that, there's no workflow instance history with it's associated input codes
                 // (workflow instance history defines a transition with a current state and a next state with both states required)
             }
-            else
+            else // If the workflow instance exists it is already loaded and a transition must be executed
             {
                 // Execute workflow transition if all input codes for the current state of the instance are provided
-
-                // Get workflow instance by code
-                var workflowInstance = await workflowInstanceRepository.GetByCodeAsync(workflowInstanceCode, new List<string>(), cancellationToken);
-                if (workflowInstance == null)
-                    throw new InvalidOperationException($"Cannot execute a workflow transition " +
-                        $"for a missing workflow instance (code of the workflow instance is {workflowInstanceCode}).");
 
                 // Get all possible transitions starting from the current workflow instance state
                 var executableTransitions = await workflowTransitionRepository.DbSet
@@ -220,7 +216,7 @@ namespace GenericWorkflowAPI.Services
                     CurrentStateId = workflowInstance.CurrentStateId,
                     NextStateId = nextStateId,
                 };
-                await workflowInstanceHistoryRepository.UpdateAsync(workflowInstanceHistory, cancellationToken);
+                await workflowInstanceHistoryRepository.UpdateLoadedAsync(workflowInstanceHistory, cancellationToken);
 
                 // Update workflow instance state based on the transition executed
                 workflowInstance.CurrentStateId = nextStateId;
@@ -255,7 +251,7 @@ namespace GenericWorkflowAPI.Services
                     {
                         // or else update existing WorkflowInstanceInputCode
                         workflowInstanceInputCode.Value = pair.Value;
-                        await workflowInstanceInputCodeRepository.UpdateAsync(workflowInstanceInputCode, cancellationToken);
+                        await workflowInstanceInputCodeRepository.UpdateLoadedAsync(workflowInstanceInputCode, cancellationToken);
                     }
 
                     // Fill workflow instance history input code
@@ -266,7 +262,7 @@ namespace GenericWorkflowAPI.Services
                         InputCodeTypeId = workflowInputCodeType.Id,
                         Value = pair.Value
                     };
-                    await workflowInstanceHistoryInputCodeRepository.UpdateAsync(workflowInstanceHistoryInputCode, cancellationToken);
+                    await workflowInstanceHistoryInputCodeRepository.UpdateLoadedAsync(workflowInstanceHistoryInputCode, cancellationToken);
                 }
             }
         }

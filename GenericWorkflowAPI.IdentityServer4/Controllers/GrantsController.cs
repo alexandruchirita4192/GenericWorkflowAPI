@@ -50,7 +50,7 @@ namespace IdentityServerHost.Quickstart.UI
         /// Handle postback to revoke a client
         /// </summary>
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Revoke(string clientId)
         {
             await _interaction.RevokeUserConsentAsync(clientId);

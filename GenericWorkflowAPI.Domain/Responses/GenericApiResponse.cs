@@ -10,6 +10,12 @@ namespace GenericWorkflowAPI.Domain.Responses
     {
         #region Constructors
 
+        private GenericApiResponse(TPayload payload, HttpStatusCode status)
+        {
+            Payload = payload;
+            Status = status;
+        }
+
         private GenericApiResponse(TPayload payload)
         {
             Status = HttpStatusCode.OK;
@@ -64,7 +70,7 @@ namespace GenericWorkflowAPI.Domain.Responses
 
         public static GenericApiResponse<TPayload> Ok() => new(HttpStatusCode.OK);
 
-        public static GenericApiResponse<TPayload> Created() => new(HttpStatusCode.Created);
+        public static GenericApiResponse<TPayload> Created(TPayload payload) => new(payload, HttpStatusCode.Created);
 
         public static GenericApiResponse<TPayload> Ok(TPayload payload) => new(payload);
 

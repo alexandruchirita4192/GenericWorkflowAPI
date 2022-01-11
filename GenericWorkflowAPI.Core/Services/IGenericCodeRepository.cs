@@ -12,6 +12,10 @@ namespace GenericWorkflowAPI.Core.Services
 
         public Task<List<TEntity>> GetByCodeListAsync(List<string> codesList, List<string> includePathList, CancellationToken cancellationToken);
 
+        public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken);
+
+        public Task UpdateAsync(List<TEntity> entitiesList, CancellationToken cancellationToken);
+
         public Task DeleteAsync(string code, CancellationToken cancellationToken);
 
         public Task DeleteAsync(List<string> codesList, CancellationToken cancellationToken);

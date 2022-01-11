@@ -39,7 +39,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
                 await repository.AddRangeAsync(entitiesList, cancellationToken);
 
-                return GenericApiResponse<string>.Created();
+                return GenericApiResponse<string>.Created(JsonConvert.SerializeObject(request.Collection, Formatting.Indented));
             }
             catch (Exception ex)
             {

@@ -15,5 +15,8 @@ namespace GenericWorkflowAPI.Domain.DTOs
 
         [Required]
         public string NextStateCode { get; set; }
+
+        [Required]
+        public string RoleCode { get; set; }
     }
 }

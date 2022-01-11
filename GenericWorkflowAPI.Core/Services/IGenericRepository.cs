@@ -19,9 +19,9 @@ namespace GenericWorkflowAPI.Core.Services
 
         public Task AddRangeAsync(List<TEntity> entitiesList, CancellationToken cancellationToken);
 
-        public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken);
+        public Task UpdateLoadedAsync(TEntity loadedEntity, CancellationToken cancellationToken);
 
-        public Task UpdateAsync(List<TEntity> entitiesList, CancellationToken cancellationToken);
+        public Task UpdateLoadedAsync(List<TEntity> loadedEntitiesList, CancellationToken cancellationToken);
 
         public Task DeleteAsync(long? id, CancellationToken cancellationToken);
 

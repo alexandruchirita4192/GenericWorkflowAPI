@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
@@ -12,9 +11,9 @@ namespace GenericWorkflowAPI.Core.Extensions
 {
     public static class ServicesExtensions
     {
-        public static void ConfigureCors(this IServiceCollection services)
+        public static IServiceCollection ConfigureCors(this IServiceCollection services)
         {
-            services.AddCors(options =>
+            return services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder.AllowAnyOrigin()
@@ -28,18 +27,20 @@ namespace GenericWorkflowAPI.Core.Extensions
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
-        public static void AddReflectionMappingInfoProvider(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddReflectionMappingInfoProvider(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
             //services.AddScoped(typeof(IReflectionMappingInfoProvider<Workflow, WorkflowDto>), typeof(ReflectionMappingInfoProvider<Workflow, WorkflowDto>));
 
-            services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
                 // IReflectionMappingInfoProvider<Workflow, WorkflowDto>
                 (mapping) => typeof(IReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value),
 
                 // ReflectionMappingInfoProvider<Workflow, WorkflowDto>
-                (mapping) => typeof(ReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value));
+                (mapping) => typeof(ReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value),
+                
+                nameof(AddReflectionMappingInfoProvider));
         }
 
         /// <summary>
@@ -52,22 +53,23 @@ namespace GenericWorkflowAPI.Core.Extensions
         /// <param name="logger">The Serilog Logger</param>
         /// <param name="getInterfaceType">The function used to generate an interface type based on received Entity type and Dto type</param>
         /// <param name="getImplementedType">The function used to generate an implemented type based on received Entity type and Dto type</param>
-        public static void AddServices<TEntityRequirement, TDtoRequirement>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger,
+        public static IServiceCollection AddServices<TEntityRequirement, TDtoRequirement>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger,
             Func<KeyValuePair<Type, Type>, Type> getInterfaceType,
-            Func<KeyValuePair<Type, Type>, Type> getImplementedType)
+            Func<KeyValuePair<Type, Type>, Type> getImplementedType,
+            string procedureName)
         {
             if (getInterfaceType == null || getImplementedType == null)
             {
                 logger.Error("One of the functions received in {procedureName} is null. Returning without adding any services.",
-                    nameof(AddServices));
-                return;
+                    procedureName ?? nameof(AddServices));
+                return services;
             }
 
             if (mappings == null || mappings.Count == 0)
             {
                 logger.Error("No mappings received in {procedureName}. Returning without adding any services.",
-                    nameof(AddServices));
-                return;
+                    procedureName ?? nameof(AddServices));
+                return services;
             }
 
             foreach (var map in mappings)
@@ -80,18 +82,21 @@ namespace GenericWorkflowAPI.Core.Extensions
                     // Check entity type
                     if (!map.Key.IsAssignableTo(typeof(TEntityRequirement)))
                     {
-                        logger.Warning("Entity {entityTypeName} doesn't implement {entityRequirementTypeName}. Skipping adding this GenericRepository to the DI container.",
+                        logger.Warning("Entity {entityTypeName} doesn't implement {entityRequirementTypeName}. Skipping adding this service to the DI container in {procedureName}.",
                             map.Key,
-                            typeof(TEntityRequirement).Name);
+                            typeof(TEntityRequirement).Name,
+                            procedureName ?? nameof(AddServices)
+                            );
                         continue;
                     }
 
                     // Check dto type
                     if (!map.Value.IsAssignableTo(typeof(TDtoRequirement)))
                     {
-                        logger.Warning("{dtoTypeName} doesn't implement {dtoRequirementTypeName}. Skipping adding the mapping helper for this entity-dto pair.",
+                        logger.Warning("{dtoTypeName} doesn't implement {dtoRequirementTypeName}. Skipping adding this service to the DI container in {procedureName}.",
                             map.Value.Name,
-                            typeof(TDtoRequirement).Name
+                            typeof(TDtoRequirement).Name,
+                            procedureName ?? nameof(AddServices)
                             );
                         continue;
                     }
@@ -101,9 +106,11 @@ namespace GenericWorkflowAPI.Core.Extensions
 
                     if (!implementedType.IsAssignableTo(interfaceType))
                     {
-                        logger.Warning("{implementedTypeName} doesn't implement {interfaceTypeName}. Skipping adding this GenericRepository to the DI container.",
+                        logger.Warning("{implementedTypeName} doesn't implement {interfaceTypeName}. Skipping adding this service to the DI container in {procedureName}.",
                             implementedType.Name,
-                            interfaceType.Name);
+                            interfaceType.Name,
+                            procedureName ?? nameof(AddServices)
+                            );
                         continue;
                     }
 
@@ -112,11 +119,16 @@ namespace GenericWorkflowAPI.Core.Extensions
                 catch (Exception ex)
                 {
                     logger.Error(ex, "Adding GenericRepository with interface {interfaceTypeName} and implementation {implementedTypeName} failed. " +
-                        "Skipping adding it to the DI container. " +
+                        "Skipping adding it to the DI container in {procedureName}. " +
                         "Note: If some type wasn't set because of an exception, then it's type is typeof(string).Name.",
-                        interfaceType.Name, implementedType.Name);
+                        interfaceType.Name,
+                        implementedType.Name,
+                        procedureName ?? nameof(AddServices)
+                        );
                 }
             }
+
+            return services;
         }
     }
 }

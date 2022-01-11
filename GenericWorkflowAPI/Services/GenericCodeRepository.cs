@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
@@ -32,7 +33,7 @@ namespace GenericWorkflowAPI.Services
 
             try
             {
-                var entitiesQueryable = DbSet.Where(entity => !entity.IsDeleted);
+                var entitiesQueryable = DbSet.AsNoTracking().Where(entity => !entity.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {
@@ -60,7 +61,7 @@ namespace GenericWorkflowAPI.Services
 
             try
             {
-                var entitiesQueryable = DbSet.Where(entity => !entity.IsDeleted);
+                var entitiesQueryable = DbSet.AsNoTracking().Where(entity => !entity.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {
@@ -78,6 +79,68 @@ namespace GenericWorkflowAPI.Services
                 _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(GetByCodeListAsync)}({JsonConvert.SerializeObject(codesList)}) function error");
             }
             return default(List<TEntity>);
+        }
+
+        public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (entity == null)
+                    return;
+
+                // TODO: Maybe improve performance somehow because the entity is reloaded from database based on code..
+                var loadedEntity = await GetByCodeAsync(entity.Code, new List<string>(), cancellationToken);
+                
+                // Copy all properties through reflection. Slow.. TODO: Make it faster maybe? At least properties cached or something...
+                var savedId = loadedEntity.Id;
+                entity.CopyProperties(loadedEntity);
+                loadedEntity.Id = savedId; // Load all except the Id
+
+                _entityService.Update(loadedEntity);
+                _dbContext.Update(loadedEntity);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
+                    typeof(GenericCodeRepository<TEntity, TDbContext>),
+                    nameof(UpdateAsync),
+                    JsonConvert.SerializeObject(entity));
+                throw;
+            }
+        }
+
+        public async Task UpdateAsync(List<TEntity> entitiesList, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (entitiesList == null || entitiesList.Count == 0)
+                    return;
+
+                foreach (var entity in entitiesList)
+                {
+                    // TODO: Maybe improve performance somehow because the entity is reloaded from database based on code..
+                    var loadedEntity = await GetByCodeAsync(entity.Code, new List<string>(), cancellationToken);
+
+                    // Copy all properties through reflection. Slow.. TODO: Make it faster maybe? At least properties cached or something...
+                    var savedId = loadedEntity.Id;
+                    entity.CopyProperties(loadedEntity);
+                    loadedEntity.Id = savedId; // Load all except the Id
+
+                    _entityService.Update(loadedEntity);
+                    _dbContext.Update(loadedEntity);
+                }
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
+                    typeof(GenericCodeRepository<TEntity, TDbContext>),
+                    nameof(UpdateAsync),
+                    JsonConvert.SerializeObject(entitiesList));
+                throw;
+            }
         }
 
         public async Task DeleteAsync(string code, CancellationToken cancellationToken)

@@ -34,6 +34,7 @@ namespace GenericWorkflowAPI.CommandHandlers
                 return Problem((int)HttpStatusCode.InternalServerError, ValidationConstants.GenericValidationMessage, response.Extensions);
             }
 
+            // 2xx - Successful status codes
             if (response.Status == HttpStatusCode.OK)
             {
                 if (response.Payload != null)
@@ -42,16 +43,25 @@ namespace GenericWorkflowAPI.CommandHandlers
                     return Ok(response.Message);
                 return Ok();
             }
+            if (response.Status == HttpStatusCode.Created)
+                return Created(response.Payload);
+            if (response.Status == HttpStatusCode.NoContent)
+                return NoContent();
 
             if (response.Status == null)
                 logger.Debug($"Unexpected null status in response {typeof(GenericApiResponse<TPayload>).FullName}; defaulting status to InternalServerError");
 
             var status = response.Status ?? HttpStatusCode.InternalServerError;
+            var statusInt = (int)status;
+
+            // 1xx – Informational, 2xx – Successful, 3xx – Redirection
+            if (statusInt >= 100 && statusInt <= 399)
+                return StatusCode(statusInt);
 
             if (string.IsNullOrWhiteSpace(response.Message))
-                return Problem((int)status);
+                return Problem(statusInt);
 
-            return Problem((int)status, response.Message, response.Extensions);
+            return Problem(statusInt, response.Message, response.Extensions);
         }
 
         #region Internal methods
@@ -69,6 +79,21 @@ namespace GenericWorkflowAPI.CommandHandlers
         private ActionResult Ok(TPayload payload)
         {
             return new OkObjectResult(payload);
+        }
+
+        private ActionResult Created(TPayload payload)
+        {
+            return new CreatedResult(accessor?.HttpContext?.Request?.Path, payload);
+        }
+
+        private ActionResult NoContent()
+        {
+            return new NoContentResult();
+        }
+
+        private ActionResult StatusCode(int statusInt)
+        {
+            return new StatusCodeResult(statusInt);
         }
 
         private ActionResult Problem(int statusCode)
@@ -90,7 +115,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
             var problemDetails = new ProblemDetails
             {
-                Type = $"{accessor?.HttpContext?.Request?.PathBase ?? "http://example.com"}"
+                Type = $"{accessor?.HttpContext?.Request?.Path ?? "http://example.com"}"
                     + (hasInvalidParams ? "/Invalid-Parameters" : "/Error"),
                 Title = hasInvalidParams ? ValidationConstants.InvalidRequestValidationTitle : ValidationConstants.GenericValidationTitle,
                 Instance = accessor?.HttpContext?.Request?.Path,

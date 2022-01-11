@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace GenericWorkflowAPI.Core.AutoMapper.Helpers
+namespace GenericWorkflowAPI.Core.AutoMapper
 {
     public interface IEntityDtoMappingProvider
     {
-        Dictionary<Type, Type> GetEntityDtoMapping(Assembly assembly);
+        EntityDtoMapping GetEntityDtoMapping(Assembly assembly);
     }
 }

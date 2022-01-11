@@ -55,18 +55,41 @@ namespace GenericWorkflowAPI.AutoMapper
                     continue;
                 }
 
+                var entityTypeFromProperty = reflectionMappedInfo.EntityPropertyInfoClass.PropertyType;
+                if (!entityTypeFromProperty.IsAssignableTo(typeof(ICodeEntity)))
+                {
+                    _logger.Warning("Invalid entity type {entityTypeFromPropertyName} which cannot be assigned to {codeEntityName}. Skip setting {codePropertyName} in {dtoTypeName}.",
+                        entityTypeFromProperty.Name,
+                        typeof(ICodeEntity).Name,
+                        reflectionMappedInfo.DtoPropertyInfoCode.Name,
+                        typeof(TDto).Name);
+                    continue;
+                }
+
                 var classPropertyValue = reflectionMappedInfo.EntityPropertyInfoClass.GetValue(entity, null) as ICodeEntity;
 
                 // If the [classPropertyValue] doesn't have a "[classPropertyValue].Code" property (defined by ICodeEntity)
                 // then setting the "Code" property for Dto won't work
                 if (classPropertyValue == null)
+                {
+                    _logger.Warning("Value of property {classPropertyName} is null. Skip setting {codePropertyName} in {dtoTypeName}.",
+                        reflectionMappedInfo.EntityPropertyInfoClass.Name,
+                        reflectionMappedInfo.DtoPropertyInfoCode.Name,
+                        typeof(TDto).Name);
                     continue;
+                }
 
                 var codeValue = classPropertyValue.Code;
                 if (string.IsNullOrWhiteSpace(codeValue))
+                {
+                    _logger.Warning("Invalid code value '{codeValue}'. Skip setting {codePropertyName} in {dtoTypeName}.",
+                        codeValue,
+                        reflectionMappedInfo.DtoPropertyInfoCode.Name,
+                        typeof(TDto).Name);
                     continue;
+                }
 
-                // Set the value of the TDto property "{}" based on the value of the TEntity
+                // Set the value of the TDto property "{Property}Code" based on the value "Code" of the TEntity of type ICodeEntity
                 reflectionMappedInfo.DtoPropertyInfoCode.SetValue(dto, codeValue, null);
             }
 
@@ -102,14 +125,21 @@ namespace GenericWorkflowAPI.AutoMapper
                     var codeValue = reflectionMappedInfo.DtoPropertyInfoCode.GetValue(dto, null) as string;
                     if (string.IsNullOrWhiteSpace(codeValue))
                     {
-                        _logger.Warning($"Invalid code value '{codeValue}'.");
+                        _logger.Warning("Invalid code value '{codeValue}'. Skip setting {idPropertyName} in {entityTypeName}.",
+                            codeValue,
+                            reflectionMappedInfo.EntityPropertyInfoId.Name,
+                            typeof(TEntity).Name);
                         continue;
                     }
 
                     var entityTypeFromProperty = reflectionMappedInfo.EntityPropertyInfoClass.PropertyType;
                     if (!entityTypeFromProperty.IsAssignableTo(typeof(ICodeEntity)))
                     {
-                        _logger.Warning($"Invalid entity type {entityTypeFromProperty.Name} which cannot be assigned to {typeof(ICodeEntity).Name}");
+                        _logger.Warning("Invalid entity type {entityTypeFromPropertyName} which cannot be assigned to {codeEntityName}. Skip setting {idPropertyName} in {entityTypeName}.",
+                            entityTypeFromProperty.Name,
+                            typeof(ICodeEntity).Name,
+                            reflectionMappedInfo.EntityPropertyInfoId.Name,
+                            typeof(TEntity).Name);
                         continue;
                     }
 
@@ -117,16 +147,24 @@ namespace GenericWorkflowAPI.AutoMapper
                     var codeRepositoryInstance = ActivatorUtilities.CreateInstance(_serviceProvider, codeRepositoryType) as IGenericCodeRepository;
                     if (codeRepositoryInstance == null)
                     {
-                        _logger.Warning("IGenericCodeRepository of type {codeRepositoryTypeName} is null.",
-                            codeRepositoryType.Name);
+                        _logger.Warning("{genericCodeReposistoryInterfaceName} instance of type {codeRepositoryTypeName} is null. Skip setting {idPropertyName} in {entityTypeName}.",
+                            nameof(IGenericCodeRepository),
+                            codeRepositoryType.Name,
+                            reflectionMappedInfo.EntityPropertyInfoId.Name,
+                            typeof(TEntity).Name);
                         continue;
                     }
 
                     var childEntity = await codeRepositoryInstance.GetInterfaceTypeByCodeAsync(codeValue, new List<string>(), cancellationToken);
                     if (childEntity == null)
                     {
-                        _logger.Warning("Child entity retrived by IGenericCodeRepository of type {entityTypeName} is null.",
-                            entityTypeFromProperty.Name);
+                        _logger.Warning("Child entity of type {entityType} retrived by {genericCodeReposistoryInterfaceName} of type {codeRepositoryTypeName} based on code {codeValue} is null. Skip setting {idPropertyName} in {entityTypeName}.",
+                            entityTypeFromProperty.Name,
+                            nameof(IGenericCodeRepository),
+                            codeRepositoryType.Name,
+                            codeValue,
+                            reflectionMappedInfo.EntityPropertyInfoId.Name,
+                            typeof(TEntity).Name);
                         continue;
                     }
 
@@ -135,7 +173,12 @@ namespace GenericWorkflowAPI.AutoMapper
                 }
                 catch(Exception ex)
                 {
-                    _logger.Error(ex, "MapDtoToEntity exception occured in foreach for item {@reflectionMappedInfo}", reflectionMappedInfo);
+                    _logger.Error(ex, "{functionName} exception occured in foreach of list {listName} for item {@reflectionMappedInfo} while setting properties from dto of type {dtoTypeName} to entity of type {entityTypeName}.", 
+                        nameof(MapDtoToEntity),
+                        nameof(MappingInfos),
+                        reflectionMappedInfo,
+                        typeof(TDto).Name,
+                        typeof(TEntity).Name);
                 }
             }
 

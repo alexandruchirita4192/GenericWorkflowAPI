@@ -41,7 +41,7 @@ namespace GenericWorkflowAPI.Services
 
             try
             {
-                var entitiesQueryable = DbSet.Where(e => !e.IsDeleted);
+                var entitiesQueryable = DbSet.AsNoTracking().Where(e => !e.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {
@@ -66,7 +66,7 @@ namespace GenericWorkflowAPI.Services
         {
             try
             {
-                var entitiesQueryable = DbSet.Where(e => !e.IsDeleted);
+                var entitiesQueryable = DbSet.AsNoTracking().Where(e => !e.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {
@@ -126,46 +126,51 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken)
+        public async Task UpdateLoadedAsync(TEntity loadedEntity, CancellationToken cancellationToken)
         {
             try
             {
-                if (entity == null)
+                if (loadedEntity == null)
                     return;
 
-                _entityService.Update(entity);
-                _dbContext.Update(entity);
+                _entityService.Update(loadedEntity);
+                _dbContext.Update(loadedEntity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(UpdateAsync)}({JsonConvert.SerializeObject(entity)}) function error");
+                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
+                    typeof(GenericRepository<TEntity, TDbContext>),
+                    nameof(UpdateLoadedAsync),
+                    JsonConvert.SerializeObject(loadedEntity));
                 throw;
             }
         }
 
-        public async Task UpdateAsync(List<TEntity> entitiesList, CancellationToken cancellationToken)
+        public async Task UpdateLoadedAsync(List<TEntity> loadedEntitiesList, CancellationToken cancellationToken)
         {
             try
             {
-                if (entitiesList == null || entitiesList.Count == 0)
+                if (loadedEntitiesList == null || loadedEntitiesList.Count == 0)
                     return;
 
-                foreach (var entity in entitiesList)
+                foreach (var loadedEntity in loadedEntitiesList)
                 {
-                    _entityService.Update(entity);
-                    _dbContext.Update(entity);
+                    _entityService.Update(loadedEntity);
+                    _dbContext.Update(loadedEntity);
                 }
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(UpdateAsync)}({JsonConvert.SerializeObject(entitiesList)}) function error");
+                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
+                    typeof(GenericRepository<TEntity, TDbContext>),
+                    nameof(UpdateLoadedAsync),
+                    JsonConvert.SerializeObject(loadedEntitiesList));
                 throw;
             }
         }
-
         public async Task DeleteAsync(long? id, CancellationToken cancellationToken)
         {
             try
@@ -183,7 +188,10 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(DeleteAsync)}({id}) function error");
+                _logger.Error(ex, "{genericTypeName}.{methodName}({id}) function error",
+                    typeof(GenericRepository<TEntity, TDbContext>),
+                    nameof(DeleteAsync),
+                    id);
                 throw;
             }
         }
@@ -212,7 +220,10 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(DeleteAsync)}({JsonConvert.SerializeObject(idsList)}) function error");
+                _logger.Error(ex, "{genericTypeName}.{methodName}({idsListAsJson}) function error",
+                    typeof(GenericRepository<TEntity, TDbContext>),
+                    nameof(DeleteAsync),
+                    JsonConvert.SerializeObject(idsList));
                 throw;
             }
         }

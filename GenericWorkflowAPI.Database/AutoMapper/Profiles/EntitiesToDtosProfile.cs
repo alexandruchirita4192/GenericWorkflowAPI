@@ -10,13 +10,14 @@ namespace GenericWorkflowAPI.AutoMapper
         {
             if (mapping == null || mapping.Count == 0)
             {
-                throw new InvalidOperationException("Empty mapping for EntitiesToDtosProfile profile");
+                throw new ArgumentException( $"Empty mapping argument passed to {nameof(EntitiesToDtosProfile)} profile", nameof(mapping));
             }
 
             foreach(var item in mapping)
             {
-                CreateMap(item.Key, item.Value);
-                CreateMap(item.Value, item.Key);
+                // Create AutoMapper mapping both ways based on those types
+                CreateMap(item.Key, item.Value); // Entity-DTO
+                CreateMap(item.Value, item.Key); // DTO-Entity
             }
         }
     }

@@ -38,42 +38,42 @@ namespace GenericWorkflowAPI.Controllers.v1
             return await base.GetCollection(cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpPost("{code}")]
         public async Task<IActionResult> Create([FromBody] WorkflowStateDto item, CancellationToken cancellationToken)
         {
             return await base.CreateItem(item, cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Collection<WorkflowStateDto> collection, CancellationToken cancellationToken)
         {
             return await base.CreateCollection(collection, cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpPut("{code}")]
         public async Task<IActionResult> Update([FromBody] WorkflowStateDto item, CancellationToken cancellationToken)
         {
             return await base.UpdateItem(item, cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] Collection<WorkflowStateDto> collection, CancellationToken cancellationToken)
         {
             return await base.UpdateCollection(collection, cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpDelete("{code}")]
         public async Task<IActionResult> Delete(string code, CancellationToken cancellationToken)
         {
             return await base.DeleteItem(code, cancellationToken);
         }
 
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromBody] Collection<string> codes, CancellationToken cancellationToken)
         {

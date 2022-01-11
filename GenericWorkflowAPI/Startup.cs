@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.CommandHandlers;
 using GenericWorkflowAPI.CommandHandlers.RequestHandlers;
-using GenericWorkflowAPI.Core.AutoMapper.Helpers;
+using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Core.Extensions;
 using GenericWorkflowAPI.Core.Helpers;
 using GenericWorkflowAPI.Core.Services;
@@ -16,9 +18,11 @@ using GenericWorkflowAPI.Extensions;
 using GenericWorkflowAPI.Helpers;
 using GenericWorkflowAPI.Services;
 using MediatR;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -28,6 +32,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
@@ -52,10 +57,11 @@ namespace GenericWorkflowAPI
             }
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IAntiforgery antiforgery)
         {
             // Configure the HTTP request pipeline.
-            if (env.IsDevelopment()) // if (app.Environment.IsDevelopment()) // for .Net 6
+            var isDevelopment = env.IsDevelopment(); // app.Environment.IsDevelopment() for .Net 6
+            if (isDevelopment)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -65,6 +71,9 @@ namespace GenericWorkflowAPI
                 });
                 app.UseMigrationsEndPoint();
                 app.UseDeveloperExceptionPage();
+
+                // Show Personal Identifiable Information in development; Some exceptions are hidden because of it
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {
@@ -74,21 +83,30 @@ namespace GenericWorkflowAPI
                 app.UseHsts();
             }
 
-            //app.UseStaticFiles(); // favicon.ico is needed??
-
-            // Add serilog logging after UseStaticFiles
-            app.UseSerilogRequestLogging(opts =>
-            {
-                opts.EnrichDiagnosticContext = LogHelper.EnrichFromRequest;
-            });
-
-            // Setup OData
-            //app.UseODataQueryRequest();
-
-            app.UseCors();
-
             if (UseAuthentication)
                 app.UseAuthentication();
+
+            if (isDevelopment)
+            {
+                // Append AntiForgery token to Swagger methods
+                app.Use(next =>
+                {
+                    return new RequestDelegate((context) =>
+                    {
+                        // The request token can be sent as a JavaScript-readable cookie, and Angular uses it by default.
+                        var token = antiforgery?.GetAndStoreTokens(context)?.RequestToken;
+                        if (!string.IsNullOrWhiteSpace(token))
+                        {
+                            context?.Response?.Cookies?.Append("XSRF-TOKEN", token, new CookieOptions() { HttpOnly = false });
+
+                            // Adding the header on the request to be fine in AntiForgery validation in development by default (mostly needed in Swagger requests)
+                            context?.Request?.Headers?.Add("RequestVerificationToken", token);
+                        }
+
+                        return next(context);
+                    });
+                });
+            }
 
             app.UseRouting();
 
@@ -100,11 +118,21 @@ namespace GenericWorkflowAPI
                 endpoints.MapControllers();
             });
 
-            //app.UseHttpsRedirection();
+            // Add serilog logging after UseStaticFiles
+            app.UseSerilogRequestLogging(opts =>
+            {
+                opts.EnrichDiagnosticContext = SerilogLogHelper.EnrichFromRequest;
+            });
+
+            // Setup OData
+            //app.UseODataQueryRequest();
+
+            app.UseCors();
+
             app.UseApiVersioning();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)//, IEntityDtoMappingProvider mappingProvider)
         {
             // Add Serilog logger
             services.AddLogging(x =>
@@ -171,7 +199,10 @@ namespace GenericWorkflowAPI
                 .AddDefaultTokenProviders();
 
             // Seed admin user data
-            services.EnsureSeedAdminUserData();
+            Task.Run(async () =>
+            {
+                await services.EnsureSeedAdminUserData();
+            });
 
             // Run embedded resource SQL files
             services.RunEmbeddedResourcesInCurrentAssembly(connectionString);
@@ -180,7 +211,7 @@ namespace GenericWorkflowAPI
             //var edmModel = EdmModelHelper.GetEdmModel();
 
             // Use controllers with Newtonsoft.Json serialization
-            services.AddControllers()
+            services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
@@ -222,14 +253,38 @@ namespace GenericWorkflowAPI
             // Add entities to dtos mapper
             services.AddSingleton(typeof(IEntityDtoMappingProvider), typeof(EntityDtoMappingProvider));
 
-            var serviceProvider = services.BuildServiceProvider();
-            var mappingProvider = serviceProvider.GetService<IEntityDtoMappingProvider>();
-            var mappings = mappingProvider.GetEntityDtoMapping(typeof(Workflow).Assembly);
+            // Create Entities-DTOs mappings for the Domain assembly
+            var domainMappings = new EntityDtoMappingProvider(Log.Logger).GetEntityDtoMapping(typeof(Workflow).Assembly);
 
-            // Auto Mapper Configurations
+            var assemblyMappingsList = new List<EntityDtoMapping> { domainMappings };
+            var entitiesToDtoProfilesList = new List<EntitiesToDtosProfile>();
+
+            foreach (var assemblyMapping in assemblyMappingsList)
+            {
+                // Add EntitiesToDtosProfile AutoMapper profile for current assembly to list
+                entitiesToDtoProfilesList.Add(new EntitiesToDtosProfile(assemblyMapping?.Mapping));
+
+                // Entity-related services: EntityService<TEntity> : IEntityService<TEntity>
+                services.AddEntityService(assemblyMapping?.Mapping, Log.Logger);
+
+                // Database-related services: GenericRepository<TEntity, TDbContext> : IGenericRepository<TEntity>
+                services.AddDatabaseGenericRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
+
+                // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
+                services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
+
+                // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
+                services.AddMappingHelpers(assemblyMapping?.Mapping, Log.Logger);
+
+                // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
+                services.AddReflectionMappingInfoProvider(assemblyMapping?.Mapping, Log.Logger);
+            }
+
+            // Add AutoMapper IMapper to services
             var mappingConfig = new MapperConfiguration(mc =>
             {
-                mc.AddProfile(new EntitiesToDtosProfile(mappings));
+                foreach (var entitiesToDtosProfile in entitiesToDtoProfilesList)
+                    mc.AddProfile(entitiesToDtosProfile);
             });
             var mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
@@ -238,28 +293,13 @@ namespace GenericWorkflowAPI
             services.AddHttpContextAccessor();
 
             // Configure Cross-Origin Resource Sharing (Cors) Policy
-            //services.ConfigureCors();
+            services.ConfigureCors();
 
             // Add a single memory cache per application
             services.AddScoped(typeof(IMemoryCache), typeof(MemoryCache));
 
             // Register encodings
             Core.Extensions.ServicesExtensions.RegisterEncodingProvider();
-
-            // Entity-related services: EntityService<TEntity> : IEntityService<TEntity>
-            services.AddEntityService(mappings, Log.Logger);
-
-            // Database-related services: GenericRepository<TEntity, TDbContext> : IGenericRepository<TEntity>
-            services.AddDatabaseGenericRepositories<ApplicationDbContext>(mappings, Log.Logger);
-
-            // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
-            services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(mappings, Log.Logger);
-
-            // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
-            services.AddMappingHelpers(mappings, Log.Logger);
-
-            // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
-            services.AddReflectionMappingInfoProvider(mappings, Log.Logger);
 
             // Add MediatR Handlers based on controllers (and log which handlers fail because entities or dtos do not implement what they should)
             var mediatorMappings = MediatorHelper.GetMappings(Log.Logger);
@@ -276,7 +316,7 @@ namespace GenericWorkflowAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Generic Workflow API", Version = "v1.0" });
 
-                // add JWT Authentication
+                // Add JWT Authentication
                 var securityScheme = new OpenApiSecurityScheme
                 {
                     Name = "JWT Authentication",
@@ -291,13 +331,15 @@ namespace GenericWorkflowAPI
                         Type = ReferenceType.SecurityScheme
                     }
                 };
-
                 c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {securityScheme, new string[] { }}
                 });
             });
+
+            // Add AntiForgery service mapping the IAntiforgery interface
+            services.AddAntiforgery();
         }
     }
 }

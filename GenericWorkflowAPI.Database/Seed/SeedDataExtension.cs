@@ -3,11 +3,13 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using GenericWorkflowAPI.Database;
 using IdentityModel;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +21,13 @@ namespace GenericWorkflowAPI.Database
 {
     public static class SeedDataExtension
     {
-        public static void EnsureSeedAdminUserData(this IServiceCollection services)
+        private const string AdministratorRole = "Administrator";
+        private const string GenericUserRole = "GenericUser";
+
+        /// <summary>
+        /// The way this data is added is not ok, but adding it anyway.
+        /// </summary>
+        public static async Task EnsureSeedAdminUserData(this IServiceCollection services)
         {
             using (var serviceProvider = services.BuildServiceProvider())
             {
@@ -29,29 +37,50 @@ namespace GenericWorkflowAPI.Database
                     {
                         context.Database.Migrate();
 
+                        var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<Domain.Entities.IdentityRole>>();
+                        
+
                         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Domain.Entities.IdentityUser>>();
-                        var admin = userMgr.FindByNameAsync("admin").Result;
+                        var admin = await userMgr.FindByNameAsync("admin");
                         if (admin == null)
                         {
                             admin = new Domain.Entities.IdentityUser
                             {
-                                UserName = "admin"
+                                UserName = "admin",
+                                Email = "test@test.test",
+                                EmailConfirmed = true,
                             };
                             
-                            var result = userMgr.CreateAsync(admin, "Pass123$").Result;
+                            var result = await userMgr.CreateAsync(admin, "Pass123$");
                             if (!result.Succeeded)
                             {
                                 throw new Exception(result.Errors.First().Description);
                             }
 
-                            result = userMgr.AddClaimsAsync(admin, new Claim[]{
+                            result = await userMgr.AddClaimsAsync(admin, new Claim[]{
                                 new Claim(JwtClaimTypes.Name, "Test Admin"),
                                 new Claim(JwtClaimTypes.GivenName, "Test"),
                                 new Claim(JwtClaimTypes.FamilyName, "Admin"),
                                 new Claim(JwtClaimTypes.Email, "TestAdmin@Domain.com"),
                                 new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                                 new Claim(JwtClaimTypes.WebSite, "http://example.org"),
-                            }).Result;
+                            });
+
+                            result = await roleMgr.CreateAsync(new Domain.Entities.IdentityRole(AdministratorRole)
+                            {
+                                CreatedDate = DateTimeOffset.UtcNow,
+                                ChangedDate = DateTimeOffset.UtcNow,
+                                ChangedByUserId = 1
+                            });
+
+                            result = await roleMgr.CreateAsync(new Domain.Entities.IdentityRole(GenericUserRole)
+                            {
+                                CreatedDate = DateTimeOffset.UtcNow,
+                                ChangedDate = DateTimeOffset.UtcNow,
+                                ChangedByUserId = 1
+                            });
+
+                            result = await userMgr.AddToRolesAsync(admin, new List<string> { AdministratorRole, GenericUserRole });
 
                             if (!result.Succeeded)
                             {
