@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Serilog;
@@ -29,6 +30,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         //[EnableQuery]
         [HttpGet("{code}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(string code, CancellationToken cancellationToken)
         {
             return await base.GetItem(code, cancellationToken);
@@ -36,6 +41,11 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         //[EnableQuery]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             return await base.GetCollection(cancellationToken);
@@ -43,6 +53,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpPost("{code}")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] WorkflowTransitionDto item, CancellationToken cancellationToken)
         {
             return await base.CreateItem(item, cancellationToken);
@@ -50,6 +64,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] Collection<WorkflowTransitionDto> collection, CancellationToken cancellationToken)
         {
             return await base.CreateCollection(collection, cancellationToken);
@@ -57,6 +75,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpPut("{code}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update([FromBody] WorkflowTransitionDto item, CancellationToken cancellationToken)
         {
             return await base.UpdateItem(item, cancellationToken);
@@ -64,6 +86,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update([FromBody] Collection<WorkflowTransitionDto> collection, CancellationToken cancellationToken)
         {
             return await base.UpdateCollection(collection, cancellationToken);
@@ -71,6 +97,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpDelete("{code}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(string code, CancellationToken cancellationToken)
         {
             return await base.DeleteItem(code, cancellationToken);
@@ -78,6 +108,10 @@ namespace GenericWorkflowAPI.Controllers.v1
 
         [ValidateAntiForgeryToken]
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete([FromBody] Collection<string> codes, CancellationToken cancellationToken)
         {
             return await base.DeleteCollection(codes, cancellationToken);
