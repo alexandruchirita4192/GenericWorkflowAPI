@@ -50,7 +50,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
                 await repository.DeleteAsync(request.Codes.ToList(), request.User, cancellationToken);
 
-                return GenericApiResponse<string>.NoContent();
+                return GenericApiResponse<string>.Ok();
             }
             catch (Exception ex)
             {

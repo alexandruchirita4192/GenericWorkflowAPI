@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
-using GenericWorkflowAPI.Domain.Responses;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -82,7 +80,7 @@ namespace GenericWorkflowAPI.Services
                 throw new ArgumentNullException(nameof(executeWorkflowRequest),
                     $"Cannot initialize a workflow instance or execute a workflow transition using a null request.");
             if (executeWorkflowRequest.User == null)
-                throw new ArgumentNullException(nameof(executeWorkflowRequest.User), 
+                throw new ArgumentNullException(nameof(executeWorkflowRequest.User),
                     $"Cannot initialize a workflow instance or execute a workflow transition using a null user.");
 
             var workflowCode = executeWorkflowRequest.WorkflowCode;
@@ -218,7 +216,6 @@ namespace GenericWorkflowAPI.Services
                     throw new InvalidOperationException($"Cannot execute workflow transition for workflow with code {workflow.Code} because the next state is null.");
 
                 // TODO: Validate if user has allocated the user role assigned to transition
-
 
                 // Fill workflow instance history
                 var workflowInstanceHistory = new WorkflowInstanceHistory()
@@ -372,6 +369,7 @@ namespace GenericWorkflowAPI.Services
             _workflowInstanceInputCodeRepository.Dispose();
             _workflowInstanceHistoryRepository.Dispose();
             _workflowInstanceHistoryInputCodeRepository.Dispose();
+            _identityRoleRepository.Dispose();
         }
     }
 }

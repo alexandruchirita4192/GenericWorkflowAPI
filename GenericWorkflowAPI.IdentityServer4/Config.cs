@@ -102,10 +102,9 @@ namespace GenericWorkflowAPI.IdentityServer4
             if (claim == null)
                 return false;
 
-            //if (claim.Type == "email_verified" && claim.ValueType == ClaimValueTypes.String)
-            //    return false;
-            //if (claim.Type == "AspNet.Identity.SecurityStamp" && claim.ValueType == ClaimValueTypes.String)
-            //    return false;
+            // There is another "email_verified" of type ClaimValueTypes.Boolean which is used instead
+            if (claim.Type == "email_verified" && claim.ValueType == ClaimValueTypes.String)
+                return false;
 
             return true;
         }

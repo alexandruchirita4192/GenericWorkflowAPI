@@ -19,13 +19,23 @@ namespace GenericWorkflowAPI.Helpers
                 return null;
 
             var firstUserEmail = controller.GetFirstClaimValue(ClaimTypes.Email);
+
+            var firstEmailVerifiedAsString = controller.GetFirstClaimValue("email_verified");
+            bool isEmailVerified = false;
+            if (firstEmailVerifiedAsString != null)
+                bool.TryParse(firstEmailVerifiedAsString, out isEmailVerified);
+
+            var firstSecurityStamp = controller.GetFirstClaimValue("AspNet.Identity.SecurityStamp");
+
             var identityClaims = controller.GetIdentityUserClaimList(userId.Value);
 
             var identityUser = new Domain.IdentityUser(userName)
             {
                 Id = userId.Value,
                 Email = firstUserEmail,
-                Claims = identityClaims
+                Claims = identityClaims,
+                EmailConfirmed = isEmailVerified,
+                SecurityStamp = firstSecurityStamp,
             };
 
             return identityUser;

@@ -56,7 +56,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
                 await repository.DeleteAsync(request.Code, request.User, cancellationToken);
 
-                return GenericApiResponse<string>.NoContent();
+                return GenericApiResponse<string>.Ok();
             }
             catch (Exception ex)
             {
