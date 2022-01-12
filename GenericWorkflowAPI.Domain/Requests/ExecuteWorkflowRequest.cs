@@ -6,6 +6,7 @@ namespace GenericWorkflowAPI.Domain.Requests
 {
     public class ExecuteWorkflowRequest : IRequest<GenericApiResponse<string>>
     {
+        public IdentityUser User { get; set; }
         public string WorkflowCode { get; set; }
         public string WorkflowInstanceCode { get; set; }
         public Dictionary<string, string> WorkflowInputCodeTypeXvalue { get; set; }

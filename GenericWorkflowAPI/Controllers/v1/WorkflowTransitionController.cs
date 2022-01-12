@@ -21,7 +21,8 @@ namespace GenericWorkflowAPI.Controllers.v1
                       $"{nameof(WorkflowTransition.Workflow)}",
                       $"{nameof(WorkflowTransition.CurrentState)}",
                       $"{nameof(WorkflowTransition.NextState)}",
-                      $"{nameof(WorkflowTransition.ChangedByUser)}"
+                      $"{nameof(WorkflowTransition.ChangedByUser)}",
+                      $"{nameof(WorkflowTransition.Role)}"
                   })
         {
         }

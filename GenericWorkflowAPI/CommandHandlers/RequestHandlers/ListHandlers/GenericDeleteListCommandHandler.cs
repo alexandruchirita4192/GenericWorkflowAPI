@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -35,7 +36,19 @@ namespace GenericWorkflowAPI.CommandHandlers
         {
             try
             {
-                await repository.DeleteAsync(request.Codes.ToList(), cancellationToken);
+                if (request == null)
+                {
+                    logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericDeleteListRequest<TDto>).FullName}");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
+                }
+                if (request.User == null)
+                {
+                    logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericDeleteListRequest<TDto>).FullName} for null user.");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
+                }
+
+                await repository.DeleteAsync(request.Codes.ToList(), request.User, cancellationToken);
 
                 return GenericApiResponse<string>.NoContent();
             }

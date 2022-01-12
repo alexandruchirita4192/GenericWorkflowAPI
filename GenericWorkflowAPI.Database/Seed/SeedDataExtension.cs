@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.Database;
 using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -21,6 +19,8 @@ namespace GenericWorkflowAPI.Database
 {
     public static class SeedDataExtension
     {
+        private const string AdministratorUserName = "admin";
+        private const string AdministratorPassword = "Pass123$";
         private const string AdministratorRole = "Administrator";
         private const string GenericUserRole = "GenericUser";
 
@@ -29,29 +29,30 @@ namespace GenericWorkflowAPI.Database
         /// </summary>
         public static async Task EnsureSeedAdminUserData(this IServiceCollection services)
         {
-            using (var serviceProvider = services.BuildServiceProvider())
+            using (var serviceProvider = services.BuildServiceProvider()) // TODO: Migrate data and seed without "BuildServiceProvider"
             {
                 using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
                 {
                     using (var context = scope.ServiceProvider.GetService<ApplicationDbContext>())
                     {
-                        context.Database.Migrate();
+                        context?.Database.Migrate();
 
-                        var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<Domain.Entities.IdentityRole>>();
-                        
+                        var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<Domain.IdentityRole>>();
+                        var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Domain.IdentityUser>>();
 
-                        var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Domain.Entities.IdentityUser>>();
-                        var admin = await userMgr.FindByNameAsync("admin");
+                        IdentityResult result = null;
+
+                        var admin = await userMgr.FindByNameAsync(AdministratorUserName);
                         if (admin == null)
                         {
-                            admin = new Domain.Entities.IdentityUser
+                            admin = new Domain.IdentityUser
                             {
-                                UserName = "admin",
+                                UserName = AdministratorUserName,
                                 Email = "test@test.test",
                                 EmailConfirmed = true,
                             };
-                            
-                            var result = await userMgr.CreateAsync(admin, "Pass123$");
+
+                            result = await userMgr.CreateAsync(admin, AdministratorPassword);
                             if (!result.Succeeded)
                             {
                                 throw new Exception(result.Errors.First().Description);
@@ -65,27 +66,41 @@ namespace GenericWorkflowAPI.Database
                                 new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                                 new Claim(JwtClaimTypes.WebSite, "http://example.org"),
                             });
+                        }
 
-                            result = await roleMgr.CreateAsync(new Domain.Entities.IdentityRole(AdministratorRole)
+                        var adminRole = await roleMgr.FindByNameAsync(AdministratorRole);
+                        if (adminRole == null)
+                        {
+                            result = await roleMgr.CreateAsync(new Domain.IdentityRole(AdministratorRole)
                             {
                                 CreatedDate = DateTimeOffset.UtcNow,
                                 ChangedDate = DateTimeOffset.UtcNow,
                                 ChangedByUserId = 1
                             });
 
-                            result = await roleMgr.CreateAsync(new Domain.Entities.IdentityRole(GenericUserRole)
+                        }
+
+                        var genericUserRole = await roleMgr.FindByNameAsync(AdministratorRole);
+                        if (genericUserRole == null)
+                        {
+                            result = await roleMgr.CreateAsync(new Domain.IdentityRole(GenericUserRole)
                             {
                                 CreatedDate = DateTimeOffset.UtcNow,
                                 ChangedDate = DateTimeOffset.UtcNow,
                                 ChangedByUserId = 1
                             });
+                        }
 
+
+                        var roles = await userMgr.GetRolesAsync(admin);
+                        if (roles == null || roles.Count == 0 || !roles.Contains(AdministratorRole) || !roles.Contains(GenericUserRole))
+                        {
                             result = await userMgr.AddToRolesAsync(admin, new List<string> { AdministratorRole, GenericUserRole });
+                        }
 
-                            if (!result.Succeeded)
-                            {
-                                throw new Exception(result.Errors.First().Description);
-                            }
+                        if (result != null && !result.Succeeded)
+                        {
+                            throw new Exception(result.Errors.First().Description);
                         }
                     }
                 }
@@ -98,7 +113,7 @@ namespace GenericWorkflowAPI.Database
 
             var separators = new string[] { "\r\nGO\r\n" };
 
-            foreach (var resourceName in assembly.GetManifestResourceNames().Where(m=>m.EndsWith(".sql")))
+            foreach (var resourceName in assembly.GetManifestResourceNames().Where(m => m.EndsWith(".sql")))
             {
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 using (var reader = new StreamReader(stream))

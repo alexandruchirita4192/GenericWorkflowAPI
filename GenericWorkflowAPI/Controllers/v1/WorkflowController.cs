@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
+using GenericWorkflowAPI.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,8 @@ namespace GenericWorkflowAPI.Controllers.v1
         [HttpPost("ExecuteWorkflow")]
         public async Task<IActionResult> ExecuteWorkflow([FromBody] ExecuteWorkflowRequest executeWorkflowRequest, CancellationToken cancellationToken)
         {
+            var userId = this.GetUserId();
+
             var genericApiResponse = await _mediator.Send(executeWorkflowRequest, cancellationToken);
             var response = await _mediator.Send(genericApiResponse, cancellationToken);
             return response;

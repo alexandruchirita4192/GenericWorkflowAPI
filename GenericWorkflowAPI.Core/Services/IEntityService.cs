@@ -1,13 +1,14 @@
-﻿using GenericWorkflowAPI.Domain.Entities;
+﻿using GenericWorkflowAPI.Domain;
+using GenericWorkflowAPI.Domain.Entities;
 
 namespace GenericWorkflowAPI.Core.Services
 {
     public interface IEntityService<TEntity> where TEntity : class, IBaseEntity, new()
     {
-        void Initialize(TEntity entity);
+        void Initialize(TEntity entity, IdentityUser user);
 
-        void Update(TEntity entity);
+        void Update(TEntity entity, IdentityUser user);
 
-        void Delete(TEntity entity);
+        void Delete(TEntity entity, IdentityUser user);
     }
 }

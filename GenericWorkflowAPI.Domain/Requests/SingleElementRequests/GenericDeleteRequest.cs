@@ -7,6 +7,7 @@ namespace GenericWorkflowAPI.Domain.Requests
     public class GenericDeleteRequest<TDto> : IRequest<GenericApiResponse<string>>
         where TDto : class, IBaseDto, new()
     {
+        public IdentityUser User { get; set; }
         public string Code { get; set; }
     }
 }

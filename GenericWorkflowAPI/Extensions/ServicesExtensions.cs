@@ -83,7 +83,7 @@ namespace GenericWorkflowAPI.Extensions
 
         public static IServiceCollection AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
         {
-            if (services == null || mappings == null || mappings.Count == 0)
+            if (mappings == null || mappings.Count == 0)
             {
                 logger.Error("MediatR mappings null or empty");
                 return services;
@@ -96,38 +96,5 @@ namespace GenericWorkflowAPI.Extensions
 
             return services;
         }
-
-        //private static void AddIdentityRoleToMappings(Dictionary<Type, Type> mappings, ILogger logger)
-        //{
-        //    if (mappings == null)
-        //    {
-        //        logger.Warning(
-        //            new ArgumentNullException(nameof(mappings)),
-        //            "Missing argument {argumentName} in method {methodName}",
-        //            nameof(mappings),
-        //            nameof(AddIdentityRoleToMappings));
-        //        return;
-        //    }
-        //    mappings.Add(typeof(IdentityRole), typeof(IdentityRole));
-        //}
-
-        //private static void RemoveIdentityRoleFromMappings(Dictionary<Type, Type> mappings, ILogger logger)
-        //{
-        //    if (mappings == null)
-        //    {
-        //        logger.Warning(
-        //            new ArgumentNullException(nameof(mappings)),
-        //            "Missing argument {argumentName} in method {methodName}",
-        //            nameof(mappings),
-        //            nameof(RemoveIdentityRoleFromMappings));
-        //        return;
-        //    }
-        //    if (!mappings.Remove(typeof(IdentityRole)))
-        //    {
-        //        logger.Warning("Cannot remove {entityTypeName} added beforehand. This might make some other {IServiceCollectionTypeName} extensions log some warnings.",
-        //            typeof(IdentityRole).Name,
-        //            typeof(IServiceCollection).Name);
-        //    }
-        //}
     }
 }

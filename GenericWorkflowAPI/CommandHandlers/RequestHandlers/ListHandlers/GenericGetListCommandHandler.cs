@@ -36,6 +36,18 @@ namespace GenericWorkflowAPI.CommandHandlers
         {
             try
             {
+                if (request == null)
+                {
+                    logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericGetListRequest<TDto>).FullName}");
+                    return GenericApiResponse<List<TDto>>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
+                }
+                if (request.User == null)
+                {
+                    logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericGetListRequest<TDto>).FullName} for null user.");
+                    return GenericApiResponse<List<TDto>>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
+                }
+
                 var entitiesList = await Repository.GetAllAsync(request.IncludePathList ?? new List<string>(), cancellationToken);
                 if (entitiesList == null || entitiesList.Count == 0)
                     return GenericApiResponse<List<TDto>>.NoContent();

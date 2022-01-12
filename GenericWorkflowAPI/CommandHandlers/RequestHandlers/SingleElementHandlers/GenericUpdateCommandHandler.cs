@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,30 +20,42 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, ICodeDto, new()
         where TEntity : class, IBaseEntity, ICodeEntity, new()
     {
-        private readonly ILogger logger;
-        private readonly IGenericCodeRepository<TEntity> repository;
-        private readonly IMappingHelper<TEntity, TDto> mappingHelper;
+        private readonly ILogger _logger;
+        private readonly IGenericCodeRepository<TEntity> _repository;
+        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
 
-        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> _repository, ILogger _logger, IMappingHelper<TEntity, TDto> _mappingHelper)
+        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
         {
-            repository = _repository;
-            logger = _logger;
-            mappingHelper = _mappingHelper;
+            _repository = repository;
+            _logger = logger;
+            _mappingHelper = mappingHelper;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericUpdateRequest<TDto> request, CancellationToken cancellationToken)
         {
             try
             {
-                var mappedEntity = await mappingHelper.MapDtoToEntity(request.Item, cancellationToken);
+                if (request == null)
+                {
+                    _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericUpdateRequest<TDto>).FullName}");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
+                }
+                if (request.User == null)
+                {
+                    _logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericUpdateRequest<TDto>).FullName} for null user.");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
+                }
 
-                await repository.UpdateAsync(mappedEntity, cancellationToken);
+                var mappedEntity = await _mappingHelper.MapDtoToEntity(request.Item, cancellationToken);
+
+                await _repository.UpdateAsync(mappedEntity, request.User, cancellationToken);
 
                 return GenericApiResponse<string>.Ok();
             }
             catch (Exception ex)
             {
-                logger.Error(ex, $"{typeof(GenericUpdateCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({JsonConvert.SerializeObject(request.Item)}) exception");
+                _logger.Error(ex, $"{typeof(GenericUpdateCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({JsonConvert.SerializeObject(request.Item)}) exception");
                 return GenericApiResponse<string>.Problem(ValidationConstants.GenericValidationMessage, HttpStatusCode.InternalServerError);
             }
         }

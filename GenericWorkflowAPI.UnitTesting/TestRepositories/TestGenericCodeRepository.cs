@@ -8,6 +8,7 @@ using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using GenericWorkflowAPI.Domain;
 
 namespace GenericWorkflowAPI.UnitTesting
 {
@@ -78,19 +79,20 @@ namespace GenericWorkflowAPI.UnitTesting
             var entityService = new EntityService<Workflow>();
             var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
 
+            var user = new IdentityUser("admin") { Id = 1 };
             var code = $"Test{DateTime.Now}";
             var entity = new Workflow()
             {
                 Code = code
             };
-            await repository.AddAsync(entity, cancellationToken);
+            await repository.AddAsync(entity, user, cancellationToken);
 
             entity = await repository.GetByCodeAsync(code, new List<string>(), cancellationToken);
             Assert.IsNotNull(entity);
             Assert.AreEqual(code, entity.Code);
             Assert.IsFalse(entity.IsDeleted);
 
-            await repository.DeleteAsync(code, cancellationToken);
+            await repository.DeleteAsync(code, user, cancellationToken);
 
             entity = await repository.GetByCodeAsync(code, new List<string>(), cancellationToken);
             Assert.IsNull(entity);

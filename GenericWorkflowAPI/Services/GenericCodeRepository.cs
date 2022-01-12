@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Services;
+using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -81,12 +82,14 @@ namespace GenericWorkflowAPI.Services
             return default(List<TEntity>);
         }
 
-        public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken)
+        public async Task UpdateAsync(TEntity entity, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (entity == null)
-                    return;
+                    throw new ArgumentNullException(nameof(entity), $"Cannot update a null entity.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot update an entity with a null user.");
 
                 // TODO: Maybe improve performance somehow because the entity is reloaded from database based on code..
                 var loadedEntity = await GetByCodeAsync(entity.Code, new List<string>(), cancellationToken);
@@ -96,7 +99,7 @@ namespace GenericWorkflowAPI.Services
                 entity.CopyProperties(loadedEntity);
                 loadedEntity.Id = savedId; // Load all except the Id
 
-                _entityService.Update(loadedEntity);
+                _entityService.Update(loadedEntity, user);
                 _dbContext.Update(loadedEntity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -110,12 +113,14 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task UpdateAsync(List<TEntity> entitiesList, CancellationToken cancellationToken)
+        public async Task UpdateAsync(List<TEntity> entitiesList, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (entitiesList == null || entitiesList.Count == 0)
-                    return;
+                    throw new ArgumentException(nameof(entitiesList), $"Cannot update a null entity list or with count zero.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot update an entity list with a null user.");
 
                 foreach (var entity in entitiesList)
                 {
@@ -127,7 +132,7 @@ namespace GenericWorkflowAPI.Services
                     entity.CopyProperties(loadedEntity);
                     loadedEntity.Id = savedId; // Load all except the Id
 
-                    _entityService.Update(loadedEntity);
+                    _entityService.Update(loadedEntity, user);
                     _dbContext.Update(loadedEntity);
                 }
 
@@ -143,41 +148,46 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task DeleteAsync(string code, CancellationToken cancellationToken)
+        public async Task DeleteAsync(string code, IdentityUser user, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(code))
-                return;
-
             try
             {
+                if (string.IsNullOrWhiteSpace(code))
+                    throw new ArgumentException(nameof(code), $"Cannot delete an entity of type {typeof(TEntity).Name} with a null or whitespace code.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null user.");
+
                 var entity = await GetByCodeAsync(code, new List<string>(), cancellationToken);
                 if (entity == null)
                     return;
 
-                _entityService.Delete(entity);
+                _entityService.Delete(entity, user);
                 _dbContext.Update(entity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(DeleteAsync)}({code}) function error");
+                throw;
             }
         }
 
-        public async Task DeleteAsync(List<string> codesList, CancellationToken cancellationToken)
+        public async Task DeleteAsync(List<string> codesList, IdentityUser user, CancellationToken cancellationToken)
         {
-            if (codesList == null || codesList.Count == 0)
-                return;
-
             try
             {
+                if (codesList == null || codesList.Count == 0)
+                    throw new ArgumentException(nameof(codesList), $"Cannot delete an entity list of type {typeof(TEntity).Name} with a null or empty code list.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null user.");
+
                 var entitiesList = await GetByCodeListAsync(codesList, new List<string>(), cancellationToken);
                 if (entitiesList == null)
                     return;
 
                 foreach (var entity in entitiesList)
                 {
-                    _entityService.Delete(entity);
+                    _entityService.Delete(entity, user);
                     _dbContext.Update(entity);
                 }
 
@@ -186,6 +196,7 @@ namespace GenericWorkflowAPI.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(DeleteAsync)}({JsonConvert.SerializeObject(codesList)}) function error");
+                throw;
             }
         }
     }

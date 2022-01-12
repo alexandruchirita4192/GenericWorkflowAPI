@@ -42,7 +42,10 @@ namespace GenericWorkflowAPI.Core.AutoMapper
 
             if (entities.Count != dtos.Count)
             {
-                _logger.Warning("Number of entities ({entities}) is different from number of dtos ({dtos})", entities.Count, dtos.Count);
+                _logger.Warning("Number of entities ({entities}) is different from number of dtos ({dtos}) in assembly {assemblyFullName}",
+                    entities.Count,
+                    dtos.Count,
+                    assembly.FullName);
             }
 
             if (!entityToDtoMappings.TryAdd(assembly, new Dictionary<Type, Type>()))
@@ -65,7 +68,7 @@ namespace GenericWorkflowAPI.Core.AutoMapper
                     .Select(pair => (KeyValuePair<Type, Type>?)pair)
                     .FirstOrDefault(pair =>
                 {
-                    return string.Compare($"{pair?.Key.Name}Dto", dtoTypeName) == 0;
+                    return string.Compare($"{pair?.Key.Name}Dto", dtoTypeName, StringComparison.InvariantCultureIgnoreCase) == 0;
                 });
 
                 if (item != null)
@@ -74,38 +77,32 @@ namespace GenericWorkflowAPI.Core.AutoMapper
                 }
                 else
                 {
-                    _logger.Warning("{dtoTypeName} doesn't have an entity match", dtoTypeName);
+                    _logger.Warning("{dtoTypeName} from assembly {assemblyFullName} doesn't have an entity pair.",
+                        dtoTypeName,
+                        assembly.FullName);
                 }
             }
 
-            //// Remove invalid mapping elements
-            //var invalidElements = new List<KeyValuePair<Type, Type>>();
-            //foreach(var item in entityToDtoMappings[assembly])
-            //{
-            //    if (item.Key == item.Value)
-            //    {
-            //        _logger.Warning("Entity {entityTypeName} doesn't have a matching dto remaining matched to itself. Removing from mapping collection.", item.Key.Name);
-            //        invalidElements.Add(item);
-            //        continue;
-            //    }
+            // Log invalid mapping elements as warnings
+            foreach (var item in entityToDtoMappings[assembly])
+            {
+                if (item.Key == item.Value)
+                {
+                    _logger.Warning("Entity {entityTypeName} from assembly {assemblyFullName} doesn't have a matching dto remaining matched to itself.",
+                        item.Key.Name,
+                        assembly.FullName);
+                    continue;
+                }
 
-            //    if ($"{item.Key.Name}Dto" != item.Value.Name)
-            //    {
-            //        _logger.Warning("Entity {entityTypeName} doesn't match properly with {dtoTypeName}. Removing from mapping collection.", item.Key.Name, item.Value.Name);
-            //        invalidElements.Add(item);
-            //        continue;
-            //    }
-            //}
-
-            //foreach(var invalidElement in invalidElements)
-            //{
-            //    if (!entityToDtoMappings[assembly].Remove(invalidElement.Key))
-            //    {
-            //        _logger.Error("Couldn't remove invalid element {@invalidElement} in {methodName}",
-            //            invalidElement,
-            //            nameof(GetEntityDtoMapping));
-            //    }
-            //}
+                if ($"{item.Key.Name}Dto" != item.Value.Name)
+                {
+                    _logger.Warning("Entity {entityTypeName} from assembly {assemblyFullName} doesn't match properly with {dtoTypeName}.",
+                        item.Key.Name,
+                        assembly.FullName, 
+                        item.Value.Name);
+                    continue;
+                }
+            }
 
             if (entityToDtoMappings[assembly].Count == 0)
             {

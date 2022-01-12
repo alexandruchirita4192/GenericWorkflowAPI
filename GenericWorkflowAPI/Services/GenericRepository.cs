@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Services;
+using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -86,14 +87,16 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task AddAsync(TEntity entity, CancellationToken cancellationToken)
+        public async Task AddAsync(TEntity entity, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (entity == null)
-                    return;
+                    throw new ArgumentNullException(nameof(entity), $"Cannot add a null entity of type {typeof(TEntity).Name}.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot add an entity of type {typeof(TEntity).Name} using a null user.");
 
-                _entityService.Initialize(entity);
+                _entityService.Initialize(entity, user);
                 await _dbContext.AddAsync(entity, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -104,16 +107,18 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task AddRangeAsync(List<TEntity> entitiesList, CancellationToken cancellationToken)
+        public async Task AddRangeAsync(List<TEntity> entitiesList, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (entitiesList == null || entitiesList.Count == 0)
-                    return;
+                    throw new ArgumentException(nameof(entitiesList), $"Cannot add a null or empty entity list of type {typeof(TEntity).Name}.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot add an entity list of type {typeof(TEntity).Name} using a null user.");
 
                 foreach (var entity in entitiesList)
                 {
-                    _entityService.Initialize(entity);
+                    _entityService.Initialize(entity, user);
                     await _dbContext.AddAsync(entity, cancellationToken);
                 }
 
@@ -126,14 +131,16 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task UpdateLoadedAsync(TEntity loadedEntity, CancellationToken cancellationToken)
+        public async Task UpdateLoadedAsync(TEntity loadedEntity, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (loadedEntity == null)
-                    return;
+                    throw new ArgumentNullException(nameof(loadedEntity), $"Cannot update a null entity of type {typeof(TEntity).Name}.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot update an entity of type {typeof(TEntity).Name} using a null user.");
 
-                _entityService.Update(loadedEntity);
+                _entityService.Update(loadedEntity, user);
                 _dbContext.Update(loadedEntity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -147,16 +154,18 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task UpdateLoadedAsync(List<TEntity> loadedEntitiesList, CancellationToken cancellationToken)
+        public async Task UpdateLoadedAsync(List<TEntity> loadedEntitiesList, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (loadedEntitiesList == null || loadedEntitiesList.Count == 0)
-                    return;
+                    throw new ArgumentException(nameof(loadedEntitiesList), $"Cannot update a null or empty entity list of type {typeof(TEntity).Name}.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot update an entity list of type {typeof(TEntity).Name} using a null user.");
 
                 foreach (var loadedEntity in loadedEntitiesList)
                 {
-                    _entityService.Update(loadedEntity);
+                    _entityService.Update(loadedEntity, user);
                     _dbContext.Update(loadedEntity);
                 }
 
@@ -171,18 +180,20 @@ namespace GenericWorkflowAPI.Services
                 throw;
             }
         }
-        public async Task DeleteAsync(long? id, CancellationToken cancellationToken)
+        public async Task DeleteAsync(long? id, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (id == null)
-                    return;
+                    throw new ArgumentNullException(nameof(id), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null id.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null user.");
 
                 var entity = await GetByIdAsync(id, new List<string>(), cancellationToken);
                 if (entity == null)
                     return;
 
-                _entityService.Delete(entity);
+                _entityService.Delete(entity, user);
                 _dbContext.Update(entity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -196,12 +207,14 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        public async Task DeleteAsync(List<long?> idsList, CancellationToken cancellationToken)
+        public async Task DeleteAsync(List<long?> idsList, IdentityUser user, CancellationToken cancellationToken)
         {
             try
             {
                 if (idsList == null || idsList.Count == 0)
-                    return;
+                    throw new ArgumentException(nameof(idsList), $"Cannot delete an entity list of type {typeof(TEntity).Name} using a null or empty id.");
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), $"Cannot delete an entity list of type {typeof(TEntity).Name} using a null user.");
 
                 foreach (var id in idsList)
                 {
@@ -212,7 +225,7 @@ namespace GenericWorkflowAPI.Services
                     if (entity == null)
                         continue;
 
-                    _entityService.Delete(entity);
+                    _entityService.Delete(entity, user);
                     _dbContext.Update(entity);
                 }
 

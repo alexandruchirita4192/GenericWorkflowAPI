@@ -24,16 +24,16 @@ namespace IdentityServerHost.Quickstart.UI
     [AllowAnonymous]
     public class ExternalController : Controller
     {
-        private readonly UserManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> _userManager;
-        private readonly SignInManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> _signInManager;
+        private readonly UserManager<GenericWorkflowAPI.Domain.IdentityUser> _userManager;
+        private readonly SignInManager<GenericWorkflowAPI.Domain.IdentityUser> _signInManager;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IEventService _events;
         private readonly ILogger<ExternalController> _logger;
 
         public ExternalController(
-            UserManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> userManager,
-            SignInManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> signInManager,
+            UserManager<GenericWorkflowAPI.Domain.IdentityUser> userManager,
+            SignInManager<GenericWorkflowAPI.Domain.IdentityUser> signInManager,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
@@ -151,7 +151,7 @@ namespace IdentityServerHost.Quickstart.UI
             return Redirect(returnUrl);
         }
 
-        private async Task<(GenericWorkflowAPI.Domain.Entities.IdentityUser user, string provider, string providerUserId, IEnumerable<Claim> claims)>
+        private async Task<(GenericWorkflowAPI.Domain.IdentityUser user, string provider, string providerUserId, IEnumerable<Claim> claims)>
             FindUserFromExternalProviderAsync(AuthenticateResult result)
         {
             var externalUser = result.Principal;
@@ -176,7 +176,7 @@ namespace IdentityServerHost.Quickstart.UI
             return (user, provider, providerUserId, claims);
         }
 
-        private async Task<GenericWorkflowAPI.Domain.Entities.IdentityUser> AutoProvisionUserAsync(string provider, string providerUserId, IEnumerable<Claim> claims)
+        private async Task<GenericWorkflowAPI.Domain.IdentityUser> AutoProvisionUserAsync(string provider, string providerUserId, IEnumerable<Claim> claims)
         {
             // create a list of claims that we want to transfer into our store
             var filtered = new List<Claim>();
@@ -216,7 +216,7 @@ namespace IdentityServerHost.Quickstart.UI
                 filtered.Add(new Claim(JwtClaimTypes.Email, email));
             }
 
-            var user = new GenericWorkflowAPI.Domain.Entities.IdentityUser
+            var user = new GenericWorkflowAPI.Domain.IdentityUser
             {
                 UserName = Guid.NewGuid().ToString(),
             };

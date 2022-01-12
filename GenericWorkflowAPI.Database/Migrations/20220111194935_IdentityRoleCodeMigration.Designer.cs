@@ -21,7 +21,7 @@ namespace GenericWorkflowAPI.Database.Migrations
                 .HasAnnotation("ProductVersion", "5.0.13")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.IdentityRole", b =>
+            modelBuilder.Entity("GenericWorkflowAPI.Domain.IdentityRole", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -69,7 +69,7 @@ namespace GenericWorkflowAPI.Database.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.IdentityUser", b =>
+            modelBuilder.Entity("GenericWorkflowAPI.Domain.IdentityUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -730,9 +730,9 @@ namespace GenericWorkflowAPI.Database.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.IdentityRole", b =>
+            modelBuilder.Entity("GenericWorkflowAPI.Domain.IdentityRole", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -741,9 +741,9 @@ namespace GenericWorkflowAPI.Database.Migrations
                     b.Navigation("ChangedByUser");
                 });
 
-            modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.IdentityUser", b =>
+            modelBuilder.Entity("GenericWorkflowAPI.Domain.IdentityUser", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId");
 
@@ -752,7 +752,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.Workflow", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -771,7 +771,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowInputCodeType", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -790,7 +790,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowInstance", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -817,7 +817,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowInstanceHistory", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -852,7 +852,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowInstanceHistoryInputCode", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -879,7 +879,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowInstanceInputCode", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -906,7 +906,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowState", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -925,7 +925,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowStateInputCodeType", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -952,7 +952,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowTransition", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -970,7 +970,7 @@ namespace GenericWorkflowAPI.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityRole", "Role")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -995,7 +995,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("GenericWorkflowAPI.Domain.Entities.WorkflowType", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", "ChangedByUser")
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", "ChangedByUser")
                         .WithMany()
                         .HasForeignKey("ChangedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1006,7 +1006,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityRole", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1015,7 +1015,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1024,7 +1024,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1033,13 +1033,13 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityRole", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1048,7 +1048,7 @@ namespace GenericWorkflowAPI.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
-                    b.HasOne("GenericWorkflowAPI.Domain.Entities.IdentityUser", null)
+                    b.HasOne("GenericWorkflowAPI.Domain.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

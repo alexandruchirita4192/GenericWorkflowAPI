@@ -88,7 +88,7 @@ namespace GenericWorkflowAPI
 
             if (isDevelopment)
             {
-                // Append AntiForgery token to Swagger methods
+                // Append AntiForgery token to all calls (making Swagger calls work)
                 app.Use(next =>
                 {
                     return new RequestDelegate((context) =>
@@ -132,7 +132,7 @@ namespace GenericWorkflowAPI
             app.UseApiVersioning();
         }
 
-        public void ConfigureServices(IServiceCollection services)//, IEntityDtoMappingProvider mappingProvider)
+        public void ConfigureServices(IServiceCollection services)
         {
             // Add Serilog logger
             services.AddLogging(x =>
@@ -188,13 +188,13 @@ namespace GenericWorkflowAPI
             services.AddTransient<ApplicationDbContext>();
 
             // Add Identity
-            services.AddIdentityCore<Domain.Entities.IdentityUser>(options =>
+            services.AddIdentityCore<Domain.IdentityUser>(options =>
             {
                 options.Tokens.AuthenticatorIssuer = Configuration["Authentication:Issuer"];
                 //options.Tokens.AuthenticatorTokenProvider = "https://localhost:5001/";
                 options.User.RequireUniqueEmail = true;
             })
-                .AddRoles<Domain.Entities.IdentityRole>()
+                .AddRoles<Domain.IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

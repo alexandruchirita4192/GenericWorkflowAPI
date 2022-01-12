@@ -1,5 +1,6 @@
 ﻿using System;
 using GenericWorkflowAPI.Core.Services;
+using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
 
 namespace GenericWorkflowAPI.Services
@@ -11,31 +12,37 @@ namespace GenericWorkflowAPI.Services
     public class EntityService<TEntity> : IEntityService<TEntity>
         where TEntity : class, IBaseEntity, new()
     {
-        public void Initialize(TEntity entity)
+        public void Initialize(TEntity entity, IdentityUser user)
         {
             if (entity == null)
-                throw new InvalidOperationException($"Cannot initialize a null entity of type {typeof(TEntity).Name}!");
+                throw new ArgumentNullException(nameof(entity), $"Cannot initialize a null entity of type {typeof(TEntity).Name}!");
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), $"Cannot initialize an entity using a null user!");
 
             entity.CreatedDate = DateTimeOffset.Now;
-            Update(entity);
+            Update(entity, user);
         }
 
-        public void Update(TEntity entity)
+        public void Update(TEntity entity, IdentityUser user)
         {
             if (entity == null)
-                throw new InvalidOperationException($"Cannot update a null entity of type {typeof(TEntity).Name}!");
+                throw new ArgumentNullException($"Cannot update a null entity of type {typeof(TEntity).Name}!");
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), $"Cannot update an entity using a null user!");
 
             entity.ChangedDate = DateTimeOffset.Now;
-            entity.ChangedByUserId = 1; // TODO: Set the current logged in user as entity.ChangedByUserId
+            entity.ChangedByUserId = user.Id;
         }
 
-        public void Delete(TEntity entity)
+        public void Delete(TEntity entity, IdentityUser user)
         {
             if (entity == null)
-                throw new InvalidOperationException($"Cannot soft delete a null entity of type {typeof(TEntity).Name}!");
+                throw new ArgumentNullException($"Cannot soft delete a null entity of type {typeof(TEntity).Name}!");
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), $"Cannot soft delete an entity using a null user!");
 
             entity.IsDeleted = true;
-            Update(entity);
+            Update(entity, user);
         }
     }
 }

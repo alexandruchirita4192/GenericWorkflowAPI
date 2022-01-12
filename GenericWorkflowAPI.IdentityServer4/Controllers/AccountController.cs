@@ -25,16 +25,16 @@ namespace IdentityServerHost.Quickstart.UI
     [AllowAnonymous]
     public class AccountController : Controller
     {
-        private readonly UserManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> _userManager;
-        private readonly SignInManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> _signInManager;
+        private readonly UserManager<GenericWorkflowAPI.Domain.IdentityUser> _userManager;
+        private readonly SignInManager<GenericWorkflowAPI.Domain.IdentityUser> _signInManager;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
 
         public AccountController(
-            UserManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> userManager,
-            SignInManager<GenericWorkflowAPI.Domain.Entities.IdentityUser> signInManager,
+            UserManager<GenericWorkflowAPI.Domain.IdentityUser> userManager,
+            SignInManager<GenericWorkflowAPI.Domain.IdentityUser> signInManager,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,

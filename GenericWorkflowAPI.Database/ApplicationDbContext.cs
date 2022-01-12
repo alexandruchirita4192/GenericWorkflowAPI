@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

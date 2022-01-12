@@ -31,7 +31,8 @@ namespace IdentityServerHost.Quickstart.UI
                 return NotFound();
             }
 
-            var model = new DiagnosticsViewModel(await HttpContext.AuthenticateAsync());
+            var authResult = await HttpContext.AuthenticateAsync();
+            var model = new DiagnosticsViewModel(authResult);
             return View(model);
         }
 
@@ -40,11 +41,13 @@ namespace IdentityServerHost.Quickstart.UI
         [AjaxOnly]
         public async Task<IActionResult> GetToken()
         {
+            var authResult = await HttpContext.AuthenticateAsync();
             var token = await _tools.IssueClientJwtAsync(
-                clientId: "client_id",
+                clientId: "GenericWorkflowAPI",
                 lifetime: 3600,
                 scopes: Config.ApiScopes.Select(s => s.Name),
-                audiences: Config.ApiAudiences);
+                audiences: Config.ApiAudiences,
+                additionalClaims: Config.GetClaims(authResult.Principal.Identities, authResult.Principal.Claims));
 
             return Ok(token);
         }

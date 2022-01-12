@@ -31,7 +31,7 @@ namespace GenericWorkflowAPI.IdentityServer4
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<Domain.Entities.IdentityUser, Domain.Entities.IdentityRole>()
+            services.AddIdentity<Domain.IdentityUser, Domain.IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -48,7 +48,7 @@ namespace GenericWorkflowAPI.IdentityServer4
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients)
-                .AddAspNetIdentity<Domain.Entities.IdentityUser>();
+                .AddAspNetIdentity<Domain.IdentityUser>();
 
             // TODO: Fix for production: not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
