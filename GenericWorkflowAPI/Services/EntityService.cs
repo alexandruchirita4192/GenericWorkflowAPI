@@ -26,7 +26,7 @@ namespace GenericWorkflowAPI.Services
         public void Update(TEntity entity, IdentityUser user)
         {
             if (entity == null)
-                throw new ArgumentNullException($"Cannot update a null entity of type {typeof(TEntity).Name}!");
+                throw new ArgumentNullException(nameof(entity), $"Cannot update a null entity of type {typeof(TEntity).Name}!");
             if (user == null)
                 throw new ArgumentNullException(nameof(user), $"Cannot update an entity using a null user!");
 
@@ -37,7 +37,7 @@ namespace GenericWorkflowAPI.Services
         public void Delete(TEntity entity, IdentityUser user)
         {
             if (entity == null)
-                throw new ArgumentNullException($"Cannot soft delete a null entity of type {typeof(TEntity).Name}!");
+                throw new ArgumentNullException(nameof(entity), $"Cannot soft delete a null entity of type {typeof(TEntity).Name}!");
             if (user == null)
                 throw new ArgumentNullException(nameof(user), $"Cannot soft delete an entity using a null user!");
 

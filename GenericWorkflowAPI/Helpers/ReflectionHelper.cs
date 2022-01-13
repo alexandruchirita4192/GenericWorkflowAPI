@@ -22,8 +22,8 @@ namespace GenericWorkflowAPI.Helpers
                 throw new ArgumentNullException(nameof(destination), "Cannot copy to a null object.");
 
             // Getting the Types of the objects
-            Type typeDest = destination.GetType();
-            Type typeSrc = source.GetType();
+            var typeDest = destination.GetType();
+            var typeSrc = source.GetType();
 
             // Iterate the Properties of the source instance and
             // populate them from their desination counterparts
@@ -34,7 +34,7 @@ namespace GenericWorkflowAPI.Helpers
                 {
                     continue;
                 }
-                PropertyInfo targetProperty = typeDest.GetProperty(srcProp.Name);
+                var targetProperty = typeDest.GetProperty(srcProp.Name);
                 if (targetProperty == null)
                 {
                     continue;
@@ -43,11 +43,11 @@ namespace GenericWorkflowAPI.Helpers
                 {
                     continue;
                 }
-                if (targetProperty.GetSetMethod(true) != null && targetProperty.GetSetMethod(true).IsPrivate)
+                if (targetProperty.GetSetMethod(true)?.IsPrivate ?? false)
                 {
                     continue;
                 }
-                if ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0)
+                if ((targetProperty.GetSetMethod()?.Attributes & MethodAttributes.Static ?? 0) != 0)
                 {
                     continue;
                 }
@@ -55,6 +55,7 @@ namespace GenericWorkflowAPI.Helpers
                 {
                     continue;
                 }
+
                 // Passed all tests, lets set the value
                 targetProperty.SetValue(destination, srcProp.GetValue(source, null), null);
             }

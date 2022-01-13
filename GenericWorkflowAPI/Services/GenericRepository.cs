@@ -5,7 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain;
+using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
@@ -58,12 +60,35 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(GetByIdAsync)}({id}) function error");
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
+                    nameof(GetByIdAsync),
+                    $"{id};{string.Join(",", includePathList)}");
+
                 throw;
             }
         }
 
         public async Task<List<TEntity>> GetAllAsync(List<string> includePathList, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var entitiesQueryable = GetAllQueryable(includePathList);
+
+                return await entitiesQueryable.ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
+                    nameof(GetAllAsync),
+                    string.Join(",", includePathList));
+
+                throw;
+            }
+        }
+
+        public IQueryable<TEntity> GetAllQueryable(List<string> includePathList)
         {
             try
             {
@@ -78,11 +103,15 @@ namespace GenericWorkflowAPI.Services
                     }
                 }
 
-                return await entitiesQueryable.ToListAsync(cancellationToken);
+                return entitiesQueryable;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(GetAllAsync)}({string.Join(",", includePathList)}) function error");
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
+                    nameof(GetAllQueryable),
+                    string.Join(",", includePathList));
+
                 throw;
             }
         }
@@ -102,7 +131,12 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(AddAsync)}({JsonConvert.SerializeObject(entity)}) function error");
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
+                    nameof(AddAsync),
+                    JsonConvert.SerializeObject(entity),
+                    user);
+
                 throw;
             }
         }
@@ -126,7 +160,12 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericRepository<TEntity, TDbContext>)}.{nameof(AddRangeAsync)}({JsonConvert.SerializeObject(entitiesList)}) function error");
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
+                    nameof(AddRangeAsync),
+                    JsonConvert.SerializeObject(entitiesList),
+                    user);
+
                 throw;
             }
         }
@@ -146,10 +185,12 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
-                    typeof(GenericRepository<TEntity, TDbContext>),
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
                     nameof(UpdateLoadedAsync),
-                    JsonConvert.SerializeObject(loadedEntity));
+                    JsonConvert.SerializeObject(loadedEntity),
+                    user);
+
                 throw;
             }
         }
@@ -173,13 +214,16 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "{genericTypeName}.{methodName}({serializedDataAsJson}) function error",
-                    typeof(GenericRepository<TEntity, TDbContext>),
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
                     nameof(UpdateLoadedAsync),
-                    JsonConvert.SerializeObject(loadedEntitiesList));
+                    JsonConvert.SerializeObject(loadedEntitiesList),
+                    user);
+
                 throw;
             }
         }
+
         public async Task DeleteAsync(long? id, IdentityUser user, CancellationToken cancellationToken)
         {
             try
@@ -199,10 +243,12 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "{genericTypeName}.{methodName}({id}) function error",
-                    typeof(GenericRepository<TEntity, TDbContext>),
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
                     nameof(DeleteAsync),
-                    id);
+                    id,
+                    user);
+                
                 throw;
             }
         }
@@ -233,10 +279,12 @@ namespace GenericWorkflowAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "{genericTypeName}.{methodName}({idsListAsJson}) function error",
-                    typeof(GenericRepository<TEntity, TDbContext>),
+                _logger.ErrorEx(ex,
+                    typeof(GenericRepository<TEntity, TDbContext>).FullName,
                     nameof(DeleteAsync),
-                    JsonConvert.SerializeObject(idsList));
+                    JsonConvert.SerializeObject(idsList),
+                    user);
+
                 throw;
             }
         }

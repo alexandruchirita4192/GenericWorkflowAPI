@@ -7,7 +7,9 @@ using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
+using GenericWorkflowAPI.Extensions;
 using GenericWorkflowAPI.Helpers;
+using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -37,8 +39,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(CreateItem)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(CreateItem),
+                    JsonConvert.SerializeObject(item),
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
 
@@ -55,8 +62,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(CreateCollection)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(CreateCollection),
+                    JsonConvert.SerializeObject(collection),
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
 
@@ -73,8 +85,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(UpdateItem)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(UpdateItem),
+                    JsonConvert.SerializeObject(item),
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
 
@@ -91,8 +108,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(UpdateCollection)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(UpdateCollection),
+                    JsonConvert.SerializeObject(request),
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
 
@@ -109,8 +131,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(DeleteItem)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(DeleteItem),
+                    code,
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
 
@@ -127,8 +154,13 @@ namespace GenericWorkflowAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCRUDController<TEntity, TDto>).FullName}.{nameof(DeleteCollection)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.ErrorEx(ex,
+                    typeof(GenericCRUDController<TEntity, TDto>).FullName,
+                    nameof(DeleteItem),
+                    JsonConvert.SerializeObject(request),
+                    request?.User);
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
     }

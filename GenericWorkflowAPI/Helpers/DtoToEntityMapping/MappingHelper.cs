@@ -171,9 +171,10 @@ namespace GenericWorkflowAPI.AutoMapper
                     // Set the value of the TDto property "{}" based on the value of the TEntity
                     reflectionMappedInfo.EntityPropertyInfoId.SetValue(entity, childEntity.Id, null);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    _logger.Error(ex, "{functionName} exception occured in foreach of list {listName} for item {@reflectionMappedInfo} while setting properties from dto of type {dtoTypeName} to entity of type {entityTypeName}.", 
+                    _logger.Error(ex,
+                        "{functionName} exception occured in foreach of list {listName} for item {@reflectionMappedInfo} while setting properties from dto of type {dtoTypeName} to entity of type {entityTypeName}.",
                         nameof(MapDtoToEntity),
                         nameof(MappingInfos),
                         reflectionMappedInfo,
@@ -218,6 +219,5 @@ namespace GenericWorkflowAPI.AutoMapper
 
             return entitiesList;
         }
-
     }
 }

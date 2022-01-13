@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -15,13 +14,13 @@ namespace GenericWorkflowAPI.Helpers
         {
             var builder = new ODataConventionModelBuilder();
 
-            var assembly = typeof(ApplicationDbContext).Assembly; // GenericWorkflowAPI.Database
+            var assembly = typeof(WorkflowDto).Assembly;
             if (assembly != null)
             {
-                var validEntityTypes = assembly.GetTypes().Where(t => typeof(IBaseDto).IsAssignableFrom(t));
+                var validDtoTypes = assembly.GetTypes().Where(t => typeof(IBaseDto).IsAssignableFrom(t));
 
-                foreach (var entityType in validEntityTypes)
-                    builder.AddEntityType(entityType);
+                foreach (var dtoType in validDtoTypes)
+                    builder.AddEntityType(dtoType);
             }
 
             return builder.GetEdmModel();

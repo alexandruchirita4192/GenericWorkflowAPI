@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Domain;
@@ -15,6 +16,8 @@ namespace GenericWorkflowAPI.Core.Services
         public Task<TEntity> GetByIdAsync(long? id, List<string> includePathList, CancellationToken cancellationToken);
 
         public Task<List<TEntity>> GetAllAsync(List<string> includePathList, CancellationToken cancellationToken);
+
+        public IQueryable<TEntity> GetAllQueryable(List<string> includePathList);
 
         public Task AddAsync(TEntity entity, IdentityUser user, CancellationToken cancellationToken);
 

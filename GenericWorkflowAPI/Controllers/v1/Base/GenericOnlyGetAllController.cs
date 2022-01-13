@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Attributes;
@@ -7,10 +8,11 @@ using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
-using GenericWorkflowAPI.Helpers;
+using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -20,8 +22,8 @@ namespace GenericWorkflowAPI.Controllers.v1
     [SerilogLogging]
     [Route("api/v{version:ApiVersion}/[controller]s")]
     public abstract class GenericOnlyGetAllController<TEntity, TDto> : ControllerBase
-    where TEntity : class, IIdEntity, new()
-    where TDto : class, IBaseDto, new()
+        where TEntity : class, IIdEntity, new()
+        where TDto : class, IBaseDto, new()
     {
         protected readonly ILogger _logger;
         protected readonly IMediator _mediator;
@@ -42,15 +44,36 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericGetListRequest<TDto> { IncludePathList = _includePathList };
             try
             {
-                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericOnlyGetAllController<TEntity, TDto>).FullName}.{nameof(GetCollection)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.Error(ex,
+                    LogConstants.SerilogTemplateExceptionWithParameter,
+                    typeof(GenericOnlyGetAllController<TEntity, TDto>).FullName,
+                    nameof(GetCollection),
+                    JsonConvert.SerializeObject(request));
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
+
+        [NonAction]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        protected async Task<IQueryable<TDto>> GetQueryable(ODataQueryOptions<TDto> queryOptions, CancellationToken cancellationToken)
+        {
+            var request = new GenericGetQueryableRequest<TDto> { IncludePathList = _includePathList };
+
+            return await _mediator.Send(request, cancellationToken);
+        }
+
+        // TODO: Remove after OData fix (this is required if the controller derives from ODataController or ApiController)
+        //[NonAction]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        //public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
+        //{
+        //    return base.ExecuteAsync(controllerContext, cancellationToken);
+        //}
     }
 }

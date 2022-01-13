@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Web.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 
 namespace GenericWorkflowAPI.Helpers
 {
-    public static class ControllerExtensions
+    public static class ApiControllerExtensions
     {
-        public static Domain.IdentityUser GetUser(this ControllerBase controller)
+        public static Domain.IdentityUser? GetUser(this ApiController controller)
         {
             var userId = controller.GetUserId();
             if (userId == null)
@@ -33,7 +33,7 @@ namespace GenericWorkflowAPI.Helpers
             {
                 Id = userId.Value,
                 Email = firstUserEmail,
-                Claims = identityClaims,
+                Claims = identityClaims ?? new List<IdentityUserClaim<string>>(),
                 EmailConfirmed = isEmailVerified,
                 SecurityStamp = firstSecurityStamp,
             };
@@ -41,21 +41,26 @@ namespace GenericWorkflowAPI.Helpers
             return identityUser;
         }
 
-        public static List<IdentityUserClaim<string>>? GetIdentityUserClaimList(this ControllerBase controller, long userId)
+        public static List<IdentityUserClaim<string>>? GetIdentityUserClaimList(this ApiController controller, long userId)
         {
-            return controller.HttpContext?.User?.Claims?
-                            .Select(c => new IdentityUserClaim<string>
-                            {
-                                ClaimType = c.Type,
-                                ClaimValue = c.Value,
-                                UserId = userId.ToString()
-                            })?.ToList();
+            return controller.GetClaimsPrincipal()
+                ?.Claims
+                ?.Select(c => new IdentityUserClaim<string>
+                {
+                    ClaimType = c.Type,
+                    ClaimValue = c.Value,
+                    UserId = userId.ToString()
+                })?.ToList();
         }
 
-        public static string? GetFirstClaimValue(this ControllerBase controller, string claimType)
+        public static ClaimsPrincipal? GetClaimsPrincipal(this ApiController controller)
         {
-            var claimValue = controller.HttpContext
-                ?.User
+            return controller.User as ClaimsPrincipal;
+        }
+
+        public static string? GetFirstClaimValue(this ApiController controller, string claimType)
+        {
+            var claimValue = controller.GetClaimsPrincipal()
                 ?.Claims
                 ?.FirstOrDefault(c => c.Type == claimType)
                 ?.Value;
@@ -63,38 +68,37 @@ namespace GenericWorkflowAPI.Helpers
             return claimValue;
         }
 
-        public static long? GetUserId(this ControllerBase controller)
+        public static long? GetUserId(this ApiController controller)
         {
             var userIdAsString = controller.GetFirstClaimValue(ClaimTypes.NameIdentifier);
-            var userId = 0l;
 
+            long userId;
             if (string.IsNullOrWhiteSpace(userIdAsString) || !long.TryParse(userIdAsString, out userId))
                 return null;
 
             return userId;
         }
 
-        public static string? GetUserName(this ControllerBase controller)
+        public static string? GetUserName(this ApiController controller)
         {
-            return controller.HttpContext?.User?.Identity?.Name;
+            return controller.User?.Identity?.Name;
         }
 
-        public static string? GetUserGivenName(this ControllerBase controller)
+        public static string? GetUserGivenName(this ApiController controller)
         {
             return controller.GetFirstClaimValue(ClaimTypes.GivenName);
         }
 
-        public static string? GetUserSurname(this ControllerBase controller)
+        public static string? GetUserSurname(this ApiController controller)
         {
             return controller.GetFirstClaimValue(ClaimTypes.Surname);
         }
 
-        public static List<string> GetUserRoles(this ControllerBase controller)
+        public static List<string> GetUserRoles(this ApiController controller)
         {
             var userRoles = new List<string>();
 
-            var roles = controller.HttpContext
-                ?.User
+            var roles = controller.GetClaimsPrincipal()
                 ?.Claims
                 ?.Where(c => c.Type == ClaimTypes.Role && c.ValueType == ClaimValueTypes.String);
 

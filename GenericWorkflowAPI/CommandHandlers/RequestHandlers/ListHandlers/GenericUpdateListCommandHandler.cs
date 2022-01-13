@@ -11,6 +11,7 @@ using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
+using GenericWorkflowAPI.Extensions;
 using MediatR;
 using Newtonsoft.Json;
 using Serilog;
@@ -56,7 +57,12 @@ namespace GenericWorkflowAPI.CommandHandlers
             }
             catch (Exception ex)
             {
-                logger.Error(ex, $"{typeof(GenericUpdateListCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({JsonConvert.SerializeObject(request.Collection)}) exception");
+                logger.ErrorEx(ex,
+                    typeof(GenericUpdateListCommandHandler<TEntity, TDto>).FullName,
+                    nameof(Handle),
+                    JsonConvert.SerializeObject(request.Collection),
+                    request.User);
+
                 return GenericApiResponse<string>.Problem(ValidationConstants.GenericValidationMessage, HttpStatusCode.InternalServerError);
             }
         }

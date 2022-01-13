@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
@@ -8,6 +7,7 @@ using GenericWorkflowAPI.CommandHandlers;
 using GenericWorkflowAPI.CommandHandlers.RequestHandlers;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Core.Extensions;
+using GenericWorkflowAPI.Core.Filters;
 using GenericWorkflowAPI.Core.Helpers;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Database;
@@ -18,16 +18,17 @@ using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Extensions;
 using GenericWorkflowAPI.Helpers;
 using GenericWorkflowAPI.Services;
+using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -39,17 +40,18 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using Serilog;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GenericWorkflowAPI
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; private set; }
+        public IWebHostEnvironment CurrentEnvironment { get; private set; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment currentEnvironment)
         {
             Configuration = configuration;
+            CurrentEnvironment = currentEnvironment;
         }
 
         public bool UseAuthentication
@@ -71,6 +73,9 @@ namespace GenericWorkflowAPI
                 {
                     c.SwaggerEndpoint("v1/swagger.json", "Generic Workflow API");
                     c.DocumentTitle = "Generic Wokflow API";
+
+                    ////// Hide all the schema
+                    ////c.DefaultModelsExpandDepth(-1);
                 });
                 app.UseMigrationsEndPoint();
                 app.UseDeveloperExceptionPage();
@@ -81,32 +86,6 @@ namespace GenericWorkflowAPI
             else
             {
                 //app.UseExceptionHandler("/Error");
-
-                //app.UseExceptionHandler(exceptionHandlerApp =>
-                //{
-                //    exceptionHandlerApp.Run(async context =>
-                //    {
-                //        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
-                //        // using static System.Net.Mime.MediaTypeNames;
-                //        context.Response.ContentType = Text.Plain;
-
-                //        await context.Response.WriteAsync("An exception was thrown.");
-
-                //        var exceptionHandlerPathFeature =
-                //            context.Features.Get<IExceptionHandlerPathFeature>();
-
-                //        if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
-                //        {
-                //            await context.Response.WriteAsync("The file was not found.");
-                //        }
-
-                //        if (exceptionHandlerPathFeature?.Path == "/")
-                //        {
-                //            await context.Response.WriteAsync("Page: Home.");
-                //        }
-                //    });
-                //});
 
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -204,6 +183,12 @@ namespace GenericWorkflowAPI
                    });
             }
 
+            // Add Problem-details middleware:
+            services.AddProblemDetails(setup =>
+            {
+                setup.IncludeExceptionDetails = (ctx, env) => CurrentEnvironment.IsDevelopment() || CurrentEnvironment.IsStaging();
+            });
+
             // TODO: Check if it's required for better memory cache, and how it's used if needed
             //// Add the memory cache services.
             //services.AddMemoryCache();
@@ -237,7 +222,7 @@ namespace GenericWorkflowAPI
             services.RunEmbeddedResourcesInCurrentAssembly(connectionString);
 
             // Generate EdmModel containing DTOs because those are exposed by API (DTOs are derived from IBaseDto)
-            //var edmModel = EdmModelHelper.GetEdmModel();
+            var edmModel = EdmModelHelper.GetEdmModel();
 
             // Use controllers with Newtonsoft.Json serialization
             services.AddControllersWithViews()
@@ -246,11 +231,11 @@ namespace GenericWorkflowAPI
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 })
                 // Add OData with versioning route on a generated EdmModel
-                //.AddOData(opt => opt.AddRouteComponents("v{version}", edmModel))
+                .AddOData(opt => opt.AddRouteComponents("v{version}", edmModel))
                 ;
 
             // Add OData query filter (allow filtering for IQueryable)
-            //services.AddODataQueryFilter();
+            services.AddODataQueryFilter();
 
             // Add API Versioning
             services.AddApiVersioning(options =>
@@ -265,7 +250,6 @@ namespace GenericWorkflowAPI
             });
 
             // Replacing {version} from Swagger with v1
-            // TODO: Use AddODataApiExplorer when using OData
             services.AddVersionedApiExplorer(
                 options =>
                 {
@@ -365,6 +349,10 @@ namespace GenericWorkflowAPI
                 {
                     {securityScheme, new string[] { }}
                 });
+
+                c.OperationFilter<OpenApiParameterIgnoreFilter>();
+                c.OperationFilter<ODataQueryOptionsFilter>();
+                c.DocumentFilter<RemoveSchemasFilter>(assemblyMappingsList);
             });
 
             // Add AntiForgery service mapping the IAntiforgery interface

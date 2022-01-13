@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using GenericWorkflowAPI.Core.Attributes;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
@@ -13,6 +15,7 @@ using GenericWorkflowAPI.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Serilog;
 
 namespace GenericWorkflowAPI.Controllers.v1
@@ -39,11 +42,20 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost("ExecuteWorkflow")]
-        public async Task<IActionResult> ExecuteWorkflow([FromBody] ExecuteWorkflowRequest executeWorkflowRequest, CancellationToken cancellationToken)
+        public async Task<IActionResult> ExecuteWorkflow([FromBody] ExecuteWorkflowRequestDto executeWorkflowDto, CancellationToken cancellationToken)
         {
+            ExecuteWorkflowRequest executeWorkflowRequest;
+
+            // Fill execute workflow request from Dto and context (user)
             try
             {
-                executeWorkflowRequest.User = this.GetUser();
+                executeWorkflowRequest = new ExecuteWorkflowRequest()
+                {
+                    User = this.GetUser(),
+                    WorkflowCode = executeWorkflowDto.WorkflowCode,
+                    WorkflowInstanceCode = executeWorkflowDto.WorkflowInstanceCode,
+                    WorkflowInputCodeTypeXvalue = executeWorkflowDto.WorkflowInputCodeTypeXvalue
+                };
             }
             catch (Exception ex)
             {
@@ -61,7 +73,6 @@ namespace GenericWorkflowAPI.Controllers.v1
             return response;
         }
 
-        //[EnableQuery]
         [HttpGet("{code}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -72,7 +83,6 @@ namespace GenericWorkflowAPI.Controllers.v1
             return await base.GetItem(code, cancellationToken);
         }
 
-        //[EnableQuery]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -82,6 +92,17 @@ namespace GenericWorkflowAPI.Controllers.v1
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             return await base.GetCollection(cancellationToken);
+        }
+
+        [EnableQuery]
+        [HttpGet("Queryable")]
+        //[ODataRoute("Queryable")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IQueryable<WorkflowDto>> Get([OpenApiParameterIgnore] ODataQueryOptions<WorkflowDto> queryOptions, CancellationToken cancellationToken)
+        {
+            return await base.GetQueryable(queryOptions, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]

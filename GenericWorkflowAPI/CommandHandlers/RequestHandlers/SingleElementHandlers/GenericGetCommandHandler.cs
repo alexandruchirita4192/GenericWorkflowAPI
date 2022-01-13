@@ -40,12 +40,6 @@ namespace GenericWorkflowAPI.CommandHandlers
                     _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericGetRequest<TDto>).FullName}");
                     return GenericApiResponse<TDto>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
                 }
-                if (request.User == null)
-                {
-                    _logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericGetRequest<TDto>).FullName} for null user.");
-                    return GenericApiResponse<TDto>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
-                        new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
-                }
                 if (string.IsNullOrWhiteSpace(request.Code))
                 {
                     return InternalInvalidCode(request);

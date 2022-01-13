@@ -6,7 +6,7 @@ using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
-using GenericWorkflowAPI.Helpers;
+using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -30,14 +30,18 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericGetRequest<TDto>() { Code = code, IncludePathList = _includePathList };
             try
             {
-                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericGetController<TEntity, TDto>).FullName}.{nameof(GetCollection)}({JsonConvert.SerializeObject(request)})");
-                return Problem(ValidationConstants.GenericValidationMessage, statusCode: 500);
+                _logger.Error(ex,
+                    LogConstants.SerilogTemplateExceptionWithParameter,
+                    typeof(GenericGetController<TEntity, TDto>).FullName,
+                    nameof(GetCollection),
+                    JsonConvert.SerializeObject(request));
+
+                throw new ProblemDetailsException(500, ValidationConstants.GenericValidationMessage, ex);
             }
         }
     }
