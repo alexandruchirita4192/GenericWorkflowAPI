@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
+using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +41,20 @@ namespace GenericWorkflowAPI.Controllers.v1
         [HttpPost("ExecuteWorkflow")]
         public async Task<IActionResult> ExecuteWorkflow([FromBody] ExecuteWorkflowRequest executeWorkflowRequest, CancellationToken cancellationToken)
         {
-            var userId = this.GetUserId();
+            try
+            {
+                executeWorkflowRequest.User = this.GetUser();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error received while setting the user to an {requestName}.", nameof(ExecuteWorkflowRequest));
+
+                var errorApiResponse = GenericApiResponse<string>.Problem(
+                    ValidationConstants.GenericValidationMessage,
+                    HttpStatusCode.InternalServerError);
+                var errorResponse = await _mediator.Send(errorApiResponse, cancellationToken);
+                return errorResponse;
+            }
 
             var genericApiResponse = await _mediator.Send(executeWorkflowRequest, cancellationToken);
             var response = await _mediator.Send(genericApiResponse, cancellationToken);

@@ -15,6 +15,7 @@ namespace GenericWorkflowAPI.Domain.Entities
         [ForeignKey("InstanceId")] // $"{nameof(InstanceId)}"
         public WorkflowInstance Instance { get; set; }
 
+        [Required]
         public long? CurrentStateId { get; set; }
 
         [ForeignKey("CurrentStateId")] // $"{nameof(CurrentStateId)}"

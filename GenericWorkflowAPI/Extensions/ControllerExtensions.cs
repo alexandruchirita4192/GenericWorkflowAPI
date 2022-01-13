@@ -8,7 +8,7 @@ namespace GenericWorkflowAPI.Helpers
 {
     public static class ControllerExtensions
     {
-        public static Domain.IdentityUser GetIdentityUser(this ControllerBase controller)
+        public static Domain.IdentityUser GetUser(this ControllerBase controller)
         {
             var userId = controller.GetUserId();
             if (userId == null)
@@ -74,7 +74,7 @@ namespace GenericWorkflowAPI.Helpers
             return userId;
         }
 
-        private static string? GetUserName(this ControllerBase controller)
+        public static string? GetUserName(this ControllerBase controller)
         {
             return controller.HttpContext?.User?.Identity?.Name;
         }

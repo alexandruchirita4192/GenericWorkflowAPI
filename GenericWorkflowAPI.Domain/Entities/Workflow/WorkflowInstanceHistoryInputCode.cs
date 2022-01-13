@@ -7,13 +7,13 @@ namespace GenericWorkflowAPI.Domain.Entities
     /// A record of an aquired input code of type <see cref="InputCodeType"/> associated at a time with an workflow instance (<see cref="Instance"/>)
     /// with value (<see cref="Value"/>).
     /// </summary>
-    public class WorkflowInstanceHistoryInputCode : BaseEntity, IWorkflowInstanceEntity
+    public class WorkflowInstanceHistoryInputCode : BaseEntity
     {
         [Required]
-        public long? InstanceId { get; set; }
+        public long? HistoryId { get; set; }
 
-        [ForeignKey("InstanceId")] // $"{nameof(InstanceId)}"
-        public WorkflowInstance Instance { get; set; }
+        [ForeignKey("HistoryId")] // $"{nameof(HistoryId)}"
+        public WorkflowInstanceHistory History { get; set; }
 
         [Required]
         public long? InputCodeTypeId { get; set; }

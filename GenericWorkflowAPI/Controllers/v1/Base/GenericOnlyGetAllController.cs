@@ -7,6 +7,7 @@ using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
+using GenericWorkflowAPI.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericGetListRequest<TDto> { IncludePathList = _includePathList };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }

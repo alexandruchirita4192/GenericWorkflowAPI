@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
@@ -21,6 +22,7 @@ using MediatR;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +39,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using Serilog;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GenericWorkflowAPI
 {
@@ -77,7 +80,33 @@ namespace GenericWorkflowAPI
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                //app.UseExceptionHandler("/Error");
+
+                //app.UseExceptionHandler(exceptionHandlerApp =>
+                //{
+                //    exceptionHandlerApp.Run(async context =>
+                //    {
+                //        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+                //        // using static System.Net.Mime.MediaTypeNames;
+                //        context.Response.ContentType = Text.Plain;
+
+                //        await context.Response.WriteAsync("An exception was thrown.");
+
+                //        var exceptionHandlerPathFeature =
+                //            context.Features.Get<IExceptionHandlerPathFeature>();
+
+                //        if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
+                //        {
+                //            await context.Response.WriteAsync("The file was not found.");
+                //        }
+
+                //        if (exceptionHandlerPathFeature?.Path == "/")
+                //        {
+                //            await context.Response.WriteAsync("Page: Home.");
+                //        }
+                //    });
+                //});
 
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();

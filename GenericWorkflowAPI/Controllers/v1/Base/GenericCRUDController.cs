@@ -7,6 +7,7 @@ using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
+using GenericWorkflowAPI.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -30,6 +31,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericCreateRequest<TDto>() { Item = item };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
@@ -47,6 +49,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericCreateListRequest<TDto>() { Collection = collection };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
@@ -64,6 +67,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericUpdateRequest<TDto>() { Item = item };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
@@ -81,6 +85,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericUpdateListRequest<TDto>() { Collection = collection };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
@@ -98,6 +103,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericDeleteRequest<TDto>() { Code = code };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }
@@ -115,6 +121,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             var request = new GenericDeleteListRequest<TDto>() { Codes = codes };
             try
             {
+                request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
                 return await _mediator.Send(response);
             }

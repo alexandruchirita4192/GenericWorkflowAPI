@@ -2,10 +2,10 @@
 
 namespace GenericWorkflowAPI.Domain.DTOs
 {
-    public class WorkflowInstanceHistoryInputCodeDto : IWorkflowInstanceDto
+    public class WorkflowInstanceHistoryInputCodeDto : IBaseDto
     {
         [Required]
-        public string InstanceCode { get; set; }
+        public string HistoryCode { get; set; }
 
         [Required]
         public string InputCodeTypeCode { get; set; }
