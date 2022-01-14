@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
+using AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -20,15 +20,15 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, ICodeDto, new()
         where TEntity : class, IBaseEntity, ICodeEntity, new()
     {
-        private readonly ILogger _logger;
         private readonly IGenericCodeRepository<TEntity> _repository;
-        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
+        private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public GenericGetCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
+        public GenericGetCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
-            _mappingHelper = mappingHelper;
+            _mapper = mapper;
         }
 
         public async Task<GenericApiResponse<TDto>> Handle(GenericGetRequest<TDto> request, CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ namespace GenericWorkflowAPI.CommandHandlers
                     return InternalInvalidCode(request);
                 }
 
-                var dto = _mappingHelper.MapEntityToDto(entity);
+                var dto = _mapper.Map<TDto>(entity);
                 if (dto == null)
                 {
                     _logger.Error($"Invalid dto received while mapping entity ({JsonConvert.SerializeObject(entity)}) to dto (null); request code is {request.Code}");

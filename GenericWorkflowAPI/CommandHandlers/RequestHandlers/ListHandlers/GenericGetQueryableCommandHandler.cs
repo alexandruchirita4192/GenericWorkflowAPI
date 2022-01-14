@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
 using MediatR;
-using Serilog;
 
 namespace GenericWorkflowAPI.CommandHandlers
 {
@@ -17,13 +17,13 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, new()
         where TEntity : class, IBaseEntity, new()
     {
-        private readonly ILogger logger;
-        private readonly IGenericRepository<TEntity> repository;
+        private readonly IGenericRepository<TEntity> _repository;
+        private readonly IMapper _mapper;
 
-        public GenericGetQueryableCommandHandler(IGenericRepository<TEntity> _repository, ILogger _logger)
+        public GenericGetQueryableCommandHandler(IGenericRepository<TEntity> repository, IMapper mapper)
         {
-            repository = _repository;
-            logger = _logger;
+            _repository = repository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -37,9 +37,9 @@ namespace GenericWorkflowAPI.CommandHandlers
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var entitiesQueryable = repository.GetAllQueryable(request.IncludePathList ?? new List<string>());
+            var entitiesQueryable = _repository.GetAllQueryable(request.IncludePathList ?? new List<string>());
 
-            var dtosQueryable = entitiesQueryable.ProjectTo<TDto>(null, request.QueryOptions);
+            var dtosQueryable = entitiesQueryable.ProjectTo<TDto>(_mapper.ConfigurationProvider, request.QueryOptions);
 
             return dtosQueryable;
         }

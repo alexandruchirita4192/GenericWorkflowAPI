@@ -13,6 +13,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -21,7 +22,7 @@ namespace GenericWorkflowAPI.Controllers.v1
     [Authorize]
     [SerilogLogging]
     [Route("api/v{version:ApiVersion}/[controller]s")]
-    public abstract class GenericOnlyGetAllController<TEntity, TDto> : ControllerBase
+    public abstract class GenericOnlyGetAllController<TEntity, TDto> : ODataController
         where TEntity : class, IIdEntity, new()
         where TDto : class, IBaseDto, new()
     {
@@ -67,13 +68,5 @@ namespace GenericWorkflowAPI.Controllers.v1
 
             return await _mediator.Send(request, cancellationToken);
         }
-
-        // TODO: Remove after OData fix (this is required if the controller derives from ODataController or ApiController)
-        //[NonAction]
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        //public override Task<HttpResponseMessage> ExecuteAsync(HttpControllerContext controllerContext, CancellationToken cancellationToken)
-        //{
-        //    return base.ExecuteAsync(controllerContext, cancellationToken);
-        //}
     }
 }

@@ -9,6 +9,7 @@ using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GenericWorkflowAPI.Domain;
+using Microsoft.Extensions.Configuration;
 
 namespace GenericWorkflowAPI.UnitTesting
 {
@@ -22,12 +23,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
             var configuration = GetConfiguration();
-            var logger = new LoggerConfiguration()
-                    .Enrich.WithThreadId()
-                    .Enrich.FromLogContext()
-                    .ReadFrom.Configuration(configuration)
-                    //.WriteTo.Seq(Configuration.GetSection("Seq").GetValue<string>("Url"))
-                    .CreateLogger();
+            Serilog.Core.Logger logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();
             var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
@@ -46,12 +42,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
             var configuration = GetConfiguration();
-            var logger = new LoggerConfiguration()
-                    .Enrich.WithThreadId()
-                    .Enrich.FromLogContext()
-                    .ReadFrom.Configuration(configuration)
-                    //.WriteTo.Seq(Configuration.GetSection("Seq").GetValue<string>("Url"))
-                    .CreateLogger();
+            var logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();
             var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
@@ -69,12 +60,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
             var configuration = GetConfiguration();
-            var logger = new LoggerConfiguration()
-                    .Enrich.WithThreadId()
-                    .Enrich.FromLogContext()
-                    .ReadFrom.Configuration(configuration)
-                    //.WriteTo.Seq(Configuration.GetSection("Seq").GetValue<string>("Url"))
-                    .CreateLogger();
+            var logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();
             var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);

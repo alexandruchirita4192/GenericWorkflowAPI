@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
+using AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -20,15 +20,15 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, new()
         where TEntity : class, IBaseEntity, new()
     {
-        private readonly ILogger logger;
-        private readonly IGenericRepository<TEntity> repository;
-        private readonly IMappingHelper<TEntity, TDto> mappingHelper;
+        private readonly IGenericRepository<TEntity> _repository;
+        private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public GenericGetListCommandHandler(IGenericRepository<TEntity> _repository, ILogger _logger, IMappingHelper<TEntity, TDto> _mappingHelper)
+        public GenericGetListCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMapper mapper)
         {
-            repository = _repository;
-            logger = _logger;
-            mappingHelper = _mappingHelper;
+            _repository = repository;
+            _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<GenericApiResponse<List<TDto>>> Handle(GenericGetListRequest<TDto> request, CancellationToken cancellationToken)
@@ -37,18 +37,19 @@ namespace GenericWorkflowAPI.CommandHandlers
             {
                 if (request == null)
                 {
-                    logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericGetListRequest<TDto>).FullName}");
+                    _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericGetListRequest<TDto>).FullName}");
                     return GenericApiResponse<List<TDto>>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
                 }
 
-                var entitiesList = await repository.GetAllAsync(request.IncludePathList ?? new List<string>(), cancellationToken);
+                var entitiesList = await _repository.GetAllAsync(request.IncludePathList ?? new List<string>(), cancellationToken);
                 if (entitiesList == null || entitiesList.Count == 0)
                     return GenericApiResponse<List<TDto>>.NoContent();
 
-                var dtosList = mappingHelper.MapEntitiesToDtos(entitiesList);
+                var dtosList = _mapper.Map<List<TDto>>(entitiesList);
+
                 if (dtosList == null || dtosList.Count == 0)
                 {
-                    logger.Error($"{typeof(GenericGetListCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}" +
+                    _logger.Error($"{typeof(GenericGetListCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}" +
                         $" wrong DTO list count {dtosList?.Count} different from entities list count {entitiesList?.Count}");
                     return GenericApiResponse<List<TDto>>.Problem(ValidationConstants.GenericValidationMessage, HttpStatusCode.InternalServerError);
                 }
@@ -57,7 +58,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             }
             catch (Exception ex)
             {
-                logger.ErrorEx(ex,
+                _logger.ErrorEx(ex,
                     typeof(GenericGetListCommandHandler<TEntity, TDto>).FullName,
                     nameof(Handle));
 

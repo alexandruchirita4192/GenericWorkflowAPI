@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericWorkflowAPI.UnitTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericWorkflowAPI.IdentityServer4", "GenericWorkflowAPI.IdentityServer4\GenericWorkflowAPI.IdentityServer4.csproj", "{8E3B4547-1E7B-4653-92F8-223E94F291E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericWorkflowAPI.Benchmark", "GenericWorkflowAPI.Benchmark\GenericWorkflowAPI.Benchmark.csproj", "{9496523B-27C7-452D-8998-FE1DF5CACE9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{8E3B4547-1E7B-4653-92F8-223E94F291E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E3B4547-1E7B-4653-92F8-223E94F291E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E3B4547-1E7B-4653-92F8-223E94F291E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9496523B-27C7-452D-8998-FE1DF5CACE9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9496523B-27C7-452D-8998-FE1DF5CACE9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9496523B-27C7-452D-8998-FE1DF5CACE9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9496523B-27C7-452D-8998-FE1DF5CACE9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

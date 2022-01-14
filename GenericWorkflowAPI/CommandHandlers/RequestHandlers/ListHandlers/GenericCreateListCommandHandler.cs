@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
+using AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -22,15 +22,15 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, new()
         where TEntity : class, IBaseEntity, new()
     {
-        private readonly ILogger logger;
-        private readonly IGenericRepository<TEntity> repository;
-        private readonly IMappingHelper<TEntity, TDto> mappingHelper;
+        private readonly IGenericRepository<TEntity> _repository;
+        private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public GenericCreateListCommandHandler(IGenericRepository<TEntity> _repository, ILogger _logger, IMappingHelper<TEntity, TDto> _mappingHelper)
+        public GenericCreateListCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMapper mapper)
         {
-            repository = _repository;
-            logger = _logger;
-            mappingHelper = _mappingHelper;
+            _repository = repository;
+            _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericCreateListRequest<TDto> request, CancellationToken cancellationToken)
@@ -39,25 +39,31 @@ namespace GenericWorkflowAPI.CommandHandlers
             {
                 if (request == null)
                 {
-                    logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericCreateListRequest<TDto>).FullName}");
+                    _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericCreateListRequest<TDto>).FullName}");
                     return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
                 }
                 if (request.User == null)
                 {
-                    logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericCreateListRequest<TDto>).FullName} for null user.");
+                    _logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericCreateListRequest<TDto>).FullName} for null user.");
                     return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
                         new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
                 }
+                if (request.Collection == null)
+                {
+                    _logger.Error(new ArgumentNullException(nameof(request.Collection)), $"Cannot handle request of type {typeof(GenericCreateListRequest<TDto>).FullName} for null collection.");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.Collection)}", ValidationConstants.InvalidCollectionMessage } });
+                }
 
-                var entitiesList = await mappingHelper.MapDtosToEntities(request.Collection.ToList(), cancellationToken);
+                var entitiesList = _mapper.Map<List<TEntity>>(request.Collection.ToList());
 
-                await repository.AddRangeAsync(entitiesList, request.User, cancellationToken);
+                await _repository.AddRangeAsync(entitiesList, request.User, cancellationToken);
 
                 return GenericApiResponse<string>.Created(JsonConvert.SerializeObject(request.Collection, Formatting.Indented));
             }
             catch (Exception ex)
             {
-                logger.ErrorEx(ex,
+                _logger.ErrorEx(ex,
                     typeof(GenericCreateListCommandHandler<TEntity, TDto>).FullName,
                     nameof(Handle),
                     JsonConvert.SerializeObject(request.Collection),

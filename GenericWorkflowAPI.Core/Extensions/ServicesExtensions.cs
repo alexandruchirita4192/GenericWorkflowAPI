@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using GenericWorkflowAPI.Core.AutoMapper.Helpers;
-using GenericWorkflowAPI.Domain.DTOs;
-using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -25,22 +22,6 @@ namespace GenericWorkflowAPI.Core.Extensions
         public static void RegisterEncodingProvider()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        }
-
-        public static IServiceCollection AddReflectionMappingInfoProvider(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
-        {
-            // Mapping Example:
-            //services.AddScoped(typeof(IReflectionMappingInfoProvider<Workflow, WorkflowDto>), typeof(ReflectionMappingInfoProvider<Workflow, WorkflowDto>));
-
-            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
-
-                // IReflectionMappingInfoProvider<Workflow, WorkflowDto>
-                (mapping) => typeof(IReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value),
-
-                // ReflectionMappingInfoProvider<Workflow, WorkflowDto>
-                (mapping) => typeof(ReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value),
-                
-                nameof(AddReflectionMappingInfoProvider));
         }
 
         /// <summary>

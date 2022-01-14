@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -22,15 +21,13 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, ICodeDto, new()
         where TEntity : class, IBaseEntity, ICodeEntity, new()
     {
-        private readonly ILogger logger;
-        private readonly IGenericCodeRepository<TEntity> repository;
-        private readonly IMappingHelper<TEntity, TDto> mappingHelper;
+        private readonly IGenericCodeRepository<TEntity> _repository;
+        private readonly ILogger _logger;
 
-        public GenericDeleteListCommandHandler(IGenericCodeRepository<TEntity> _repository, ILogger _logger, IMappingHelper<TEntity, TDto> _mappingHelper)
+        public GenericDeleteListCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger)
         {
-            repository = _repository;
-            logger = _logger;
-            mappingHelper = _mappingHelper;
+            _repository = repository;
+            _logger = logger;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericDeleteListRequest<TDto> request, CancellationToken cancellationToken)
@@ -39,23 +36,29 @@ namespace GenericWorkflowAPI.CommandHandlers
             {
                 if (request == null)
                 {
-                    logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericDeleteListRequest<TDto>).FullName}");
+                    _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericDeleteListRequest<TDto>).FullName}");
                     return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict);
                 }
                 if (request.User == null)
                 {
-                    logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericDeleteListRequest<TDto>).FullName} for null user.");
+                    _logger.Error(new ArgumentNullException(nameof(request.User)), $"Cannot handle request of type {typeof(GenericDeleteListRequest<TDto>).FullName} for null user.");
                     return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
                         new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
                 }
+                if (request.Codes == null)
+                {
+                    _logger.Error(new ArgumentNullException(nameof(request.Codes)), $"Cannot handle request of type {typeof(GenericDeleteListRequest<TDto>).FullName} for null codes collection.");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.Codes)}", ValidationConstants.InvalidCollectionMessage } });
+                }
 
-                await repository.DeleteAsync(request.Codes.ToList(), request.User, cancellationToken);
+                await _repository.DeleteAsync(request.Codes.ToList(), request.User, cancellationToken);
 
                 return GenericApiResponse<string>.Ok();
             }
             catch (Exception ex)
             {
-                logger.ErrorEx(ex,
+                _logger.ErrorEx(ex,
                     typeof(GenericDeleteCommandHandler<TEntity, TDto>).FullName,
                     nameof(Handle),
                     JsonConvert.SerializeObject(request.Codes),

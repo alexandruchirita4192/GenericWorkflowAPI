@@ -30,7 +30,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -73,9 +72,6 @@ namespace GenericWorkflowAPI
                 {
                     c.SwaggerEndpoint("v1/swagger.json", "Generic Workflow API");
                     c.DocumentTitle = "Generic Wokflow API";
-
-                    ////// Hide all the schema
-                    ////c.DefaultModelsExpandDepth(-1);
                 });
                 app.UseMigrationsEndPoint();
                 app.UseDeveloperExceptionPage();
@@ -85,8 +81,6 @@ namespace GenericWorkflowAPI
             }
             else
             {
-                //app.UseExceptionHandler("/Error");
-
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -133,7 +127,7 @@ namespace GenericWorkflowAPI
             });
 
             // Setup OData
-            //app.UseODataQueryRequest();
+            app.UseODataQueryRequest();
 
             app.UseCors();
 
@@ -188,10 +182,6 @@ namespace GenericWorkflowAPI
             {
                 setup.IncludeExceptionDetails = (ctx, env) => CurrentEnvironment.IsDevelopment() || CurrentEnvironment.IsStaging();
             });
-
-            // TODO: Check if it's required for better memory cache, and how it's used if needed
-            //// Add the memory cache services.
-            //services.AddMemoryCache();
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
 
@@ -285,12 +275,6 @@ namespace GenericWorkflowAPI
 
                 // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
                 services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
-
-                // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
-                services.AddMappingHelpers(assemblyMapping?.Mapping, Log.Logger);
-
-                // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
-                services.AddReflectionMappingInfoProvider(assemblyMapping?.Mapping, Log.Logger);
             }
 
             // Add AutoMapper IMapper to services
@@ -307,9 +291,6 @@ namespace GenericWorkflowAPI
 
             // Configure Cross-Origin Resource Sharing (Cors) Policy
             services.ConfigureCors();
-
-            // Add a single memory cache per application
-            services.AddScoped(typeof(IMemoryCache), typeof(MemoryCache));
 
             // Register encodings
             Core.Extensions.ServicesExtensions.RegisterEncodingProvider();

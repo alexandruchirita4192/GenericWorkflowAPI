@@ -58,6 +58,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             if (statusInt >= 100 && statusInt <= 399)
                 return StatusCode(statusInt);
 
+            // 4xx - Client error, 5xx - Server error
             if (string.IsNullOrWhiteSpace(response.Message))
                 return Problem(statusInt);
 

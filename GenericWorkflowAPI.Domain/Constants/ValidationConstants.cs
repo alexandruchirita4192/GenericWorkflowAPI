@@ -7,5 +7,7 @@
         public const string GenericValidationMessage = "An error occured. Please contact the administrator for details.";
         public const string InvalidCodeMessage = "Invalid code";
         public const string InvalidUserMessage = "Invalid user";
+        public const string InvalidCollectionMessage = "Invalid collection";
+        public const string InvalidItemMessage = "Invalid item";
     }
 }

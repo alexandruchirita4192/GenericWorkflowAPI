@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
+using AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -20,15 +20,15 @@ namespace GenericWorkflowAPI.CommandHandlers
         where TDto : class, IBaseDto, ICodeDto, new()
         where TEntity : class, IBaseEntity, ICodeEntity, new()
     {
-        private readonly ILogger _logger;
         private readonly IGenericCodeRepository<TEntity> _repository;
-        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
+        private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
+        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
-            _mappingHelper = mappingHelper;
+            _mapper = mapper;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericUpdateRequest<TDto> request, CancellationToken cancellationToken)
@@ -46,10 +46,16 @@ namespace GenericWorkflowAPI.CommandHandlers
                     return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
                         new Dictionary<string, object> { { $"{nameof(request.User)}", ValidationConstants.InvalidUserMessage } });
                 }
+                if (request.Item == null)
+                {
+                    _logger.Error(new ArgumentNullException(nameof(request.Item)), $"Cannot handle request of type {typeof(GenericUpdateRequest<TDto>).FullName} for null item.");
+                    return GenericApiResponse<string>.Problem(ValidationConstants.InvalidRequestValidationTitle, HttpStatusCode.Conflict,
+                        new Dictionary<string, object> { { $"{nameof(request.Item)}", ValidationConstants.InvalidItemMessage } });
+                }
 
-                var mappedEntity = await _mappingHelper.MapDtoToEntity(request.Item, cancellationToken);
+                var entity = _mapper.Map<TEntity>(request.Item);
 
-                await _repository.UpdateAsync(mappedEntity, request.User, cancellationToken);
+                await _repository.UpdateAsync(entity, request.User, cancellationToken);
 
                 return GenericApiResponse<string>.Ok();
             }
