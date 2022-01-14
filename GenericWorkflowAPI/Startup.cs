@@ -37,6 +37,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 
@@ -195,7 +196,6 @@ namespace GenericWorkflowAPI
             services.AddIdentityCore<Domain.IdentityUser>(options =>
             {
                 options.Tokens.AuthenticatorIssuer = Configuration["Authentication:Issuer"];
-                //options.Tokens.AuthenticatorTokenProvider = "https://localhost:5001/";
                 options.User.RequireUniqueEmail = true;
             })
                 .AddRoles<Domain.IdentityRole>()
@@ -214,15 +214,10 @@ namespace GenericWorkflowAPI
             // Generate EdmModel containing DTOs because those are exposed by API (DTOs are derived from IBaseDto)
             var edmModel = EdmModelHelper.GetEdmModel();
 
-            // Use controllers with Newtonsoft.Json serialization
+            // Use controllers (with views only for antiforgery validation)
             services.AddControllersWithViews()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                })
                 // Add OData with versioning route on a generated EdmModel
-                .AddOData(opt => opt.AddRouteComponents("v{version}", edmModel))
-                ;
+                .AddOData(opt => opt.AddRouteComponents("v{version}", edmModel));
 
             // Add OData query filter (allow filtering for IQueryable)
             services.AddODataQueryFilter();
