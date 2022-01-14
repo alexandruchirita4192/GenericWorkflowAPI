@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -184,6 +185,10 @@ namespace GenericWorkflowAPI
                 setup.IncludeExceptionDetails = (ctx, env) => CurrentEnvironment.IsDevelopment() || CurrentEnvironment.IsStaging();
             });
 
+
+            // Add the memory cache services.
+            services.AddMemoryCache();
+
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
 
             // Add SQL Server services and exception page
@@ -270,6 +275,12 @@ namespace GenericWorkflowAPI
 
                 // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
                 services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
+
+                // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
+                services.AddMappingHelpers(assemblyMapping?.Mapping, Log.Logger);
+
+                // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
+                services.AddReflectionMappingInfoProvider(assemblyMapping?.Mapping, Log.Logger);
             }
 
             // Add AutoMapper IMapper to services

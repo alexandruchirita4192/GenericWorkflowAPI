@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
+using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -24,13 +24,13 @@ namespace GenericWorkflowAPI.CommandHandlers
     {
         private readonly IGenericCodeRepository<TEntity> _repository;
         private readonly ILogger _logger;
-        private readonly IMapper _mapper;
+        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
 
-        public GenericUpdateListCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMapper mapper)
+        public GenericUpdateListCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
         {
             _repository = repository;
             _logger = logger;
-            _mapper = mapper;
+            _mappingHelper = mappingHelper;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericUpdateListRequest<TDto> request, CancellationToken cancellationToken)
@@ -55,7 +55,7 @@ namespace GenericWorkflowAPI.CommandHandlers
                         new Dictionary<string, object> { { $"{nameof(request.Collection)}", ValidationConstants.InvalidCollectionMessage } });
                 }
 
-                var mappedEntities = _mapper.Map<List<TEntity>>(request.Collection.ToList());
+                var mappedEntities = await _mappingHelper.MapDtosToEntities(request.Collection.ToList(), cancellationToken);
 
                 await _repository.UpdateAsync(mappedEntities, request.User, cancellationToken);
 

@@ -22,7 +22,6 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
-            var configuration = GetConfiguration();
             Serilog.Core.Logger logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();
@@ -41,7 +40,6 @@ namespace GenericWorkflowAPI.UnitTesting
 
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
-            var configuration = GetConfiguration();
             var logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();
@@ -59,7 +57,6 @@ namespace GenericWorkflowAPI.UnitTesting
 
             var cancellationToken = new CancellationToken();
             var dbContext = GetInMemoryDbContext();
-            var configuration = GetConfiguration();
             var logger = GetLogger();
 
             var entityService = new EntityService<Workflow>();

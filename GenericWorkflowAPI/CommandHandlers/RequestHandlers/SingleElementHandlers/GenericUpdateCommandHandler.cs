@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
+using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.Constants;
 using GenericWorkflowAPI.Domain.DTOs;
@@ -22,13 +22,13 @@ namespace GenericWorkflowAPI.CommandHandlers
     {
         private readonly IGenericCodeRepository<TEntity> _repository;
         private readonly ILogger _logger;
-        private readonly IMapper _mapper;
+        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
 
-        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMapper mapper)
+        public GenericUpdateCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
         {
             _repository = repository;
             _logger = logger;
-            _mapper = mapper;
+            _mappingHelper = mappingHelper;
         }
 
         public async Task<GenericApiResponse<string>> Handle(GenericUpdateRequest<TDto> request, CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ namespace GenericWorkflowAPI.CommandHandlers
                         new Dictionary<string, object> { { $"{nameof(request.Item)}", ValidationConstants.InvalidItemMessage } });
                 }
 
-                var entity = _mapper.Map<TEntity>(request.Item);
+                var entity = await _mappingHelper.MapDtoToEntity(request.Item, cancellationToken);
 
                 await _repository.UpdateAsync(entity, request.User, cancellationToken);
 

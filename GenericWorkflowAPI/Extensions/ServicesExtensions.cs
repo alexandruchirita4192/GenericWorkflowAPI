@@ -65,6 +65,22 @@ namespace GenericWorkflowAPI.Extensions
                 nameof(AddEntityService));
         }
 
+        public static IServiceCollection AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        {
+            // Mapping Example:
+            //services.AddScoped(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
+
+            return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
+
+                // IMappingHelper<Workflow, WorkflowDto>
+                (mapping) => typeof(IMappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+
+                // MappingHelper<Workflow, WorkflowDto>
+                (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+
+                nameof(AddMappingHelpers));
+        }
+
         public static IServiceCollection AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
         {
             if (mappings == null || mappings.Count == 0)
