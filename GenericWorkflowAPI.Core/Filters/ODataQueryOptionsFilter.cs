@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -31,40 +32,35 @@ namespace GenericWorkflowAPI.Core.Filters
                     "Expands related entities inline.");
 
                 // Additional OData query options are available for collections of entities only
-                if (context.MethodInfo.ReturnType.IsArray ||
-                    typeof(IQueryable).IsAssignableFrom(context.MethodInfo.ReturnType) ||
-                    typeof(IEnumerable).IsAssignableFrom(context.MethodInfo.ReturnType))
-                {
-                    AddOperationParameters(
-                        operation, queryAttribute, stringSchema,
-                        AllowedQueryOptions.Filter,
-                        "$filter",
-                        "Filters the results, based on a Boolean condition.");
+                AddOperationParameters(
+                    operation, queryAttribute, stringSchema,
+                    AllowedQueryOptions.Filter,
+                    "$filter",
+                    "Filters the results, based on a Boolean condition.");
 
-                    AddOperationParameters(
-                        operation, queryAttribute, stringSchema,
-                        AllowedQueryOptions.OrderBy,
-                        "$orderby",
-                        "Request resources in a particular order.");
+                AddOperationParameters(
+                    operation, queryAttribute, stringSchema,
+                    AllowedQueryOptions.OrderBy,
+                    "$orderby",
+                    "Request resources in a particular order.");
 
-                    AddOperationParameters(
-                        operation, queryAttribute, stringSchema,
-                        AllowedQueryOptions.Top,
-                        "$top",
-                        "Requests the number of items to be included in the result.");
+                AddOperationParameters(
+                    operation, queryAttribute, stringSchema,
+                    AllowedQueryOptions.Top,
+                    "$top",
+                    "Requests the number of items to be included in the result.");
 
-                    AddOperationParameters(
-                        operation, queryAttribute, stringSchema,
-                        AllowedQueryOptions.Skip,
-                        "$skip",
-                        "Requests the number of items that are to be skipped.");
+                AddOperationParameters(
+                    operation, queryAttribute, stringSchema,
+                    AllowedQueryOptions.Skip,
+                    "$skip",
+                    "Requests the number of items that are to be skipped.");
 
-                    AddOperationParameters(
-                        operation, queryAttribute, stringSchema,
-                        AllowedQueryOptions.Count,
-                        "$count",
-                        "Request the count of the resources.");
-                }
+                AddOperationParameters(
+                    operation, queryAttribute, stringSchema,
+                    AllowedQueryOptions.Count,
+                    "$count",
+                    "Request the count of the resources.");
             }
         }
 

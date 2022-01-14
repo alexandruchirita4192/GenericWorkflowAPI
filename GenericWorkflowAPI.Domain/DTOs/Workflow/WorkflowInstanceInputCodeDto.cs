@@ -4,28 +4,25 @@ using Newtonsoft.Json;
 
 namespace GenericWorkflowAPI.Domain.DTOs
 {
+    [Filter]
     [Expand]
-    [Page(MaxTop = 5, PageSize = 1)]
+    [Page(MaxTop = 5, PageSize = 10)]
     [Select(SelectType = SelectExpandType.Automatic)]
+    [OrderBy(nameof(InstanceCode), nameof(TypeCode))]
     public class WorkflowInstanceInputCodeDto : IWorkflowInstanceDto
     {
-        [Filter]
-        [OrderBy]
         [Required]
         public string InstanceCode { get; set; }
 
         [JsonIgnore]
         public WorkflowInstanceDto Instance { get; set; }
 
-        [Filter]
-        [OrderBy]
         [Required]
         public string TypeCode { get; set; }
 
         [JsonIgnore]
         public WorkflowInputCodeTypeDto Type { get; set; }
 
-        [Filter]
         [Required]
         public string Value { get; set; }
     }
