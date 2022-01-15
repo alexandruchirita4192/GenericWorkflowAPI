@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
+using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Core.Extensions;
+using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
@@ -30,8 +34,10 @@ namespace GenericWorkflowAPI.Benchmark
 
         private readonly Logger _logger;
         private readonly EntityService<Workflow> _entityService;
+        private readonly EntityService<WorkflowType> _entityServiceWorkflowType;
         private readonly GenericCodeRepository<Workflow, ApplicationDbContext> _repository;
         private readonly IMapper _mapper;
+        private readonly MappingHelper<Workflow, WorkflowDto> _mappingHelper;
         private readonly List<Workflow> _entities;
         private readonly List<WorkflowDto> _dtos;
 
@@ -47,14 +53,33 @@ namespace GenericWorkflowAPI.Benchmark
             _logger = GetLogger();
 
             _entityService = new EntityService<Workflow>();
+            _entityServiceWorkflowType = new EntityService<WorkflowType>();
             _repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, _logger, _entityService);
             _mapper = GetMapper(_logger);
 
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var reflectionMappingInfoProvider = new ReflectionMappingInfoProvider<Workflow, WorkflowDto>(_logger, memoryCache);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton<DbContext>(dbContext);
+            serviceCollection.AddSingleton(dbContext);
+            serviceCollection.AddSingleton<ILogger>(_logger);
+            serviceCollection.AddSingleton<IEntityService<Workflow>>(_entityService);
+            serviceCollection.AddSingleton<IEntityService<WorkflowType>>(_entityServiceWorkflowType);
+            serviceCollection.AddSingleton<IGenericRepository<Workflow>>(_repository);
+            serviceCollection.AddSingleton<IGenericCodeRepository<Workflow>>(_repository);
+            serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
+            serviceCollection.AddSingleton<IReflectionMappingInfoProvider<Workflow, WorkflowDto>>(reflectionMappingInfoProvider);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            _mappingHelper = new MappingHelper<Workflow, WorkflowDto>(_logger, _mapper, reflectionMappingInfoProvider, serviceProvider);
+
             _entities = _repository.DbSet.Include(w => w.Type).AsNoTracking().ToList();
-            _dtos = _mapper.Map<List<WorkflowDto>>(_entities);
 
             _logger.Information(JsonConvert.SerializeObject(_entities));
+            _dtos = _mapper.Map<List<WorkflowDto>>(_entities);
             _logger.Information(JsonConvert.SerializeObject(_dtos));
+            var _entities2 = _mapper.Map<List<Workflow>>(_dtos); // this mapping works but doesn't fill Workflow.TypeId property which is required
+            _logger.Information(JsonConvert.SerializeObject(_entities2));
         }
 
         #endregion Constructors
@@ -122,9 +147,26 @@ namespace GenericWorkflowAPI.Benchmark
         #region Benchmark methods
 
         [Benchmark]
-        public void TestMappingWithIMapper()
+        public void TestMappingWithIMapper_EntitiesToDtos_WorkSame()
         {
             var dtos = _mapper.Map<List<WorkflowDto>>(_entities);
+        }
+        [Benchmark]
+        public void TestMappingWithMappingHelper_EntitiesToDtos_WorkSame()
+        {
+            var dtos = _mappingHelper.MapEntitiesToDtos(_entities);
+        }
+
+        [Benchmark]
+        public void TestMappingWithIMapper_DtosToEntities_NotOkButFaster()
+        {
+            var entities = _mapper.Map<List<Workflow>>(_dtos);
+        }
+
+        [Benchmark]
+        public async Task TestMappingWithMappingHelper_DtosToEntities_WorksBetter()
+        {
+            var entities = await _mappingHelper.MapDtosToEntities(_dtos, new CancellationToken());
         }
 
         #endregion Benchmark methods
