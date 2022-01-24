@@ -24,7 +24,7 @@ namespace GenericWorkflowAPI.UnitTesting
             return configuration;
         }
 
-        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration, bool? isInMemory)
+        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration = null, bool? isInMemory = null)
         {
             if (configuration == null && !(isInMemory ?? false))
                 throw new ArgumentNullException(nameof(configuration));
