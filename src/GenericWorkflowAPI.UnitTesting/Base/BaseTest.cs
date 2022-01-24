@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Database;
+using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -23,25 +24,20 @@ namespace GenericWorkflowAPI.UnitTesting
             return configuration;
         }
 
-        public ApplicationDbContext GetInMemoryDbContext()
+        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration, bool? isInMemory)
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase("db")
-                .Options;
-            var dbContext = new ApplicationDbContext(options);
-            return dbContext;
-        }
-
-        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration)
-        {
-            if (configuration == null)
+            if (configuration == null && !(isInMemory ?? false))
                 throw new ArgumentNullException(nameof(configuration));
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer(connectionString)
-                .Options;
-            var dbContext = new ApplicationDbContext(options);
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+
+            if (isInMemory ?? false)
+                optionsBuilder.UseInMemoryDatabase("db");
+            else
+                optionsBuilder.UseSqlServer(connectionString);
+
+            var dbContext = new ApplicationDbContext(optionsBuilder.Options);
 
             return dbContext;
         }
@@ -56,8 +52,11 @@ namespace GenericWorkflowAPI.UnitTesting
             return logger;
         }
 
-        public IMapper GetMapper(ILogger logger)
+        public IMapper GetMapper(ILogger? logger)
         {
+            if (logger == null)
+                logger = GetLogger();
+
             // Create Entities-DTOs mappings for the Domain assembly
             var domainMappings = new EntityDtoMappingProvider(logger).GetEntityDtoMapping(typeof(Workflow).Assembly);
 
@@ -78,6 +77,33 @@ namespace GenericWorkflowAPI.UnitTesting
             var mapper = mappingConfig.CreateMapper();
 
             return mapper;
+        }
+
+        public EntityService<TEntity> GetEntityService<TEntity>()
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+        {
+            return new EntityService<TEntity>();
+        }
+
+        public GenericCodeRepository<TEntity, ApplicationDbContext> GetGenericCodeRepository<TEntity, TDto>(
+            bool? isInMemoryDbContext = null,
+            IConfiguration? configuration = null,
+            Serilog.Core.Logger? logger = null,
+            ApplicationDbContext? dbContext = null,
+            EntityService<TEntity>? entityService = null)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto
+        {
+            if (configuration == null)
+                configuration = GetConfiguration();
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            if (logger == null)
+                logger = GetLogger();
+            if (entityService == null)
+                entityService = GetEntityService<TEntity>();
+
+            return new GenericCodeRepository<TEntity, ApplicationDbContext>(dbContext, logger, entityService);
         }
     }
 }

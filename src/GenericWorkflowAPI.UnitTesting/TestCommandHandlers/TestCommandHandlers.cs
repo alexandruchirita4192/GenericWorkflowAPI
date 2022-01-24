@@ -8,11 +8,9 @@ using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.CommandHandlers;
 using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Core.Services;
-using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
-using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,11 +35,8 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemoryDbContext: false, logger: logger);
 
             // GenericGetListCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -76,11 +71,8 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemoryDbContext: false, logger: logger);
 
             // GenericGetCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -121,12 +113,13 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var configuration = GetConfiguration();
+            var isInMemory = false;
+            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            var entityService = GetEntityService<Workflow>();
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -182,12 +175,13 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var configuration = GetConfiguration();
+            var isInMemory = false;
+            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            var entityService = GetEntityService<Workflow>();
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -243,12 +237,13 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var configuration = GetConfiguration();
+            var isInMemory = false;
+            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            var entityService = GetEntityService<Workflow>();
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -304,12 +299,13 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var configuration = GetConfiguration();
+            var isInMemory = false;
+            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            var entityService = GetEntityService<Workflow>();
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -356,12 +352,8 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(logger: logger);
 
             // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
             var handler = new GenericDeleteCommandHandler<Workflow, WorkflowDto>(repository, logger);
@@ -379,7 +371,6 @@ namespace GenericWorkflowAPI.UnitTesting
             Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
         }
 
-
         [TestMethod]
         public async Task GenericDeleteListCommandHandler_Workflow_WorkflowDto_ResultIsNotNull()
         {
@@ -393,12 +384,8 @@ namespace GenericWorkflowAPI.UnitTesting
             };
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
             var logger = GetLogger();
-            var entityService = new EntityService<Workflow>();
-            var entityServiceWorkflowType = new EntityService<WorkflowType>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(logger: logger);
 
             // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
             var handler = new GenericDeleteListCommandHandler<Workflow, WorkflowDto>(repository, logger);
