@@ -153,7 +153,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var isInMemory = false;
             var dbContext = GetSqlServerDbContext(configuration, isInMemory);
             var entityService = GetEntityService<Workflow>();
-            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository<Workflow>(isInMemory, configuration, logger, dbContext, entityService);
             var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
@@ -214,7 +214,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var isInMemory = false;
             var dbContext = GetSqlServerDbContext(configuration, isInMemory);
             var entityService = GetEntityService<Workflow>();
-            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(isInMemory, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository<Workflow>(isInMemory, configuration, logger, dbContext, entityService);
             var entityServiceWorkflowType = GetEntityService<WorkflowType>();
 
             // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
@@ -262,7 +262,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(logger: logger);
+            var repository = GetGenericCodeRepository<Workflow>(logger: logger);
 
             // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
             var handler = new GenericDeleteCommandHandler<Workflow, WorkflowDto>(repository, logger);
@@ -294,7 +294,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<Workflow, WorkflowDto>(logger: logger);
+            var repository = GetGenericCodeRepository<Workflow>(logger: logger);
 
             // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
             var handler = new GenericDeleteListCommandHandler<Workflow, WorkflowDto>(repository, logger);

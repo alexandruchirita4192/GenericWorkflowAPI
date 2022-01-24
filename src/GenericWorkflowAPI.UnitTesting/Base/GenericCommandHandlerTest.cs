@@ -33,7 +33,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity, TDto>(isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, logger: logger);
 
             // GenericGetListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -60,7 +60,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity, TDto>(isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, logger: logger);
 
             // GenericGetCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -91,7 +91,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var configuration = GetConfiguration();
             var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity, TDto>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -139,7 +139,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var configuration = GetConfiguration();
             var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity, TDto>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);

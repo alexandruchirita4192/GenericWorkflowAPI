@@ -35,7 +35,7 @@ namespace GenericWorkflowAPI.Services
 
             try
             {
-                var entitiesQueryable = DbSet.AsNoTracking().Where(entity => !entity.IsDeleted);
+                var entitiesQueryable = DbSet.Where(entity => !entity.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {
@@ -67,7 +67,7 @@ namespace GenericWorkflowAPI.Services
 
             try
             {
-                var entitiesQueryable = DbSet.AsNoTracking().Where(entity => !entity.IsDeleted);
+                var entitiesQueryable = DbSet.Where(entity => !entity.IsDeleted);
 
                 if (includePathList != null && includePathList.Count != 0)
                 {

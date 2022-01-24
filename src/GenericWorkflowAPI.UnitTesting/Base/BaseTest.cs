@@ -32,6 +32,10 @@ namespace GenericWorkflowAPI.UnitTesting
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
+            // Testing requires errors detailed and filled with sensitive data
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.EnableSensitiveDataLogging();
+
             if (isInMemory ?? false)
                 optionsBuilder.UseInMemoryDatabase("db");
             else
@@ -85,14 +89,13 @@ namespace GenericWorkflowAPI.UnitTesting
             return new EntityService<TEntity>();
         }
 
-        public GenericCodeRepository<TEntity, ApplicationDbContext> GetGenericCodeRepository<TEntity, TDto>(
+        public GenericCodeRepository<TEntity, ApplicationDbContext> GetGenericCodeRepository<TEntity>(
             bool? isInMemoryDbContext = null,
             IConfiguration? configuration = null,
             Serilog.Core.Logger? logger = null,
             ApplicationDbContext? dbContext = null,
             EntityService<TEntity>? entityService = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
-            where TDto : class, IBaseDto
         {
             if (configuration == null)
                 configuration = GetConfiguration();

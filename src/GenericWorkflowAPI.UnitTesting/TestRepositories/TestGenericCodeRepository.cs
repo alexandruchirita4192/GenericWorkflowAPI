@@ -10,6 +10,7 @@ using GenericWorkflowAPI.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GenericWorkflowAPI.Domain;
 using Microsoft.Extensions.Configuration;
+using GenericWorkflowAPI.Domain.DTOs;
 
 namespace GenericWorkflowAPI.UnitTesting
 {
@@ -21,11 +22,7 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             ServicesExtensions.RegisterEncodingProvider();
             var cancellationToken = new CancellationToken();
-            var dbContext = GetSqlServerDbContext(isInMemory: true);
-            Serilog.Core.Logger logger = GetLogger();
-
-            var entityService = new EntityService<Workflow>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
 
             var emptyList = await repository.GetAllAsync(new List<string>(), cancellationToken);
 
@@ -39,11 +36,7 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
 
             var cancellationToken = new CancellationToken();
-            var dbContext = GetSqlServerDbContext(isInMemory: true);
-            var logger = GetLogger();
-
-            var entityService = new EntityService<Workflow>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
 
             var entity = await repository.GetByCodeAsync("InvalidCode", new List<string>(), cancellationToken);
 
@@ -56,11 +49,7 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
 
             var cancellationToken = new CancellationToken();
-            var dbContext = GetSqlServerDbContext(isInMemory: true);
-            var logger = GetLogger();
-
-            var entityService = new EntityService<Workflow>();
-            var repository = new GenericCodeRepository<Workflow, ApplicationDbContext>(dbContext, logger, entityService);
+            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
 
             var user = new IdentityUser("admin") { Id = 1 };
             var code = $"Test{DateTime.Now}";
