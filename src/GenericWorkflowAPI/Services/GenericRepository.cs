@@ -39,8 +39,8 @@ namespace GenericWorkflowAPI.Services
 
         public async Task<TEntity> GetByIdAsync(long? id, List<string> includePathList, CancellationToken cancellationToken)
         {
-            if (id == null)
-                return default(TEntity);
+            if (id == null || cancellationToken.IsCancellationRequested)
+                return new TEntity();
 
             try
             {
@@ -71,6 +71,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task<List<TEntity>> GetAllAsync(List<string> includePathList, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return new List<TEntity>();
+
             try
             {
                 var entitiesQueryable = GetAllQueryable(includePathList);
@@ -118,6 +121,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task AddAsync(TEntity entity, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (entity == null)
@@ -143,6 +149,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task AddRangeAsync(List<TEntity> entitiesList, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (entitiesList == null || entitiesList.Count == 0)
@@ -172,6 +181,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task UpdateLoadedAsync(TEntity loadedEntity, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (loadedEntity == null)
@@ -197,6 +209,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task UpdateLoadedAsync(List<TEntity> loadedEntitiesList, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (loadedEntitiesList == null || loadedEntitiesList.Count == 0)
@@ -226,6 +241,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task DeleteAsync(long? id, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (id == null)
@@ -255,6 +273,9 @@ namespace GenericWorkflowAPI.Services
 
         public async Task DeleteAsync(List<long?> idsList, IdentityUser user, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 if (idsList == null || idsList.Count == 0)

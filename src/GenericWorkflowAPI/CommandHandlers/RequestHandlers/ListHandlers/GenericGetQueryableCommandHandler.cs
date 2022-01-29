@@ -32,6 +32,8 @@ namespace GenericWorkflowAPI.CommandHandlers
         /// <remarks>This handler has less error-handling because it needs to return IQueryable<TDto> and a generic error-handling has been created.</remarks>
         public async Task<IQueryable<TDto>> Handle(GenericGetQueryableRequest<TDto> request, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return new List<TDto>().AsQueryable();
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));

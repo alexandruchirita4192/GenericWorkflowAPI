@@ -166,6 +166,152 @@ namespace GenericWorkflowAPI.UnitTesting
             return response;
         }
 
+        public async Task<GenericApiResponse<string>> GenericUpdateCommandHandlerExecute<TEntity, TDto>(
+            TDto dto,
+            Domain.IdentityUser user,
+            List<Type> entityServiceExtraTypes,
+            bool isInMemoryDbContext)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto, ICodeDto, new()
+        {
+            // Request setup:
+            var request = new GenericUpdateRequest<TDto>
+            {
+                Item = dto,
+                User = user
+            };
+
+            // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
+            var logger = GetLogger();
+            var configuration = GetConfiguration();
+            var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            var entityService = GetEntityService<TEntity>();
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+
+            // GenericCreateListCommandHandler<TEntity, TDto> setup:
+            var mapper = GetMapper(logger);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var reflectionMappingInfoProvider = new ReflectionMappingInfoProvider<TEntity, TDto>(logger, memoryCache);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton(dbContext);
+            serviceCollection.AddSingleton<ILogger>(logger);
+            serviceCollection.AddSingleton<IEntityService<TEntity>>(entityService);
+
+            FillEntityServiceForExtraTypes(serviceCollection, entityServiceExtraTypes);
+
+            serviceCollection.AddSingleton<IGenericRepository<TEntity>>(repository);
+            serviceCollection.AddSingleton<IGenericCodeRepository<TEntity>>(repository);
+            serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
+            serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericUpdateCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var cancellationToken = new CancellationToken();
+
+            var response = await handler.Handle(request, cancellationToken);
+            return response;
+        }
+
+        public async Task<GenericApiResponse<string>> GenericUpdateListCommandHandlerExecute<TEntity, TDto>(
+            TDto dto,
+            Domain.IdentityUser user,
+            List<Type> entityServiceExtraTypes,
+            bool isInMemoryDbContext)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto, ICodeDto, new()
+        {
+            // Request setup:
+            var request = new GenericUpdateListRequest<TDto>
+            {
+                Collection = new Collection<TDto> { dto },
+                User = user
+            };
+
+            // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
+            var logger = GetLogger();
+            var configuration = GetConfiguration();
+            var isInMemory = false;
+            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            var entityService = GetEntityService<TEntity>();
+            var repository = GetGenericCodeRepository<TEntity>(isInMemory, configuration, logger, dbContext, entityService);
+
+            // GenericCreateListCommandHandler<TEntity, TDto> setup:
+            var mapper = GetMapper(logger);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var reflectionMappingInfoProvider = new ReflectionMappingInfoProvider<TEntity, TDto>(logger, memoryCache);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddSingleton(dbContext);
+            serviceCollection.AddSingleton<ILogger>(logger);
+            serviceCollection.AddSingleton<IEntityService<TEntity>>(entityService);
+
+            FillEntityServiceForExtraTypes(serviceCollection, entityServiceExtraTypes);
+
+            serviceCollection.AddSingleton<IGenericRepository<TEntity>>(repository);
+            serviceCollection.AddSingleton<IGenericCodeRepository<TEntity>>(repository);
+            serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
+            serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericUpdateListCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var cancellationToken = new CancellationToken();
+
+            var response = await handler.Handle(request, cancellationToken);
+            return response;
+        }
+
+        public async Task<GenericApiResponse<string>> GenericDeleteCommandHandlerExecute<TEntity, TDto>(
+            string code,
+            Domain.IdentityUser user,
+            bool isInMemoryDbContext)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto, ICodeDto, new()
+        {
+            // Request setup:
+            var request = new GenericDeleteRequest<TDto>
+            {
+                Code = code,
+                User = user
+            };
+
+            // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
+            var logger = GetLogger();
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, logger: logger);
+
+            // GenericDeleteCommandHandler<TEntity, TDto> setup:
+            var handler = new GenericDeleteCommandHandler<TEntity, TDto>(repository, logger);
+            var cancellationToken = new CancellationToken();
+
+            var response = await handler.Handle(request, cancellationToken);
+            return response;
+        }
+
+        public async Task<GenericApiResponse<string>> GenericDeleteListCommandHandlerExecute<TEntity, TDto> (
+            Collection<string> codes,
+            Domain.IdentityUser user,
+            bool isInMemoryDbContext)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto, ICodeDto, new()
+        {
+            // Request setup:
+            var request = new GenericDeleteListRequest<TDto>
+            {
+                Codes = codes,
+                User = user
+            };
+
+            // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
+            var logger = GetLogger();
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, logger: logger);
+
+            // GenericDeleteListCommandHandler<Workflow, WorkflowDto> setup:
+            var handler = new GenericDeleteListCommandHandler<TEntity, TDto>(repository, logger);
+            var cancellationToken = new CancellationToken();
+            var response = await handler.Handle(request, cancellationToken);
+
+            return response;
+        }
 
         private void FillEntityServiceForExtraTypes(ServiceCollection serviceCollection, List<Type> entityServiceExtraTypes)
         {
@@ -192,6 +338,5 @@ namespace GenericWorkflowAPI.UnitTesting
                 serviceCollection.AddSingleton(entityServiceInstanceInterfaceType, entityServiceInstance);
             }
         }
-
     }
 }

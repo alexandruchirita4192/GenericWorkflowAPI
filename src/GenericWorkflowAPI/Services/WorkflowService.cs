@@ -82,6 +82,8 @@ namespace GenericWorkflowAPI.Services
 
         public async Task Run(ExecuteWorkflowRequest executeWorkflowRequest, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
             if (executeWorkflowRequest == null)
                 throw new ArgumentNullException(nameof(executeWorkflowRequest),
                     $"Cannot initialize a workflow instance or execute a workflow transition using a null request.");
@@ -145,6 +147,8 @@ namespace GenericWorkflowAPI.Services
             WorkflowInstance? workflowInstance,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             if (workflowInputCodeTypeXvalue == null)
@@ -207,6 +211,8 @@ namespace GenericWorkflowAPI.Services
             Workflow? workflow,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return new WorkflowInstance();
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             if (workflowInputCodeTypeXvalue == null)
@@ -259,6 +265,8 @@ namespace GenericWorkflowAPI.Services
             Dictionary<string, string> workflowInputCodeTypeXvalue,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return (new WorkflowTransition(), 0, new List<WorkflowInputCodeType>());
             if (executableTransitions == null)
                 throw new ArgumentNullException(nameof(executableTransitions));
             if (workflow == null)
@@ -337,6 +345,8 @@ namespace GenericWorkflowAPI.Services
             List<WorkflowInputCodeType>? validWorkflowInputCodeTypesForNewInstance, 
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             if (workflowInputCodeTypeXvalue == null)
@@ -388,6 +398,8 @@ namespace GenericWorkflowAPI.Services
             List<WorkflowInputCodeType>? validWorkflowInputCodeTypes,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             if (workflowInputCodeTypeXvalue == null)
@@ -444,8 +456,14 @@ namespace GenericWorkflowAPI.Services
             }
         }
 
-        private async Task<WorkflowInstanceHistory> FillWorkflowInstanceHistory(Domain.IdentityUser user, WorkflowInstance workflowInstance, long? nextStateId, CancellationToken cancellationToken)
+        private async Task<WorkflowInstanceHistory> FillWorkflowInstanceHistory(
+            Domain.IdentityUser user,
+            WorkflowInstance workflowInstance,
+            long? nextStateId,
+            CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return new WorkflowInstanceHistory();
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
             if (workflowInstance == null)
@@ -488,6 +506,8 @@ namespace GenericWorkflowAPI.Services
             bool createWorkflowInstance,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return (new List<WorkflowInputCodeType>(), false);
             if (workflow == null)
                 throw new ArgumentNullException(nameof(workflow));
             if (workflowState == null)

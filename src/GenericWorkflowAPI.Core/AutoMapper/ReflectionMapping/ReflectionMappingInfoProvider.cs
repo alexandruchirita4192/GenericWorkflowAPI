@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.Extensions.Caching.Memory;
@@ -65,20 +66,17 @@ namespace GenericWorkflowAPI.Core.AutoMapper.Helpers
             var mappedProperties = new List<ReflectionMappingInfo>();
 
             // Get properties ending with "Id" through reflection (example: "InstanceId" of type "long?")
-            foreach (var entityPropertyInfoId in entityProperties)
+            foreach (var entityPropertyInfo in entityProperties)
             {
-                if (entityPropertyInfoId.PropertyType == typeof(long?)
-                && !string.IsNullOrWhiteSpace(entityPropertyInfoId.Name)
-                && entityPropertyInfoId.Name
-                    .EndsWith(ReflectionMappingInfo.PropertyNameSuffixId))
+                if (IsValidPropertyInfoId(entityPropertyInfo))
                 {
-                    var propertyNameWithoutId = entityPropertyInfoId.Name
-                        .Substring(0, entityPropertyInfoId.Name
+                    var propertyNameWithoutId = entityPropertyInfo.Name
+                        .Substring(0, entityPropertyInfo.Name
                             .IndexOf(ReflectionMappingInfo.PropertyNameSuffixId));
 
                     if (!string.IsNullOrWhiteSpace(propertyNameWithoutId))
                     {
-                        mappedProperties.Add(new ReflectionMappingInfo(entityType, propertyNameWithoutId, entityPropertyInfoId));
+                        mappedProperties.Add(new ReflectionMappingInfo(entityType, propertyNameWithoutId, entityPropertyInfo));
                     }
                 }
             }
@@ -112,6 +110,19 @@ namespace GenericWorkflowAPI.Core.AutoMapper.Helpers
             }
 
             return mappedProperties;
+        }
+
+        /// <summary>
+        /// Validates that <paramref name="entityPropertyInfoId"/> is of type <see cref="long?"/>
+        ///  with property name ending in <see cref="ReflectionMappingInfo.PropertyNameSuffixId"/>.
+        /// </summary>
+        private static bool IsValidPropertyInfoId(PropertyInfo entityPropertyInfoId)
+        {
+            return entityPropertyInfoId != null 
+                && entityPropertyInfoId.PropertyType == typeof(long?)
+                && !string.IsNullOrWhiteSpace(entityPropertyInfoId.Name)
+                && entityPropertyInfoId.Name
+                    .EndsWith(ReflectionMappingInfo.PropertyNameSuffixId);
         }
     }
 }

@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Extensions;
-using Serilog;
-using GenericWorkflowAPI.Database;
-using GenericWorkflowAPI.Domain.Entities;
-using GenericWorkflowAPI.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GenericWorkflowAPI.Domain;
-using Microsoft.Extensions.Configuration;
-using GenericWorkflowAPI.Domain.DTOs;
+using GenericWorkflowAPI.Domain.Entities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericWorkflowAPI.UnitTesting
 {

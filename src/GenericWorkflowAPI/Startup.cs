@@ -195,7 +195,7 @@ namespace GenericWorkflowAPI
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddTransient<ApplicationDbContext>();
+            services.AddSingleton<ApplicationDbContext>();
 
             // Add Identity
             services.AddIdentityCore<Domain.IdentityUser>(options =>
@@ -265,22 +265,22 @@ namespace GenericWorkflowAPI
             foreach (var assemblyMapping in assemblyMappingsList)
             {
                 // Add EntitiesToDtosProfile AutoMapper profile for current assembly to list
-                entitiesToDtoProfilesList.Add(new EntitiesToDtosProfile(assemblyMapping?.Mapping));
+                entitiesToDtoProfilesList.Add(new EntitiesToDtosProfile(assemblyMapping.Mapping));
 
                 // Entity-related services: EntityService<TEntity> : IEntityService<TEntity>
-                services.AddEntityService(assemblyMapping?.Mapping, Log.Logger);
+                services.AddEntityService(assemblyMapping.Mapping, Log.Logger);
 
                 // Database-related services: GenericRepository<TEntity, TDbContext> : IGenericRepository<TEntity>
-                services.AddDatabaseGenericRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
+                services.AddDatabaseGenericRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
 
                 // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
-                services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping?.Mapping, Log.Logger);
+                services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
 
                 // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
-                services.AddMappingHelpers(assemblyMapping?.Mapping, Log.Logger);
+                services.AddMappingHelpers(assemblyMapping.Mapping, Log.Logger);
 
                 // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
-                services.AddReflectionMappingInfoProvider(assemblyMapping?.Mapping, Log.Logger);
+                services.AddReflectionMappingInfoProvider(assemblyMapping.Mapping, Log.Logger);
             }
 
             // Add AutoMapper IMapper to services
@@ -303,13 +303,13 @@ namespace GenericWorkflowAPI
 
             // Add MediatR Handlers based on controllers (and log which handlers fail because entities or dtos do not implement what they should)
             var mediatorMappings = MediatorHelper.GetMappings(Log.Logger);
-            services.AddMediatorMappingsToServices(mediatorMappings, Log.Logger);
+            services.AddMediatRHandlersToServices(mediatorMappings, Log.Logger);
 
             // Add workflow service
-            services.AddScoped<IWorkflowService, WorkflowService>();
+            services.AddSingleton<IWorkflowService, WorkflowService>();
 
             // Add workflow command handler
-            services.AddScoped<IRequestHandler<ExecuteWorkflowRequest, GenericApiResponse<string>>, ExecuteWorkflowCommandHandler>();
+            services.AddSingleton<IRequestHandler<ExecuteWorkflowRequest, GenericApiResponse<string>>, ExecuteWorkflowCommandHandler>();
 
             // Swagger/OpenAPI ( https://aka.ms/aspnetcore/swashbuckle ):
             services.AddSwaggerGen(c =>

@@ -40,7 +40,8 @@ namespace GenericWorkflowAPI.Core.AutoMapper
             
             if (!cache.TryGetValue(assembly, out mapping))
                 throw new ArgumentException(nameof(cache), $"Couldn't get value for assembly {assembly.FullName} out of cache argument passed to {nameof(EntityDtoMapping)}");
-            
+
+            Assembly = assembly;
             Mapping = mapping;
         }
     }

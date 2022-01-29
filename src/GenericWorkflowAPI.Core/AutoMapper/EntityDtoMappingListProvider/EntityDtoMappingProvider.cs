@@ -29,8 +29,7 @@ namespace GenericWorkflowAPI.Core.AutoMapper
         {
             if (assembly == null)
             {
-                _logger.Error("Missing assembly in method {methodName}", nameof(GetEntityDtoMapping));
-                return new EntityDtoMapping(assembly);
+                throw new ArgumentNullException(nameof(assembly));
             }
 
             if (entityToDtoMappings.Count != 0 && entityToDtoMappings.ContainsKey(assembly))

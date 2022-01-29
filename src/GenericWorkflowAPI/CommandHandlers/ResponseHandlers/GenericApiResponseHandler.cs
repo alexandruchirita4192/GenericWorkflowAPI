@@ -28,6 +28,8 @@ namespace GenericWorkflowAPI.CommandHandlers
         /// </summary>
         public async Task<ActionResult> Handle(GenericApiResponse<TPayload> response, CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return Ok();
             if (response == null)
             {
                 logger.Error($"{nameof(GenericApiResponseHandler<TPayload>)}.{nameof(Handle)} received empty response");

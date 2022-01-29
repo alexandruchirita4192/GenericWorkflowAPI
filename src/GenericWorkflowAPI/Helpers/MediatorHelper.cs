@@ -15,11 +15,11 @@ using Serilog;
 
 namespace GenericWorkflowAPI.Helpers
 {
-    /// <summary>
-    /// Gets MediatR handlers based on controllers with their generic arguments
-    /// </summary>
     public static class MediatorHelper
     {
+        /// <summary>
+        /// Gets MediatR handlers based on controllers with their generic arguments
+        /// </summary>
         public static List<InterfaceImplementationMapper> GetMappings(ILogger logger)
         {
             var mappings = new List<InterfaceImplementationMapper>();

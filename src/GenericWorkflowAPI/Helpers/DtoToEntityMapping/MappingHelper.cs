@@ -98,6 +98,9 @@ namespace GenericWorkflowAPI.AutoMapper
 
         public async Task<TEntity> MapDtoToEntity(TDto dto, CancellationToken cancellationToken)
         {
+            if (dto == null || cancellationToken.IsCancellationRequested)
+                return new TEntity();
+
             // This mapping might not do anything at all actually for some TEntity
             var entity = _mapper.Map<TDto, TEntity>(dto);
 
@@ -110,6 +113,10 @@ namespace GenericWorkflowAPI.AutoMapper
             {
                 try
                 {
+                    // Return early with an incomplete type because it doesn't matter
+                    if (cancellationToken.IsCancellationRequested)
+                        return entity;
+
                     // Skip incomplete mapping properties
                     if (string.IsNullOrWhiteSpace(reflectionMappedInfo.BasePropertyName)
                     || reflectionMappedInfo.EntityPropertyInfoClass == null
@@ -121,7 +128,7 @@ namespace GenericWorkflowAPI.AutoMapper
                         continue;
                     }
 
-                    // Set the value of the TDto property "{}" based on the value of the TEntity
+                    // Set the value of the TEntity property "{Property}Id" based on the value of the TDto property "{Property}Code" loading the entity based on code and using it's Id
                     var codeValue = reflectionMappedInfo.DtoPropertyInfoCode.GetValue(dto, null) as string;
                     if (string.IsNullOrWhiteSpace(codeValue))
                     {
@@ -168,7 +175,7 @@ namespace GenericWorkflowAPI.AutoMapper
                         continue;
                     }
 
-                    // Set the value of the TDto property "{}" based on the value of the TEntity
+                    // Set the value of the TEntity property "{Property}Id" based on the value of the TEntity property Id
                     reflectionMappedInfo.EntityPropertyInfoId.SetValue(entity, childEntity.Id, null);
                 }
                 catch (Exception ex)
@@ -188,10 +195,10 @@ namespace GenericWorkflowAPI.AutoMapper
 
         public List<TDto> MapEntitiesToDtos(List<TEntity> entitiesList)
         {
-            if (entitiesList == null || entitiesList.Count == 0)
-                return default(List<TDto>);
-
             var dtosList = new List<TDto>();
+
+            if (entitiesList == null || entitiesList.Count == 0)
+                return dtosList;
 
             foreach (var entity in entitiesList)
             {
@@ -205,10 +212,10 @@ namespace GenericWorkflowAPI.AutoMapper
 
         public async Task<List<TEntity>> MapDtosToEntities(List<TDto> dtosList, CancellationToken cancellationToken)
         {
-            if (dtosList == null || dtosList.Count == 0)
-                return default(List<TEntity>);
-
             var entitiesList = new List<TEntity>();
+
+            if (dtosList == null || dtosList.Count == 0 || cancellationToken.IsCancellationRequested)
+                return entitiesList;
 
             foreach (var dto in dtosList)
             {

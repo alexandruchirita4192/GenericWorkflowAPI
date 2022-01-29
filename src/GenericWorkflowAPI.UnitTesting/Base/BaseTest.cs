@@ -4,7 +4,6 @@ using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Database;
-using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +14,11 @@ namespace GenericWorkflowAPI.UnitTesting
 {
     public class BaseTest
     {
+        public Domain.IdentityUser GetDefaultUser()
+        {
+            return new Domain.IdentityUser("admin") { Id = 1 }; // TODO: This shouldn't be hard-coded
+        }
+
         public IConfiguration GetConfiguration()
         {
             var configuration = new ConfigurationBuilder()
@@ -70,7 +74,7 @@ namespace GenericWorkflowAPI.UnitTesting
             foreach (var assemblyMapping in assemblyMappingsList)
             {
                 // Add EntitiesToDtosProfile AutoMapper profile for current assembly to list
-                entitiesToDtoProfilesList.Add(new EntitiesToDtosProfile(assemblyMapping?.Mapping));
+                entitiesToDtoProfilesList.Add(new EntitiesToDtosProfile(assemblyMapping.Mapping));
             }
 
             var mappingConfig = new MapperConfiguration(mc =>

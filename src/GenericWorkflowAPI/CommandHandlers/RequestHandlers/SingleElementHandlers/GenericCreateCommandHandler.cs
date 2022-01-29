@@ -35,6 +35,8 @@ namespace GenericWorkflowAPI.CommandHandlers
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return GenericApiResponse<string>.Created(string.Empty);
                 if (request == null)
                 {
                     _logger.Error(new ArgumentNullException(nameof(request)), $"Invalid request of type {typeof(GenericCreateRequest<TDto>).FullName}");

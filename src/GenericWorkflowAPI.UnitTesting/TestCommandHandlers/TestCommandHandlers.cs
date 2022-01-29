@@ -2,21 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
-using GenericWorkflowAPI.AutoMapper;
-using GenericWorkflowAPI.CommandHandlers;
-using GenericWorkflowAPI.Core.AutoMapper.Helpers;
-using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
-using GenericWorkflowAPI.Domain.Requests;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace GenericWorkflowAPI.UnitTesting
 {
@@ -75,7 +65,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 Description = $"Description{uniqueId}",
                 TypeCode = "TestCode" // TODO: This shouldn't be hard-coded
             };
-            var user = new Domain.IdentityUser("admin") { Id = 1 }; // TODO: This shouldn't be hard-coded
+            var user = GetDefaultUser();
             var entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
 
             // 2. Act:
@@ -84,7 +74,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 user,
                 entityServiceExtraTypes,
                 false);
-            
+
             // 3. Assert:
             Assert.IsNotNull(response);
             Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
@@ -98,7 +88,6 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task GenericCreateListCommandHandler_Workflow_WorkflowDto_ResultIsNotNull()
         {
             // 1. Arrange:
-
             var uniqueId = DateTime.Now.Ticks;
             var workflowDto = new WorkflowDto
             {
@@ -107,16 +96,16 @@ namespace GenericWorkflowAPI.UnitTesting
                 Description = $"Description{uniqueId}",
                 TypeCode = "TestCode" // TODO: This shouldn't be hard-coded
             };
-            var user = new Domain.IdentityUser("admin") { Id = 1 };  // TODO: This shouldn't be hard-coded
+            var user = GetDefaultUser();
             var entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
 
             // 2. Act:
             var response = await GenericCreateListCommandHandlerExecute<Workflow, WorkflowDto>(
-                new Collection<WorkflowDto> { workflowDto }, 
-                user, 
+                new Collection<WorkflowDto> { workflowDto },
+                user,
                 entityServiceExtraTypes,
                 false);
-            
+
             // 3. Assert:
             Assert.IsNotNull(response);
             Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
@@ -130,8 +119,6 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task GenericUpdateCommandHandler_Workflow_WorkflowDto_ResultIsNotNull()
         {
             // 1. Arrange:
-
-            // Request setup:
             var uniqueId = DateTime.Now.Ticks;
             var workflowDto = new WorkflowDto
             {
@@ -140,43 +127,15 @@ namespace GenericWorkflowAPI.UnitTesting
                 Description = $"Description{uniqueId}",
                 TypeCode = "TestCode" // TODO: This shouldn't be hard-coded
             };
-
-            var request = new GenericUpdateRequest<WorkflowDto>
-            {
-                Item = workflowDto,
-                User = new Domain.IdentityUser("admin") { Id = 1 } // TODO: This shouldn't be hard-coded
-            };
-
-            // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var logger = GetLogger();
-            var configuration = GetConfiguration();
-            var isInMemory = false;
-            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
-            var entityService = GetEntityService<Workflow>();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemory, configuration, logger, dbContext, entityService);
-            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
-
-            // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
-            var mapper = GetMapper(logger);
-            var memoryCache = new MemoryCache(new MemoryCacheOptions());
-            var reflectionMappingInfoProvider = new ReflectionMappingInfoProvider<Workflow, WorkflowDto>(logger, memoryCache);
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton(configuration);
-            serviceCollection.AddSingleton(dbContext);
-            serviceCollection.AddSingleton<ILogger>(logger);
-            serviceCollection.AddSingleton<IEntityService<Workflow>>(entityService);
-            serviceCollection.AddSingleton<IEntityService<WorkflowType>>(entityServiceWorkflowType);
-            serviceCollection.AddSingleton<IGenericRepository<Workflow>>(repository);
-            serviceCollection.AddSingleton<IGenericCodeRepository<Workflow>>(repository);
-            serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
-            serviceCollection.AddSingleton<IReflectionMappingInfoProvider<Workflow, WorkflowDto>>(reflectionMappingInfoProvider);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<Workflow, WorkflowDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericUpdateCommandHandler<Workflow, WorkflowDto>(repository, logger, mappingHelper);
-            var cancellationToken = new CancellationToken();
+            var user = GetDefaultUser();
+            var entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
 
             // 2. Act:
-            var response = await handler.Handle(request, cancellationToken);
+            var response = await GenericUpdateCommandHandlerExecute<Workflow, WorkflowDto>(
+                workflowDto,
+                user,
+                entityServiceExtraTypes,
+                false);
 
             // 3. Assert:
             Assert.IsNotNull(response);
@@ -192,7 +151,6 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             // 1. Arrange:
 
-            // Request setup:
             var uniqueId = DateTime.Now.Ticks;
             var workflowDto = new WorkflowDto
             {
@@ -201,43 +159,15 @@ namespace GenericWorkflowAPI.UnitTesting
                 Description = $"Description{uniqueId}",
                 TypeCode = "TestCode" // TODO: This shouldn't be hard-coded
             };
-
-            var request = new GenericUpdateListRequest<WorkflowDto>
-            {
-                Collection = new Collection<WorkflowDto> { workflowDto },
-                User = new Domain.IdentityUser("admin") { Id = 1 } // TODO: This shouldn't be hard-coded
-            };
-
-            // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var logger = GetLogger();
-            var configuration = GetConfiguration();
-            var isInMemory = false;
-            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
-            var entityService = GetEntityService<Workflow>();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemory, configuration, logger, dbContext, entityService);
-            var entityServiceWorkflowType = GetEntityService<WorkflowType>();
-
-            // GenericCreateListCommandHandler<Workflow, WorkflowDto> setup:
-            var mapper = GetMapper(logger);
-            var memoryCache = new MemoryCache(new MemoryCacheOptions());
-            var reflectionMappingInfoProvider = new ReflectionMappingInfoProvider<Workflow, WorkflowDto>(logger, memoryCache);
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton(configuration);
-            serviceCollection.AddSingleton(dbContext);
-            serviceCollection.AddSingleton<ILogger>(logger);
-            serviceCollection.AddSingleton<IEntityService<Workflow>>(entityService);
-            serviceCollection.AddSingleton<IEntityService<WorkflowType>>(entityServiceWorkflowType);
-            serviceCollection.AddSingleton<IGenericRepository<Workflow>>(repository);
-            serviceCollection.AddSingleton<IGenericCodeRepository<Workflow>>(repository);
-            serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
-            serviceCollection.AddSingleton<IReflectionMappingInfoProvider<Workflow, WorkflowDto>>(reflectionMappingInfoProvider);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<Workflow, WorkflowDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericUpdateListCommandHandler<Workflow, WorkflowDto>(repository, logger, mappingHelper);
-            var cancellationToken = new CancellationToken();
+            var user = GetDefaultUser();
+            var entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
 
             // 2. Act:
-            var response = await handler.Handle(request, cancellationToken);
+            var response = await GenericUpdateListCommandHandlerExecute<Workflow, WorkflowDto>(
+                workflowDto,
+                user,
+                entityServiceExtraTypes,
+                false);
 
             // 3. Assert:
             Assert.IsNotNull(response);
@@ -252,24 +182,14 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task GenericDeleteCommandHandler_Workflow_WorkflowDto_ResultIsNotNull()
         {
             // 1. Arrange:
-
-            // Request setup:
-            var request = new GenericDeleteRequest<WorkflowDto>
-            {
-                Code = "Code637777971885190442", // TODO: This shouldn't be hard-coded
-                User = new Domain.IdentityUser("admin") { Id = 1 } // minimum user requirements
-            };
-
-            // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var logger = GetLogger();
-            var repository = GetGenericCodeRepository<Workflow>(logger: logger);
-
-            // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
-            var handler = new GenericDeleteCommandHandler<Workflow, WorkflowDto>(repository, logger);
-            var cancellationToken = new CancellationToken();
+            var code = "Code637777971885190442"; // TODO: This shouldn't be hard-coded
+            var user = GetDefaultUser();
 
             // 2. Act:
-            var response = await handler.Handle(request, cancellationToken);
+            var response = await GenericDeleteCommandHandlerExecute<Workflow, WorkflowDto>(
+                code,
+                user,
+                false);
 
             // 3. Assert:
             Assert.IsNotNull(response);
@@ -284,24 +204,15 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task GenericDeleteListCommandHandler_Workflow_WorkflowDto_ResultIsNotNull()
         {
             // 1. Arrange:
-
-            // Request setup:
-            var request = new GenericDeleteListRequest<WorkflowDto>
-            {
-                Codes = new Collection<string> { "Code637777967760777833" }, // TODO: This shouldn't be hard-coded
-                User = new Domain.IdentityUser("admin") { Id = 1 } // minimum user requirements
-            };
-
-            // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
-            var logger = GetLogger();
-            var repository = GetGenericCodeRepository<Workflow>(logger: logger);
-
-            // GenericDeleteCommandHandler<Workflow, WorkflowDto> setup:
-            var handler = new GenericDeleteListCommandHandler<Workflow, WorkflowDto>(repository, logger);
-            var cancellationToken = new CancellationToken();
+            var codes = new Collection<string> { "Code637777967760777833" }; // TODO: This shouldn't be hard-coded
+            var user = GetDefaultUser();
 
             // 2. Act:
-            var response = await handler.Handle(request, cancellationToken);
+            var response = await GenericDeleteListCommandHandlerExecute<Workflow, WorkflowDto>(
+                codes,
+                user,
+                false
+                );
 
             // 3. Assert:
             Assert.IsNotNull(response);

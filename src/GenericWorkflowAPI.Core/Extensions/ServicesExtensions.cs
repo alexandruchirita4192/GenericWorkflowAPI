@@ -6,11 +6,15 @@ using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using GenericWorkflowAPI.Core.AutoMapper;
 
 namespace GenericWorkflowAPI.Core.Extensions
 {
     public static class ServicesExtensions
     {
+        /// <summary>
+        /// Configure Cors Policy allowing any origin, method and header.
+        /// </summary>
         public static IServiceCollection ConfigureCors(this IServiceCollection services)
         {
             return services.AddCors(options =>
@@ -22,15 +26,22 @@ namespace GenericWorkflowAPI.Core.Extensions
             });
         }
 
+        /// <summary>
+        /// Register supported encodings (might be required for some console logging using an encoding or configuration reading from file having an encoding).
+        /// </summary>
         public static void RegisterEncodingProvider()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
+        /// <summary>
+        /// Add singleton services that provide <see cref="ReflectionMappingInfo"/> list with <see cref="IReflectionMappingInfoProvider{TEntity, TDto}"/> implemented as
+        ///  <see cref="ReflectionMappingInfoProvider{TEntity, TDto}"/> to the <paramref name="services"/> container based on <paramref name="mappings"/> dictionary.
+        /// </summary>
         public static IServiceCollection AddReflectionMappingInfoProvider(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
-            //services.AddScoped(typeof(IReflectionMappingInfoProvider<Workflow, WorkflowDto>), typeof(ReflectionMappingInfoProvider<Workflow, WorkflowDto>));
+            //services.AddSingleton(typeof(IReflectionMappingInfoProvider<Workflow, WorkflowDto>), typeof(ReflectionMappingInfoProvider<Workflow, WorkflowDto>));
 
             return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
@@ -40,7 +51,8 @@ namespace GenericWorkflowAPI.Core.Extensions
                 // ReflectionMappingInfoProvider<Workflow, WorkflowDto>
                 (mapping) => typeof(ReflectionMappingInfoProvider<,>).MakeGenericType(mapping.Key, mapping.Value),
 
-                nameof(AddReflectionMappingInfoProvider));
+                nameof(AddReflectionMappingInfoProvider),
+                ServiceLifetime.Singleton);
         }
 
         /// <summary>
@@ -56,8 +68,12 @@ namespace GenericWorkflowAPI.Core.Extensions
         public static IServiceCollection AddServices<TEntityRequirement, TDtoRequirement>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger,
             Func<KeyValuePair<Type, Type>, Type> getInterfaceType,
             Func<KeyValuePair<Type, Type>, Type> getImplementedType,
-            string procedureName)
+            string procedureName,
+            ServiceLifetime serviceLifetime)
         {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
             if (getInterfaceType == null || getImplementedType == null)
             {
                 logger.Error("One of the functions received in {procedureName} is null. Returning without adding any services.",
@@ -104,17 +120,7 @@ namespace GenericWorkflowAPI.Core.Extensions
                     interfaceType = getInterfaceType(map);
                     implementedType = getImplementedType(map);
 
-                    if (!implementedType.IsAssignableTo(interfaceType))
-                    {
-                        logger.Warning("{implementedTypeName} doesn't implement {interfaceTypeName}. Skipping adding this service to the DI container in {procedureName}.",
-                            implementedType.Name,
-                            interfaceType.Name,
-                            procedureName ?? nameof(AddServices)
-                            );
-                        continue;
-                    }
-
-                    services.AddScoped(interfaceType, implementedType);
+                    services.AddService(interfaceType, implementedType, serviceLifetime, logger);
                 }
                 catch (Exception ex)
                 {
@@ -129,6 +135,54 @@ namespace GenericWorkflowAPI.Core.Extensions
             }
 
             return services;
+        }
+
+        /// <summary>
+        /// Add <paramref name="implementedType"/> service as an interface <paramref name="interfaceType"/> to the <paramref name="services"/>
+        ///  dependency injection container with the <see cref="ServiceLifetime"/> lifetime.
+        /// </summary>
+        public static void AddService(this IServiceCollection services, Type interfaceType, Type implementedType, ServiceLifetime serviceLifetime, ILogger logger)
+        {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
+            if (interfaceType == null)
+            {
+                logger.Error("Interface type is null in method {methodName} while adding service with lifetime {serviceLifetime}.", nameof(AddService), serviceLifetime);
+                return;
+            }
+
+            if (implementedType == null)
+            {
+                logger.Error("Implemented type is null in method {methodName} for interface type {interfaceTypeName} while adding service with lifetime {serviceLifetime}.",
+                    nameof(AddService),
+                    interfaceType.Name,
+                    serviceLifetime);
+                return;
+            }
+
+            if (!implementedType.IsAssignableTo(interfaceType))
+            {
+                logger.Warning("{implementedTypeName} doesn't implement {interfaceTypeName}. Skipping adding this service to the DI container in {procedureName}.",
+                    implementedType.Name,
+                    interfaceType.Name,
+                    nameof(AddService)
+                    );
+                return;
+            }
+
+            switch (serviceLifetime)
+            {
+                case ServiceLifetime.Singleton:
+                    services.AddSingleton(interfaceType, implementedType);
+                    break;
+                case ServiceLifetime.Scoped:
+                    services.AddScoped(interfaceType, implementedType);
+                    break;
+                case ServiceLifetime.Transient:
+                    services.AddTransient(interfaceType, implementedType);
+                    break;
+            }
         }
     }
 }

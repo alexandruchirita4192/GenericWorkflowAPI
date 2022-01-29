@@ -15,11 +15,15 @@ namespace GenericWorkflowAPI.Extensions
 {
     public static class ServicesExtensions
     {
+        /// <summary>
+        /// Add code repository services as singleton with interface <see cref="IGenericCodeRepository{TEntity}"/> implementing
+        ///  <see cref="GenericCodeRepository{TEntity, TDbContext}"/> to the <paramref name="services"/> container based on <paramref name="mappings"/> dictionary.
+        /// </summary>
         public static IServiceCollection AddDatabaseGenericCodeRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
             where TDbContext : DbContext
         {
             // Mapping Example:
-            //services.AddScoped(typeof(IGenericCodeRepository<Workflow>), typeof(GenericCodeRepository<Workflow, ApplicationDbContext>));
+            //services.AddSingleton(typeof(IGenericCodeRepository<Workflow>), typeof(GenericCodeRepository<Workflow, ApplicationDbContext>));
 
             return services.AddServices<ICodeEntity, ICodeDto>(mappings, logger,
 
@@ -29,14 +33,19 @@ namespace GenericWorkflowAPI.Extensions
                 // GenericCodeRepository<Workflow, ApplicationDbContext>
                 (map) => typeof(GenericCodeRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
                 
-                nameof(AddDatabaseGenericCodeRepositories));
+                nameof(AddDatabaseGenericCodeRepositories),
+                ServiceLifetime.Singleton);
         }
 
+        /// <summary>
+        /// Add repository services as singleton with interface <see cref="IGenericRepository{TEntity}"/> implementing
+        ///  <see cref="GenericRepository{TEntity, TDbContext}"/> to the <paramref name="services"/> container based on <paramref name="mappings"/> dictionary.
+        /// </summary>
         public static IServiceCollection AddDatabaseGenericRepositories<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
             where TDbContext : DbContext
         {
             // Mapping Example:
-            //services.AddScoped(typeof(IGenericRepository<Workflow>), typeof(GenericRepository<Workflow, ApplicationDbContext>));
+            //services.AddSingleton(typeof(IGenericRepository<Workflow>), typeof(GenericRepository<Workflow, ApplicationDbContext>));
 
             return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
@@ -46,9 +55,13 @@ namespace GenericWorkflowAPI.Extensions
                 // GenericRepository<Workflow, ApplicationDbContext>
                 (map) => typeof(GenericRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
                 
-                nameof(AddDatabaseGenericRepositories));
+                nameof(AddDatabaseGenericRepositories),
+                ServiceLifetime.Singleton);
         }
 
+        /// <summary>
+        /// Add entity-related services as singletons (<see cref="IEntityService{TEntity}"/> implemented as <see cref="EntityService{TEntity}"/>).
+        /// </summary>
         public static IServiceCollection AddEntityService(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
@@ -62,13 +75,17 @@ namespace GenericWorkflowAPI.Extensions
                 // EntityService<Workflow>
                 (mapping) => typeof(EntityService<>).MakeGenericType(mapping.Key),
                 
-                nameof(AddEntityService));
+                nameof(AddEntityService),
+                ServiceLifetime.Singleton);
         }
 
+        /// <summary>
+        /// Add mapping-related services as singletons (<see cref="IMappingHelper{TEntity, TDto}"/> implemented as <see cref="MappingHelper{TEntity, TDto}"/>).
+        /// </summary>
         public static IServiceCollection AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
         {
             // Mapping Example:
-            //services.AddScoped(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
+            //services.AddSingleton(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
 
             return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
@@ -78,11 +95,19 @@ namespace GenericWorkflowAPI.Extensions
                 // MappingHelper<Workflow, WorkflowDto>
                 (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
 
-                nameof(AddMappingHelpers));
+                nameof(AddMappingHelpers),
+                ServiceLifetime.Singleton);
         }
 
-        public static IServiceCollection AddMediatorMappingsToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
+
+        /// <summary>
+        /// Add MediatR handlers from <paramref name="mappings"/> to <paramref name="services"/> as singletons.
+        /// </summary>
+        public static IServiceCollection AddMediatRHandlersToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
         {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
             if (mappings == null || mappings.Count == 0)
             {
                 logger.Error("MediatR mappings null or empty");
@@ -91,7 +116,7 @@ namespace GenericWorkflowAPI.Extensions
 
             foreach (var mapping in mappings)
             {
-                services.AddScoped(mapping.Interface, mapping.Implementation);
+                services.AddService(mapping.Interface, mapping.Implementation, ServiceLifetime.Singleton, logger);
             }
 
             return services;

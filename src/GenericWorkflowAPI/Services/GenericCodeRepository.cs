@@ -30,8 +30,8 @@ namespace GenericWorkflowAPI.Services
 
         public async Task<TEntity> GetByCodeAsync(string code, List<string> includePathList, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(code))
-                return default(TEntity);
+            if (string.IsNullOrWhiteSpace(code) || cancellationToken.IsCancellationRequested)
+                return new TEntity();
 
             try
             {
@@ -62,8 +62,8 @@ namespace GenericWorkflowAPI.Services
 
         public async Task<List<TEntity>> GetByCodeListAsync(List<string> codesList, List<string> includePathList, CancellationToken cancellationToken)
         {
-            if (codesList == null || codesList.Count == 0)
-                return default(List<TEntity>);
+            if (codesList == null || codesList.Count == 0 || cancellationToken.IsCancellationRequested)
+                return new List<TEntity>();
 
             try
             {
@@ -95,6 +95,8 @@ namespace GenericWorkflowAPI.Services
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity), $"Cannot update a null entity.");
                 if (user == null)
@@ -128,6 +130,8 @@ namespace GenericWorkflowAPI.Services
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 if (entitiesList == null || entitiesList.Count == 0)
                     throw new ArgumentException(nameof(entitiesList), $"Cannot update a null entity list or with count zero.");
                 if (user == null)
@@ -165,6 +169,8 @@ namespace GenericWorkflowAPI.Services
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 if (string.IsNullOrWhiteSpace(code))
                     throw new ArgumentException(nameof(code), $"Cannot delete an entity of type {typeof(TEntity).Name} with a null or whitespace code.");
                 if (user == null)
@@ -194,6 +200,8 @@ namespace GenericWorkflowAPI.Services
         {
             try
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 if (codesList == null || codesList.Count == 0)
                     throw new ArgumentException(nameof(codesList), $"Cannot delete an entity list of type {typeof(TEntity).Name} with a null or empty code list.");
                 if (user == null)
