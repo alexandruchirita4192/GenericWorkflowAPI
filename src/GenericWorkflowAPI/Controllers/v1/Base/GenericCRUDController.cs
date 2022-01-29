@@ -35,7 +35,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -58,7 +58,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -81,7 +81,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -127,7 +127,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -150,7 +150,7 @@ namespace GenericWorkflowAPI.Controllers.v1
             {
                 request.User = this.GetUser();
                 var response = await _mediator.Send(request, cancellationToken);
-                return await _mediator.Send(response);
+                return await _mediator.Send(response, cancellationToken);
             }
             catch (Exception ex)
             {

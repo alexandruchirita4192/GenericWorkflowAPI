@@ -29,26 +29,26 @@ namespace GenericWorkflowAPI.CommandHandlers
         public async Task<ActionResult> Handle(GenericApiResponse<TPayload> response, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
-                return Ok();
+                return GenericApiResponseHandler<TPayload>.Ok();
             if (response == null)
             {
                 logger.Error($"{nameof(GenericApiResponseHandler<TPayload>)}.{nameof(Handle)} received empty response");
-                return Problem((int)HttpStatusCode.InternalServerError, ValidationConstants.GenericValidationMessage, response.Extensions);
+                return Problem((int)HttpStatusCode.InternalServerError);
             }
 
             // 2xx - Successful status codes
             if (response.Status == HttpStatusCode.OK)
             {
                 if (response.Payload != null)
-                    return Ok(response.Payload);
+                    return GenericApiResponseHandler<TPayload>.Ok(response.Payload);
                 if (!string.IsNullOrWhiteSpace(response.Message))
-                    return Ok(response.Message);
-                return Ok();
+                    return GenericApiResponseHandler<TPayload>.Ok(response.Message);
+                return GenericApiResponseHandler<TPayload>.Ok();
             }
             if (response.Status == HttpStatusCode.Created)
                 return Created(response.Payload);
             if (response.Status == HttpStatusCode.NoContent)
-                return NoContent();
+                return GenericApiResponseHandler<TPayload>.NoContent();
 
             if (response.Status == null)
                 logger.Debug($"Unexpected null status in response {typeof(GenericApiResponse<TPayload>).FullName}; defaulting status to InternalServerError");
@@ -58,7 +58,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
             // 1xx – Informational, 2xx – Successful, 3xx – Redirection
             if (statusInt >= 100 && statusInt <= 399)
-                return StatusCode(statusInt);
+                return GenericApiResponseHandler<TPayload>.StatusCode(statusInt);
 
             // 4xx - Client error, 5xx - Server error
             if (string.IsNullOrWhiteSpace(response.Message))
@@ -69,17 +69,17 @@ namespace GenericWorkflowAPI.CommandHandlers
 
         #region Internal methods
 
-        private ActionResult Ok()
+        private static ActionResult Ok()
         {
             return new OkResult();
         }
 
-        private ActionResult Ok(string message)
+        private static ActionResult Ok(string message)
         {
             return new OkObjectResult(message);
         }
 
-        private ActionResult Ok(TPayload payload)
+        private static ActionResult Ok(TPayload payload)
         {
             return new OkObjectResult(payload);
         }
@@ -89,12 +89,12 @@ namespace GenericWorkflowAPI.CommandHandlers
             return new CreatedResult(accessor?.HttpContext?.Request?.Path, payload);
         }
 
-        private ActionResult NoContent()
+        private static ActionResult NoContent()
         {
             return new NoContentResult();
         }
 
-        private ActionResult StatusCode(int statusInt)
+        private static ActionResult StatusCode(int statusInt)
         {
             return new StatusCodeResult(statusInt);
         }

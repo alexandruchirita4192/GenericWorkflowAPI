@@ -7,6 +7,7 @@ using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.CommandHandlers;
 using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Core.Services;
+using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
@@ -21,7 +22,8 @@ namespace GenericWorkflowAPI.UnitTesting
     {
         public async Task<GenericApiResponse<List<TDto>>> GenericGetListCommandHandlerExecute<TEntity, TDto>(
             List<string> includePathList,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, new()
         {
@@ -33,7 +35,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
 
             // GenericGetListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -47,7 +49,8 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task<GenericApiResponse<TDto>> GenericGetCommandHandlerExecute<TEntity, TDto>(
             List<string> includePathList,
             string code,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -60,7 +63,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
 
             // GenericGetCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -75,7 +78,8 @@ namespace GenericWorkflowAPI.UnitTesting
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -89,9 +93,10 @@ namespace GenericWorkflowAPI.UnitTesting
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
             var logger = GetLogger();
             var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateCommandHandler<Workflow, WorkflowDto> setup:
             var mapper = GetMapper(logger);
@@ -122,7 +127,8 @@ namespace GenericWorkflowAPI.UnitTesting
             Collection<TDto> dtoCollection,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -137,9 +143,10 @@ namespace GenericWorkflowAPI.UnitTesting
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
             var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -170,7 +177,8 @@ namespace GenericWorkflowAPI.UnitTesting
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -184,9 +192,10 @@ namespace GenericWorkflowAPI.UnitTesting
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
             var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -217,7 +226,8 @@ namespace GenericWorkflowAPI.UnitTesting
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -231,10 +241,10 @@ namespace GenericWorkflowAPI.UnitTesting
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
             var configuration = GetConfiguration();
-            var isInMemory = false;
-            var dbContext = GetSqlServerDbContext(configuration, isInMemory);
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
             var entityService = GetEntityService<TEntity>();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemory, configuration, logger, dbContext, entityService);
+            var repository = GetGenericCodeRepository(isInMemoryDbContext, configuration, logger, dbContext, entityService);
 
             // GenericCreateListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -264,7 +274,8 @@ namespace GenericWorkflowAPI.UnitTesting
         public async Task<GenericApiResponse<string>> GenericDeleteCommandHandlerExecute<TEntity, TDto>(
             string code,
             Domain.IdentityUser user,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -277,7 +288,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, dbContext: dbContext, logger: logger);
 
             // GenericDeleteCommandHandler<TEntity, TDto> setup:
             var handler = new GenericDeleteCommandHandler<TEntity, TDto>(repository, logger);
@@ -287,10 +298,11 @@ namespace GenericWorkflowAPI.UnitTesting
             return response;
         }
 
-        public async Task<GenericApiResponse<string>> GenericDeleteListCommandHandlerExecute<TEntity, TDto> (
+        public async Task<GenericApiResponse<string>> GenericDeleteListCommandHandlerExecute<TEntity, TDto>(
             Collection<string> codes,
             Domain.IdentityUser user,
-            bool isInMemoryDbContext)
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -303,7 +315,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<Workflow, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, logger: logger);
+            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext: isInMemoryDbContext, dbContext: dbContext, logger: logger);
 
             // GenericDeleteListCommandHandler<Workflow, WorkflowDto> setup:
             var handler = new GenericDeleteListCommandHandler<TEntity, TDto>(repository, logger);

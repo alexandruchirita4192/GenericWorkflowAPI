@@ -39,7 +39,7 @@ namespace GenericWorkflowAPI.CommandHandlers
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var entitiesQueryable = _repository.GetAllQueryable(request.IncludePathList ?? new List<string>());
+            var entitiesQueryable = await Task.Run(() => _repository.GetAllQueryable(request.IncludePathList ?? new List<string>()));
 
             var dtosQueryable = entitiesQueryable.ProjectTo<TDto>(_mapper.ConfigurationProvider, request.QueryOptions);
 

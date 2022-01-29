@@ -121,7 +121,7 @@ namespace GenericWorkflowAPI.Services
             if (workflowInstance == null)
             {
                 // Try to create a new instance if all input codes for the first state are provided
-                workflowInstance = await CreateNewWorkflowInstance(
+                await CreateNewWorkflowInstance(
                     user, 
                     workflowInputCodeTypeXvalue,
                     workflow,
@@ -222,7 +222,8 @@ namespace GenericWorkflowAPI.Services
 
             var firstWorkflowState = await _workflowStateRepository.DbSet.FirstOrDefaultAsync(ws => ws.WorkflowId == workflow.Id 
                 && (ws.IsFirstState ?? false)
-                && !ws.IsDeleted);
+                && !ws.IsDeleted,
+                cancellationToken);
 
             if (firstWorkflowState == null)
                 throw new InvalidOperationException($"No first state defined in the workflow with code {workflow.Code}. Cannot create a new workflow instance.");
@@ -341,8 +342,8 @@ namespace GenericWorkflowAPI.Services
             Dictionary<string, string>? workflowInputCodeTypeXvalue, 
             Workflow? workflow, 
             WorkflowInstance? workflowInstance,
-            WorkflowInstanceHistory? workflowInstanceHistory,
-            List<WorkflowInputCodeType>? validWorkflowInputCodeTypesForNewInstance, 
+            WorkflowInstanceHistory workflowInstanceHistory,
+            List<WorkflowInputCodeType> validWorkflowInputCodeTypesForNewInstance, 
             CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -425,7 +426,8 @@ namespace GenericWorkflowAPI.Services
                         $"for workflow with code {workflowCode}. Cannot create a new workflow instance.");
 
                 var workflowInstanceInputCode = await _workflowInstanceInputCodeRepository.DbSet
-                    .FirstOrDefaultAsync(wiic => wiic.InstanceId == workflowInstance.Id && wiic.TypeId == workflowInputCodeType.Id && !wiic.IsDeleted);
+                    .FirstOrDefaultAsync(wiic => wiic.InstanceId == workflowInstance.Id && wiic.TypeId == workflowInputCodeType.Id && !wiic.IsDeleted,
+                    cancellationToken);
                 if (workflowInstanceInputCode == null)
                 {
                     // add WorkflowInstanceInputCode if not exists
@@ -517,7 +519,7 @@ namespace GenericWorkflowAPI.Services
 
             var validWorkflowInputCodeTypes = await _workflowInputCodeTypeRepository.DbSet
                 .Where(wict => wict.WorkflowId == workflow.Id && !wict.IsDeleted)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             var noInputCodeTypes = validWorkflowInputCodeTypes == null || validWorkflowInputCodeTypes.Count == 0;
             var moreWorkflowInputTypeCodesThanNeecessaryReceived = false;
@@ -591,11 +593,14 @@ namespace GenericWorkflowAPI.Services
                 }
             }
 
-            return (validWorkflowInputCodeTypes, moreWorkflowInputTypeCodesThanNeecessaryReceived);
+            return (validWorkflowInputCodeTypes ?? new List<WorkflowInputCodeType>(), moreWorkflowInputTypeCodesThanNeecessaryReceived);
         }
 
         public void Dispose()
         {
+            // To prevent derived types with finalizers from having to reimplement IDisposable and to call it, unsealed types without finalizers should still call GC.SuppressFinalize.
+            GC.SuppressFinalize(this);
+
             _workflowRepository.Dispose();
             _workflowInputCodeTypeRepository.Dispose();
             _workflowStateRepository.Dispose();

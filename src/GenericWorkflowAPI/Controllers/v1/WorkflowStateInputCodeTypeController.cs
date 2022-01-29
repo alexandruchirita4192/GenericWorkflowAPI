@@ -35,7 +35,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(string code, CancellationToken cancellationToken)
         {
-            return await base.GetItem(code, cancellationToken);
+            return await GetItem(code, cancellationToken);
         }
 
         [HttpGet]
@@ -46,7 +46,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await base.GetCollection(cancellationToken);
+            return await GetCollection(cancellationToken);
         }
 
         [EnableQuery]
@@ -56,7 +56,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IQueryable<WorkflowStateInputCodeTypeDto>> Get([OpenApiParameterIgnore] ODataQueryOptions<WorkflowStateInputCodeTypeDto> queryOptions, CancellationToken cancellationToken)
         {
-            return await base.GetQueryable(queryOptions, cancellationToken);
+            return await GetQueryable(queryOptions, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -67,7 +67,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] WorkflowStateInputCodeTypeDto item, CancellationToken cancellationToken)
         {
-            return await base.CreateItem(item, cancellationToken);
+            return await CreateItem(item, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -78,7 +78,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] Collection<WorkflowStateInputCodeTypeDto> collection, CancellationToken cancellationToken)
         {
-            return await base.CreateCollection(collection, cancellationToken);
+            return await CreateCollection(collection, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -89,7 +89,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update([FromBody] WorkflowStateInputCodeTypeDto item, CancellationToken cancellationToken)
         {
-            return await base.UpdateItem(item, cancellationToken);
+            return await UpdateItem(item, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -100,7 +100,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update([FromBody] Collection<WorkflowStateInputCodeTypeDto> collection, CancellationToken cancellationToken)
         {
-            return await base.UpdateCollection(collection, cancellationToken);
+            return await UpdateCollection(collection, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -111,7 +111,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(string code, CancellationToken cancellationToken)
         {
-            return await base.DeleteItem(code, cancellationToken);
+            return await DeleteItem(code, cancellationToken);
         }
 
         [ValidateAntiForgeryToken]
@@ -122,7 +122,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete([FromBody] Collection<string> codes, CancellationToken cancellationToken)
         {
-            return await base.DeleteCollection(codes, cancellationToken);
+            return await DeleteCollection(codes, cancellationToken);
         }
     }
 }

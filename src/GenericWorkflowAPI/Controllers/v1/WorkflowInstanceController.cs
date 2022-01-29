@@ -34,7 +34,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(string code, CancellationToken cancellationToken)
         {
-            return await base.GetItem(code, cancellationToken);
+            return await GetItem(code, cancellationToken);
         }
 
         [HttpGet]
@@ -45,7 +45,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            return await base.GetCollection(cancellationToken);
+            return await GetCollection(cancellationToken);
         }
 
         [EnableQuery]
@@ -55,7 +55,7 @@ namespace GenericWorkflowAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IQueryable<WorkflowInstanceDto>> Get([OpenApiParameterIgnore] ODataQueryOptions<WorkflowInstanceDto> queryOptions, CancellationToken cancellationToken)
         {
-            return await base.GetQueryable(queryOptions, cancellationToken);
+            return await GetQueryable(queryOptions, cancellationToken);
         }
     }
 }

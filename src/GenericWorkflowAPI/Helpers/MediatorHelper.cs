@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using GenericWorkflowAPI.CommandHandlers;
 using GenericWorkflowAPI.Controllers.v1;
 using GenericWorkflowAPI.Domain;
@@ -200,7 +199,7 @@ namespace GenericWorkflowAPI.Helpers
                 .Where(t => t.IsClass
                     && t.IsPublic
                     && !t.IsAbstract
-                    && (t.IsAssignableTo(typeof(ApiController)) || t.IsAssignableTo(typeof(ControllerBase)))
+                    && (t.IsAssignableTo(typeof(ControllerBase)))
                     && t.BaseType?.GetGenericArguments()?.Length == 2).ToList();
         }
 
@@ -209,16 +208,16 @@ namespace GenericWorkflowAPI.Helpers
         /// /// </summary>
         private static void MediatorHelperSetupTypeWrapInTryCatch(
             // (entityType, dtoType) => typeof(...).MakeGenericType(...)
-            Func<Type, Type, Type?> requestTypeFunc,
+            Func<Type, Type, Type> requestTypeFunc,
 
             // (entityType, dtoType) => typeof(...).MakeGenericType(...)
-            Func<Type, Type, Type?> responseTypeFunc,
+            Func<Type, Type, Type> responseTypeFunc,
 
             // (requestType, responseType, entityType, dtoType) => typeof(...).MakeGenericType(...)
-            Func<Type?, Type?, Type, Type, Type?> interfaceTypeFunc,
+            Func<Type, Type, Type, Type, Type> interfaceTypeFunc,
 
             // (requestType, responseType, entityType, dtoType) => typeof(...).MakeGenericType(...)
-            Func<Type?, Type?, Type, Type, Type?> implementedTypeFunc,
+            Func<Type, Type, Type, Type, Type> implementedTypeFunc,
 
             List<InterfaceImplementationMapper> mappings,
             Type entityType,
@@ -232,10 +231,10 @@ namespace GenericWorkflowAPI.Helpers
 
             try
             {
-                requestType = requestTypeFunc?.Invoke(entityType, dtoType);
-                responseType = responseTypeFunc?.Invoke(entityType, dtoType);
-                interfaceType = interfaceTypeFunc?.Invoke(requestType, responseType, entityType, dtoType);
-                implementedType = implementedTypeFunc?.Invoke(requestType, responseType, entityType, dtoType);
+                requestType = requestTypeFunc.Invoke(entityType, dtoType);
+                responseType = responseTypeFunc.Invoke(entityType, dtoType);
+                interfaceType = interfaceTypeFunc.Invoke(requestType, responseType, entityType, dtoType);
+                implementedType = implementedTypeFunc.Invoke(requestType, responseType, entityType, dtoType);
 
                 var genericApiResponseHandlerMapper = new InterfaceImplementationMapper(interfaceType, implementedType);
                 if (!interfaceType.IsAssignableFrom(implementedType))
