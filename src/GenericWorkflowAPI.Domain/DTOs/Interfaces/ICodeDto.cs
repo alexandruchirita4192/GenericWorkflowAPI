@@ -2,6 +2,6 @@
 {
     public interface ICodeDto : IBaseDto
     {
-        string Code { get; set; }
+        string? Code { get; set; }
     }
 }

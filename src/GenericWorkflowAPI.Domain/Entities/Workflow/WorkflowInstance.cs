@@ -15,16 +15,16 @@ namespace GenericWorkflowAPI.Domain.Entities
         public long? WorkflowId { get; set; }
 
         [ForeignKey("WorkflowId")] // $"{nameof(WorkflowId)}"
-        public Workflow Workflow { get; set; }
+        public Workflow? Workflow { get; set; }
 
         [Required]
         [StringLength(100)]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [Required]
         public long? CurrentStateId { get; set; }
 
         [ForeignKey("CurrentStateId")] // $"{nameof(CurrentStateId)}"
-        public WorkflowState CurrentState { get; set; }
+        public WorkflowState? CurrentState { get; set; }
     }
 }

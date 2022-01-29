@@ -17,6 +17,6 @@ namespace GenericWorkflowAPI.Domain.Entities
         public long? ChangedByUserId { get; set; }
 
         [ForeignKey("ChangedByUserId")]
-        public IdentityUser ChangedByUser { get; set; }
+        public IdentityUser? ChangedByUser { get; set; }
     }
 }

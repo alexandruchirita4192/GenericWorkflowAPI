@@ -12,20 +12,20 @@ namespace GenericWorkflowAPI.Domain.DTOs
     public class WorkflowInstanceHistoryDto : IWorkflowInstanceDto
     {
         [Required]
-        public string InstanceCode { get; set; }
+        public string? InstanceCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInstanceDto Instance { get; set; }
+        public WorkflowInstanceDto? Instance { get; set; }
 
-        public string CurrentStateCode { get; set; }
+        public string? CurrentStateCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowStateDto CurrentState { get; set; }
+        public WorkflowStateDto? CurrentState { get; set; }
 
         [Required]
-        public string NextStateCode { get; set; }
+        public string? NextStateCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowStateDto NextState { get; set; }
+        public WorkflowStateDto? NextState { get; set; }
     }
 }

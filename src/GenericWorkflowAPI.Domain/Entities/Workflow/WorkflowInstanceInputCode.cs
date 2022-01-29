@@ -13,16 +13,16 @@ namespace GenericWorkflowAPI.Domain.Entities
         public long? InstanceId { get; set; }
 
         [ForeignKey("InstanceId")] // $"{nameof(InstanceId)}"
-        public WorkflowInstance Instance { get; set; }
+        public WorkflowInstance? Instance { get; set; }
 
         [Required]
         public long? TypeId { get; set; }
 
         [ForeignKey("TypeId")] // $"{nameof(TypeId)}"
-        public WorkflowInputCodeType Type { get; set; }
+        public WorkflowInputCodeType? Type { get; set; }
 
         [Required]
         [StringLength(1000)]
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

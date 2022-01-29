@@ -2,6 +2,6 @@
 {
     public interface ICodeEntity : IBaseEntity
     {
-        public string Code { get; set; }
+        public string? Code { get; set; }
     }
 }

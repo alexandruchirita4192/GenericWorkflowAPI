@@ -10,29 +10,29 @@ namespace GenericWorkflowAPI.Domain.Entities
     {
         [Required]
         [StringLength(100)]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [Required]
         public long? WorkflowId { get; set; }
 
         [ForeignKey("WorkflowId")] // $"{nameof(WorkflowId)}"
-        public Workflow Workflow { get; set; }
+        public Workflow? Workflow { get; set; }
 
         [Required]
         public long? CurrentStateId { get; set; }
 
         [ForeignKey("CurrentStateId")] // $"{nameof(CurrentStateId)}"
-        public WorkflowState CurrentState { get; set; }
+        public WorkflowState? CurrentState { get; set; }
 
         [Required]
         public long? NextStateId { get; set; }
 
         [ForeignKey("NextStateId")] // $"{nameof(NextStateId)}"
-        public WorkflowState NextState { get; set; }
+        public WorkflowState? NextState { get; set; }
 
         public long? RoleId { get; set; }
 
         [ForeignKey("RoleId")] // $"{nameof(RoleId)}"
-        public IdentityRole Role { get; set; }
+        public IdentityRole? Role { get; set; }
     }
 }

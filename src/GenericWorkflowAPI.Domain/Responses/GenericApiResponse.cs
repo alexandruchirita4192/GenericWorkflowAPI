@@ -47,7 +47,7 @@ namespace GenericWorkflowAPI.Domain.Responses
         /// <summary>
         /// The payload sent in the body (in ActionResult)
         /// </summary>
-        public TPayload Payload { get; private set; }
+        public TPayload? Payload { get; private set; }
 
         /// <summary>
         /// The status code set to the ActionResult
@@ -57,12 +57,12 @@ namespace GenericWorkflowAPI.Domain.Responses
         /// <summary>
         /// Used later in the <see cref="ProblemDetails"/> DTO to specify the Detail of the error occured
         /// </summary>
-        public string Message { get; private set; }
+        public string? Message { get; private set; }
 
         /// <summary>
         /// Used later in the <see cref="ProblemDetails"/> DTO to point to the invalid properties with their error
         /// </summary>
-        public Dictionary<string, object> Extensions { get; set; }
+        public Dictionary<string, object>? Extensions { get; set; }
 
         #endregion Properties
 

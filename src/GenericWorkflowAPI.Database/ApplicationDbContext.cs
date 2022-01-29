@@ -26,16 +26,16 @@ namespace GenericWorkflowAPI.Database
 
         #region Workflow entities
 
-        public DbSet<Workflow> Workflows { get; set; }
-        public DbSet<WorkflowInputCodeType> WorkflowInputCodeTypes { get; set; }
-        public DbSet<WorkflowInstance> WorkflowInstances { get; set; }
-        public DbSet<WorkflowInstanceHistory> WorkflowInstanceHistory { get; set; }
-        public DbSet<WorkflowInstanceHistoryInputCode> WorkflowInstanceHistoryInputCodes { get; set; }
-        public DbSet<WorkflowInstanceInputCode> WorkflowInstanceInputCodes { get; set; }
-        public DbSet<WorkflowState> WorkflowStates { get; set; }
-        public DbSet<WorkflowStateInputCodeType> WorkflowStateInputCodeTypes { get; set; }
-        public DbSet<WorkflowTransition> WorkflowTransitions { get; set; }
-        public DbSet<WorkflowType> WorkflowTypes { get; set; }
+        public DbSet<Workflow>? Workflows { get; set; }
+        public DbSet<WorkflowInputCodeType>? WorkflowInputCodeTypes { get; set; }
+        public DbSet<WorkflowInstance>? WorkflowInstances { get; set; }
+        public DbSet<WorkflowInstanceHistory>? WorkflowInstanceHistory { get; set; }
+        public DbSet<WorkflowInstanceHistoryInputCode>? WorkflowInstanceHistoryInputCodes { get; set; }
+        public DbSet<WorkflowInstanceInputCode>? WorkflowInstanceInputCodes { get; set; }
+        public DbSet<WorkflowState>? WorkflowStates { get; set; }
+        public DbSet<WorkflowStateInputCodeType>? WorkflowStateInputCodeTypes { get; set; }
+        public DbSet<WorkflowTransition>? WorkflowTransitions { get; set; }
+        public DbSet<WorkflowType>? WorkflowTypes { get; set; }
 
         #endregion Workflow entities
 

@@ -12,17 +12,17 @@ namespace GenericWorkflowAPI.Domain.DTOs
     public class WorkflowInstanceHistoryInputCodeDto : IBaseDto
     {
         [Required]
-        public string HistoryCode { get; set; }
+        public string? HistoryCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInstanceHistoryDto History { get; set; }
+        public WorkflowInstanceHistoryDto? History { get; set; }
 
         [Required]
-        public string InputCodeTypeCode { get; set; }
+        public string? InputCodeTypeCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInputCodeTypeDto InputCodeType { get; set; }
+        public WorkflowInputCodeTypeDto? InputCodeType { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

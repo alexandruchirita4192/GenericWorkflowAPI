@@ -12,15 +12,15 @@ namespace GenericWorkflowAPI.Domain.DTOs
     public class WorkflowDto : IDescriptibleDto
     {
         [Required]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public string TypeCode { get; set; }
+        public string? TypeCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowTypeDto Type { get; set; }
+        public WorkflowTypeDto? Type { get; set; }
     }
 }

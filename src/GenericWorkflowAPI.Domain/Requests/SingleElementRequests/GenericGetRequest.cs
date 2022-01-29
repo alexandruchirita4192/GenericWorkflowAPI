@@ -8,7 +8,7 @@ namespace GenericWorkflowAPI.Domain.Requests
     public class GenericGetRequest<TDto> : IRequest<GenericApiResponse<TDto>>
         where TDto : class, IBaseDto, new()
     {
-        public string Code { get; set; }
-        public List<string> IncludePathList { get; set; }
+        public string? Code { get; set; }
+        public List<string>? IncludePathList { get; set; }
     }
 }

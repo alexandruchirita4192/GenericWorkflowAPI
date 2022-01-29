@@ -25,7 +25,7 @@ namespace GenericWorkflowAPI.Domain
 
         #endregion Constructors
 
-        public string Code { get { return Name; } set { Name = Code; } }
+        public string? Code { get { return Name; } set { Name = Code; } }
 
         public DateTimeOffset? CreatedDate { get; set; }
         public DateTimeOffset? ChangedDate { get; set; }
@@ -35,6 +35,6 @@ namespace GenericWorkflowAPI.Domain
         public long? ChangedByUserId { get; set; }
 
         [ForeignKey("ChangedByUserId")]
-        public IdentityUser ChangedByUser { get; set; }
+        public IdentityUser? ChangedByUser { get; set; }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IWorkflowInstanceDto : IBaseDto
     {
-        public string InstanceCode { get; set; }
+        public string? InstanceCode { get; set; }
     }
 }

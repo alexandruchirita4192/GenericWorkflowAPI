@@ -2,6 +2,6 @@
 {
     public interface IWorkflowDto : IBaseDto
     {
-        string WorkflowCode { get; set; }
+        string? WorkflowCode { get; set; }
     }
 }

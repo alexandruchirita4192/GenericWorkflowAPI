@@ -12,18 +12,18 @@ namespace GenericWorkflowAPI.Domain.DTOs
     public class WorkflowStateInputCodeTypeDto : IWorkflowStateDto, ICodeDto
     {
         [Required]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [Required]
-        public string StateCode { get; set; }
+        public string? StateCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowStateDto State { get; set; }
+        public WorkflowStateDto? State { get; set; }
 
         [Required]
-        public string InputCodeTypeCode { get; set; }
+        public string? InputCodeTypeCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInputCodeTypeDto InputCodeType { get; set; }
+        public WorkflowInputCodeTypeDto? InputCodeType { get; set; }
     }
 }

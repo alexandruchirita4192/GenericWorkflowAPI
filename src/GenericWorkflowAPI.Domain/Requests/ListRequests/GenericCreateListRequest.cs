@@ -8,7 +8,7 @@ namespace GenericWorkflowAPI.Domain.Requests
     public class GenericCreateListRequest<TDto> : IRequest<GenericApiResponse<string>>
         where TDto : class, IBaseDto, new()
     {
-        public IdentityUser User { get; set; }
-        public Collection<TDto> Collection { get; set; }
+        public IdentityUser? User { get; set; }
+        public Collection<TDto>? Collection { get; set; }
     }
 }

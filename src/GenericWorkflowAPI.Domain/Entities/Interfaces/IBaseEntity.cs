@@ -8,6 +8,6 @@ namespace GenericWorkflowAPI.Domain.Entities
         public DateTimeOffset? ChangedDate { get; set; }
         public bool IsDeleted { get; set; }
         public long? ChangedByUserId { get; set; }
-        public IdentityUser ChangedByUser { get; set; }
+        public IdentityUser? ChangedByUser { get; set; }
     }
 }

@@ -12,18 +12,18 @@ namespace GenericWorkflowAPI.Domain.DTOs
     public class WorkflowInstanceInputCodeDto : IWorkflowInstanceDto
     {
         [Required]
-        public string InstanceCode { get; set; }
+        public string? InstanceCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInstanceDto Instance { get; set; }
+        public WorkflowInstanceDto? Instance { get; set; }
 
         [Required]
-        public string TypeCode { get; set; }
+        public string? TypeCode { get; set; }
 
         [JsonIgnore]
-        public WorkflowInputCodeTypeDto Type { get; set; }
+        public WorkflowInputCodeTypeDto? Type { get; set; }
 
         [Required]
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

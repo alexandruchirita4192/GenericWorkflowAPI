@@ -11,18 +11,18 @@ namespace GenericWorkflowAPI.Domain.Entities
     {
         [Required]
         [StringLength(100)]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         [Required]
         public long? StateId { get; set; }
 
         [ForeignKey("StateId")] // $"{nameof(StateId)}"
-        public WorkflowState State { get; set; }
+        public WorkflowState? State { get; set; }
 
         [Required]
         public long? InputCodeTypeId { get; set; }
 
         [ForeignKey("InputCodeTypeId")] // $"{nameof(InputCodeTypeId)}"
-        public WorkflowInputCodeType InputCodeType { get; set; }
+        public WorkflowInputCodeType? InputCodeType { get; set; }
     }
 }

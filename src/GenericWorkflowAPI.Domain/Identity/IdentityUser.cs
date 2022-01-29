@@ -34,8 +34,8 @@ namespace GenericWorkflowAPI.Domain
         public long? ChangedByUserId { get; set; }
 
         [ForeignKey("ChangedByUserId")]
-        public IdentityUser ChangedByUser { get; set; }
+        public IdentityUser? ChangedByUser { get; set; }
 
-        public ICollection<IdentityUserClaim<string>> Claims { get; set; }
+        public ICollection<IdentityUserClaim<string>>? Claims { get; set; }
     }
 }
