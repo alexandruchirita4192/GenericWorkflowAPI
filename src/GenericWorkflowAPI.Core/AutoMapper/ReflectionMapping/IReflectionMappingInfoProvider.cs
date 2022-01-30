@@ -8,6 +8,6 @@ namespace GenericWorkflowAPI.Core.AutoMapper.Helpers
         where TEntity : class, IBaseEntity
         where TDto : class, IBaseDto
     {
-        List<ReflectionMappingInfo> GetCacheWithReflectionMappingInfo();
+        List<ReflectionMappingInfo>? GetCacheWithReflectionMappingInfo();
     }
 }

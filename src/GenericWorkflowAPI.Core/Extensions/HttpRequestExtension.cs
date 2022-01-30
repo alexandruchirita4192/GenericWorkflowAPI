@@ -20,7 +20,7 @@ namespace GenericWorkflowAPI.IdentityServer4.Extensions
                 throw new ArgumentNullException(nameof(request), "Request object is null.");
             }
 
-            if (!string.IsNullOrEmpty(httpVerb) && string.Compare(request.Method, httpVerb, true) != 0)
+            if (!string.IsNullOrWhiteSpace(httpVerb) && string.Compare(request.Method, httpVerb, true) != 0)
             {
                 return false;
             }

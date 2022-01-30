@@ -36,6 +36,13 @@ namespace GenericWorkflowAPI.CommandHandlers
                 return Problem((int)HttpStatusCode.InternalServerError);
             }
 
+            return await Task.Run(() => InternalHandle(response));
+        }
+
+        #region Internal methods
+
+        private ActionResult InternalHandle(GenericApiResponse<TPayload> response)
+        {
             // 2xx - Successful status codes
             if (response.Status == HttpStatusCode.OK)
             {
@@ -46,7 +53,12 @@ namespace GenericWorkflowAPI.CommandHandlers
                 return GenericApiResponseHandler<TPayload>.Ok();
             }
             if (response.Status == HttpStatusCode.Created)
-                return Created(response.Payload);
+            {
+                if (response.Payload != null)
+                    return Created(response.Payload);
+                else
+                    return Created(); // This isn't a best practice and it shouldn't happen, but at least works
+            }
             if (response.Status == HttpStatusCode.NoContent)
                 return GenericApiResponseHandler<TPayload>.NoContent();
 
@@ -64,10 +76,8 @@ namespace GenericWorkflowAPI.CommandHandlers
             if (string.IsNullOrWhiteSpace(response.Message))
                 return Problem(statusInt);
 
-            return Problem(statusInt, response.Message, response.Extensions);
+            return Problem(statusInt, response.Message, response.Extensions ?? new Dictionary<string, object>());
         }
-
-        #region Internal methods
 
         private static ActionResult Ok()
         {
@@ -89,6 +99,11 @@ namespace GenericWorkflowAPI.CommandHandlers
             return new CreatedResult(accessor?.HttpContext?.Request?.Path, payload);
         }
 
+        private static ActionResult Created()
+        {
+            return new StatusCodeResult(StatusCodes.Status201Created);
+        }
+
         private static ActionResult NoContent()
         {
             return new NoContentResult();
@@ -101,7 +116,7 @@ namespace GenericWorkflowAPI.CommandHandlers
 
         private ActionResult Problem(int statusCode)
         {
-            return Problem(statusCode, string.Empty, new Dictionary<string, object>());
+            return Problem(statusCode, ValidationConstants.GenericValidationMessage, new Dictionary<string, object>());
         }
 
         private ActionResult Problem(int statusCode, string genericValidationMessage, Dictionary<string, object> invalidParams)
@@ -127,7 +142,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             };
 
             // Add invalid parameters
-            if (hasInvalidParams)
+            if (hasInvalidParams && invalidParams != null) // hasInvalidParams already checks for null, but this extra check is done to solve a warning
                 foreach (var param in invalidParams)
                     problemDetails.Extensions[param.Key] = param.Value;
 

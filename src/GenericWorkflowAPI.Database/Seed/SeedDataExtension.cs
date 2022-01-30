@@ -40,7 +40,7 @@ namespace GenericWorkflowAPI.Database
                         var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<Domain.IdentityRole>>();
                         var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<Domain.IdentityUser>>();
 
-                        IdentityResult result = null;
+                        IdentityResult? result = null;
 
                         var admin = await userMgr.FindByNameAsync(AdministratorUserName);
                         if (admin == null)
@@ -116,21 +116,24 @@ namespace GenericWorkflowAPI.Database
             foreach (var resourceName in assembly.GetManifestResourceNames().Where(m => m.EndsWith(".sql")))
             {
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
-                using (var reader = new StreamReader(stream))
+                if (stream != null)
                 {
-                    var script = reader.ReadToEnd();
-
-                    using (var connection = new SqlConnection(connectionString))
+                    using (var reader = new StreamReader(stream))
                     {
-                        connection.Open();
-                        foreach (var currentBatch in script.Split(separators, StringSplitOptions.RemoveEmptyEntries))
-                            using (var command = connection.CreateCommand())
-                            {
-                                command.CommandType = CommandType.Text;
-                                command.CommandText = currentBatch;
-                                command.ExecuteNonQuery();
-                            }
-                        connection.Close();
+                        var script = reader.ReadToEnd();
+
+                        using (var connection = new SqlConnection(connectionString))
+                        {
+                            connection.Open();
+                            foreach (var currentBatch in script.Split(separators, StringSplitOptions.RemoveEmptyEntries))
+                                using (var command = connection.CreateCommand())
+                                {
+                                    command.CommandType = CommandType.Text;
+                                    command.CommandText = currentBatch;
+                                    command.ExecuteNonQuery();
+                                }
+                            connection.Close();
+                        }
                     }
                 }
             }

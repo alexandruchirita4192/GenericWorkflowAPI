@@ -107,7 +107,7 @@ namespace GenericWorkflowAPI
                             context?.Request?.Headers?.Add("RequestVerificationToken", token);
                         }
 
-                        return next(context);
+                        return next(context ?? new DefaultHttpContext());
                     });
                 });
             }

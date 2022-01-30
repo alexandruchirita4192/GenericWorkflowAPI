@@ -157,6 +157,9 @@ namespace GenericWorkflowAPI.Services
                 throw new ArgumentNullException(nameof(workflow));
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
+            if (string.IsNullOrWhiteSpace(workflow.Code))
+                throw new InvalidOperationException($"Invalid workflow code for the current workflow instance." +
+                    $"Cannot execute transition for the workflow instance with code {workflowInstance.Code}.");
 
             // Get all possible transitions starting from the current workflow instance state
             var executableTransitions = await _workflowTransitionRepository.DbSet
@@ -168,8 +171,8 @@ namespace GenericWorkflowAPI.Services
                 .ToListAsync(cancellationToken);
 
             var currentWorkflowState = await _workflowStateRepository.GetByIdAsync(workflowInstance.CurrentStateId, new List<string>(), cancellationToken);
-            if (currentWorkflowState == null)
-                throw new InvalidOperationException($"There is no start state with id {workflowInstance.Id} for the workflow with code {workflow.Code}. " +
+            if (currentWorkflowState == null || string.IsNullOrWhiteSpace(currentWorkflowState.Code))
+                throw new InvalidOperationException($"There is no start state with id {workflowInstance.CurrentStateId} for the workflow with code {workflow.Code} or the workflow state code is invalid. " +
                     $"Cannot execute transition for the workflow instance with code {workflowInstance.Code}.");
 
             if (executableTransitions == null || !executableTransitions.Any())
@@ -283,10 +286,10 @@ namespace GenericWorkflowAPI.Services
             // (in this case this is the preffered executed transition), or transitions with required workflow input type codes but others too
             // (if there's no exact match, then the first of this type is the executed transition)).
 
-            WorkflowTransition exactMatchInputTypeCodesWorkflowTransition = null;
-            WorkflowTransition moreThanRequiredInputTypeCodesWorkflowTransition = null;
-            List<WorkflowInputCodeType> exactMatchInputTypeCodesWorkflowTransitionWorkflowInputCodeTypes = null;
-            List<WorkflowInputCodeType> moreThanRequiredInputTypeCodesWorkflowTransitionWorkflowInputCodeTypes = null;
+            WorkflowTransition? exactMatchInputTypeCodesWorkflowTransition = null;
+            WorkflowTransition? moreThanRequiredInputTypeCodesWorkflowTransition = null;
+            List<WorkflowInputCodeType>? exactMatchInputTypeCodesWorkflowTransitionWorkflowInputCodeTypes = null;
+            List<WorkflowInputCodeType>? moreThanRequiredInputTypeCodesWorkflowTransitionWorkflowInputCodeTypes = null;
 
             foreach (var transition in executableTransitions)
             {
@@ -489,6 +492,10 @@ namespace GenericWorkflowAPI.Services
                 throw new ArgumentNullException(nameof(user));
             if (transitionToExecute == null)
                 throw new ArgumentNullException(nameof(transitionToExecute));
+            if (transitionToExecute.Role == null)
+                throw new InvalidOperationException("Cannot validate transition required role if the transition role is null.");
+            if (string.IsNullOrWhiteSpace(transitionToExecute.Role.Code))
+                throw new InvalidOperationException("Cannot validate transition required role if the transition role code is null or whitespace.");
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var requiredRoleCode = transitionToExecute.Role.Code;
@@ -524,7 +531,7 @@ namespace GenericWorkflowAPI.Services
             var noInputCodeTypes = validWorkflowInputCodeTypes == null || validWorkflowInputCodeTypes.Count == 0;
             var moreWorkflowInputTypeCodesThanNeecessaryReceived = false;
 
-            if (!noInputCodeTypes)
+            if (!noInputCodeTypes && validWorkflowInputCodeTypes != null) // extra check added just to remove some warnings
             {
                 var workflowInputCodeTypesForCurrentState = await _workflowStateInputCodeTypeRepository.DbSet
                     .Where(wsict => wsict.StateId == workflowState.Id && !wsict.IsDeleted)

@@ -36,7 +36,7 @@ namespace GenericWorkflowAPI.Core.AutoMapper
             if (!cache.ContainsKey(assembly))
                 throw new ArgumentException(nameof(cache), $"Assembly {assembly.FullName} missing from cache argument passed to {nameof(EntityDtoMapping)}");
 
-            Dictionary<Type, Type> mapping;
+            Dictionary<Type, Type>? mapping = null;
             
             if (!cache.TryGetValue(assembly, out mapping))
                 throw new ArgumentException(nameof(cache), $"Couldn't get value for assembly {assembly.FullName} out of cache argument passed to {nameof(EntityDtoMapping)}");

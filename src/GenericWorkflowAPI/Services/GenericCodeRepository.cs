@@ -78,7 +78,7 @@ namespace GenericWorkflowAPI.Services
                     }
                 }
 
-                return await entitiesQueryable.Where(entity => codesList.Contains(entity.Code)).ToListAsync(cancellationToken);
+                return await entitiesQueryable.Where(entity => entity.Code != null && codesList.Contains(entity.Code)).ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -101,6 +101,8 @@ namespace GenericWorkflowAPI.Services
                     throw new ArgumentNullException(nameof(entity), $"Cannot update a null entity.");
                 if (user == null)
                     throw new ArgumentNullException(nameof(user), $"Cannot update an entity with a null user.");
+                if (string.IsNullOrWhiteSpace(entity.Code))
+                    throw new InvalidOperationException($"Cannot update an entity {typeof(TEntity).Name} with a null code.");
 
                 // TODO: Maybe improve performance somehow because the entity is reloaded from database based on code..
                 var loadedEntity = await GetByCodeAsync(entity.Code, new List<string>(), cancellationToken);
@@ -139,6 +141,9 @@ namespace GenericWorkflowAPI.Services
 
                 foreach (var entity in entitiesList)
                 {
+                    if (string.IsNullOrWhiteSpace(entity.Code)) // Skip entities without code, to update at least the working entities
+                        continue;
+
                     // TODO: Maybe improve performance somehow because the entity is reloaded from database based on code..
                     var loadedEntity = await GetByCodeAsync(entity.Code, new List<string>(), cancellationToken);
 

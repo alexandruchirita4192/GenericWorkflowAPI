@@ -22,9 +22,9 @@ namespace GenericWorkflowAPI.Core.AutoMapper.Helpers
             _memoryCache = memoryCache;
         }
 
-        public List<ReflectionMappingInfo> GetCacheWithReflectionMappingInfo()
+        public List<ReflectionMappingInfo>? GetCacheWithReflectionMappingInfo()
         {
-            List<ReflectionMappingInfo> mappingInfos = null;
+            List<ReflectionMappingInfo>? mappingInfos = null;
             try
             {
                 if (!_memoryCache.TryGetValue($"{nameof(mappingInfos)}", out mappingInfos) || mappingInfos == null)

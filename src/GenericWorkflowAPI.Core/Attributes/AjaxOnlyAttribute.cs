@@ -9,11 +9,11 @@ namespace GenericWorkflowAPI.Core.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public class AjaxOnlyAttribute : ActionMethodSelectorAttribute
     {
-        public string HttpVerb { get; set; }
+        public string? HttpVerb { get; set; }
 
         public override bool IsValidForRequest(RouteContext routeContext, ActionDescriptor action)
         {
-            return routeContext.HttpContext.Request.IsAjax(HttpVerb);
+            return routeContext.HttpContext.Request.IsAjax(HttpVerb ?? string.Empty);
         }
     }
 }

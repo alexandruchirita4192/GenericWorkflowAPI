@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -11,9 +9,7 @@ namespace GenericWorkflowAPI.Core.Filters
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var queryAttribute = context.MethodInfo.GetCustomAttributes(true)
-                .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
-                .OfType<EnableQueryAttribute>().FirstOrDefault();
+            var queryAttribute = GetQueryAttributeFrom(context);
 
             var stringSchema = context.SchemaGenerator.GenerateSchema(typeof(string), context.SchemaRepository);
 
@@ -62,6 +58,19 @@ namespace GenericWorkflowAPI.Core.Filters
                     "$count",
                     "Request the count of the resources.");
             }
+        }
+
+        private static EnableQueryAttribute? GetQueryAttributeFrom(OperationFilterContext context)
+        {
+            var customAttributesArray = context.MethodInfo.GetCustomAttributes(true);
+
+            if (context.MethodInfo.DeclaringType != null)
+            {
+                customAttributesArray = customAttributesArray.Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true)).ToArray();
+            }
+
+            var queryAttribute = customAttributesArray.OfType<EnableQueryAttribute>().FirstOrDefault();
+            return queryAttribute;
         }
 
         private static void AddOperationParameters(
