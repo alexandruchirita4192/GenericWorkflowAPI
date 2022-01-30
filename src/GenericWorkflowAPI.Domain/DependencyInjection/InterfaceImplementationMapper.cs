@@ -9,6 +9,11 @@ namespace GenericWorkflowAPI.Domain
 
         public InterfaceImplementationMapper(Type _interface, Type _implementation)
         {
+            if (_interface == null)
+                throw new ArgumentNullException(nameof(_interface));
+            if (_implementation == null)
+                throw new ArgumentNullException(nameof(_implementation));
+
             Interface = _interface;
             Implementation = _implementation;
         }
@@ -25,18 +30,11 @@ namespace GenericWorkflowAPI.Domain
             return a.Interface != b.Interface || a.Implementation != b.Implementation;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
             var other = obj as InterfaceImplementationMapper;
+            if (other is null)
+                return false;
             return other == this;
         }
 

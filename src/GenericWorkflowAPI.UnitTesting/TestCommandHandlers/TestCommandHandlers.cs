@@ -28,10 +28,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNotNull(response.Payload);
             Assert.IsTrue((int)(response.Status ?? HttpStatusCode.OK) < 400); // 4xx-5xx are error statuses
 
-            foreach (var item in response.Payload)
-            {
-                Console.WriteLine(JsonConvert.SerializeObject(item));
-            }
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -81,7 +78,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNotNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.Created, response.Status, "HttpStatus was not Created.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -112,7 +109,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNotNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.Created, response.Status, "HttpStatus was not Created.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -143,7 +140,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -175,7 +172,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -197,7 +194,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
 
         [TestMethod]
@@ -220,7 +217,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Assert.IsNull(response.Payload);
             Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
     }
 }
