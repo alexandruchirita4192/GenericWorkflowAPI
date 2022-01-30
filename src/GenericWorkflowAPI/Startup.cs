@@ -302,8 +302,8 @@ namespace GenericWorkflowAPI
             Core.Extensions.ServicesExtensions.RegisterEncodingProvider();
 
             // Add MediatR Handlers based on controllers (and log which handlers fail because entities or dtos do not implement what they should)
-            var mediatorMappings = MediatorHelper.GetMappings(Log.Logger);
-            services.AddMediatRHandlersToServices(mediatorMappings, Log.Logger);
+            var servicePairs = MediatorHelper.GetServicePairs(Log.Logger);
+            services.AddMediatRHandlersToServices(servicePairs, Log.Logger);
 
             // Add workflow service
             services.AddSingleton<IWorkflowService, WorkflowService>();

@@ -101,22 +101,22 @@ namespace GenericWorkflowAPI.Extensions
 
 
         /// <summary>
-        /// Add MediatR handlers from <paramref name="mappings"/> to <paramref name="services"/> as singletons.
+        /// Add MediatR handlers from <paramref name="servicePairs"/> to <paramref name="services"/> as singletons.
         /// </summary>
-        public static IServiceCollection AddMediatRHandlersToServices(this IServiceCollection services, List<InterfaceImplementationMapper> mappings, ILogger logger)
+        public static IServiceCollection AddMediatRHandlersToServices(this IServiceCollection services, List<ServiceInterfaceImplementationPair> servicePairs, ILogger logger)
         {
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            if (mappings == null || mappings.Count == 0)
+            if (servicePairs == null || servicePairs.Count == 0)
             {
-                logger.Error("MediatR mappings null or empty");
+                logger.Error("MediatR service interface-implementation pairs null or empty");
                 return services;
             }
 
-            foreach (var mapping in mappings)
+            foreach (var service in servicePairs)
             {
-                services.AddService(mapping.Interface, mapping.Implementation, ServiceLifetime.Singleton, logger);
+                services.AddService(service.Interface, service.Implementation, ServiceLifetime.Singleton, logger);
             }
 
             return services;

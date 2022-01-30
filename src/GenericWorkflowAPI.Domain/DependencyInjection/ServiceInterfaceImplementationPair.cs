@@ -2,12 +2,16 @@
 
 namespace GenericWorkflowAPI.Domain
 {
-    public class InterfaceImplementationMapper
+    /// <summary>
+    /// Service <see cref="Interface"/>-<see cref="Implementation"/> pair.
+    /// </summary>
+    /// <remarks>Used for MediatR handler services.</remarks>
+    public class ServiceInterfaceImplementationPair
     {
         public Type Interface { get; private set; }
         public Type Implementation { get; private set; }
 
-        public InterfaceImplementationMapper(Type _interface, Type _implementation)
+        public ServiceInterfaceImplementationPair(Type _interface, Type _implementation)
         {
             if (_interface == null)
                 throw new ArgumentNullException(nameof(_interface));
@@ -20,19 +24,19 @@ namespace GenericWorkflowAPI.Domain
 
         #region Comparison operators
 
-        public static bool operator ==(InterfaceImplementationMapper a, InterfaceImplementationMapper b)
+        public static bool operator ==(ServiceInterfaceImplementationPair a, ServiceInterfaceImplementationPair b)
         {
             return a.Interface == b.Interface && a.Implementation == b.Implementation;
         }
 
-        public static bool operator !=(InterfaceImplementationMapper a, InterfaceImplementationMapper b)
+        public static bool operator !=(ServiceInterfaceImplementationPair a, ServiceInterfaceImplementationPair b)
         {
             return a.Interface != b.Interface || a.Implementation != b.Implementation;
         }
 
         public override bool Equals(object? obj)
         {
-            var other = obj as InterfaceImplementationMapper;
+            var other = obj as ServiceInterfaceImplementationPair;
             if (other is null)
                 return false;
             return other == this;

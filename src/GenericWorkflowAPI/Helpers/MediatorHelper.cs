@@ -19,9 +19,9 @@ namespace GenericWorkflowAPI.Helpers
         /// <summary>
         /// Gets MediatR handlers based on controllers with their generic arguments
         /// </summary>
-        public static List<InterfaceImplementationMapper> GetMappings(ILogger logger)
+        public static List<ServiceInterfaceImplementationPair> GetServicePairs(ILogger logger)
         {
-            var mappings = new List<InterfaceImplementationMapper>();
+            var mappings = new List<ServiceInterfaceImplementationPair>();
 
             var types = GetControllerTypes();
             if (types == null || types.Count == 0)
@@ -40,7 +40,7 @@ namespace GenericWorkflowAPI.Helpers
                 if (genericCrudControllerType.IsAssignableFrom(type))
                 {
                     // Example handling input GenericApiResponse<string>:
-                    var genericApiResponseHandlerStringMapper = new InterfaceImplementationMapper(
+                    var genericApiResponseHandlerStringMapper = new ServiceInterfaceImplementationPair(
                             typeof(IRequestHandler<GenericApiResponse<string>, ActionResult>),
                             typeof(GenericApiResponseHandler<string>)
                         );
@@ -204,7 +204,7 @@ namespace GenericWorkflowAPI.Helpers
         }
 
         /// <summary>
-        /// The main function creating interface-implementation mapping and adding them to the <paramref name="mappings"/>
+        /// The main function creating interface-implementation mapping and adding them to the <paramref name="servicePairs"/>
         /// /// </summary>
         private static void MediatorHelperSetupTypeWrapInTryCatch(
             // (entityType, dtoType) => typeof(...).MakeGenericType(...)
@@ -219,7 +219,7 @@ namespace GenericWorkflowAPI.Helpers
             // (requestType, responseType, entityType, dtoType) => typeof(...).MakeGenericType(...)
             Func<Type, Type, Type, Type, Type> implementedTypeFunc,
 
-            List<InterfaceImplementationMapper> mappings,
+            List<ServiceInterfaceImplementationPair> servicePairs,
             Type entityType,
             Type dtoType,
             ILogger logger)
@@ -236,11 +236,11 @@ namespace GenericWorkflowAPI.Helpers
                 interfaceType = interfaceTypeFunc.Invoke(requestType, responseType, entityType, dtoType);
                 implementedType = implementedTypeFunc.Invoke(requestType, responseType, entityType, dtoType);
 
-                var genericApiResponseHandlerMapper = new InterfaceImplementationMapper(interfaceType, implementedType);
+                var genericApiResponseHandlerMapper = new ServiceInterfaceImplementationPair(interfaceType, implementedType);
                 if (!interfaceType.IsAssignableFrom(implementedType))
                     throw new InvalidOperationException($"Implementation {implementedType} doesn't implement the interface {interfaceType}");
-                if (!mappings.Contains(genericApiResponseHandlerMapper))
-                    mappings.Add(genericApiResponseHandlerMapper);
+                if (!servicePairs.Contains(genericApiResponseHandlerMapper))
+                    servicePairs.Add(genericApiResponseHandlerMapper);
             }
             catch (Exception ex)
             {
@@ -251,7 +251,7 @@ namespace GenericWorkflowAPI.Helpers
                     responseType?.FullName,
                     interfaceType?.FullName,
                     implementedType?.FullName,
-                    JsonConvert.SerializeObject(mappings));
+                    JsonConvert.SerializeObject(servicePairs));
             }
         }
     }
