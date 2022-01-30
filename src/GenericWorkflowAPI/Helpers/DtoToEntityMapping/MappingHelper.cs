@@ -24,7 +24,7 @@ namespace GenericWorkflowAPI.AutoMapper
         private readonly IReflectionMappingInfoProvider<TEntity, TDto> _reflectionMappingInfoProvider;
         private readonly IServiceProvider _serviceProvider;
 
-        private readonly List<ReflectionMappingInfo> MappingInfos;
+        private readonly List<ReflectionMappingInfo>? MappingInfos;
 
         public MappingHelper(ILogger logger, IMapper mapper, IReflectionMappingInfoProvider<TEntity, TDto> reflectionMappingInfoProvider, IServiceProvider serviceProvider)
         {
@@ -40,6 +40,9 @@ namespace GenericWorkflowAPI.AutoMapper
         {
             // This mapping might not do anything at all actually for some TEntity
             var dto = _mapper.Map<TEntity, TDto>(entity);
+
+            if (MappingInfos == null)
+                return dto;
 
             // Parse all reflection property infos
             foreach (var reflectionMappedInfo in MappingInfos)
@@ -66,11 +69,9 @@ namespace GenericWorkflowAPI.AutoMapper
                     continue;
                 }
 
-                var classPropertyValue = reflectionMappedInfo.EntityPropertyInfoClass.GetValue(entity, null) as ICodeEntity;
-
                 // If the [classPropertyValue] doesn't have a "[classPropertyValue].Code" property (defined by ICodeEntity)
                 // then setting the "Code" property for Dto won't work
-                if (classPropertyValue == null)
+                if (reflectionMappedInfo.EntityPropertyInfoClass.GetValue(entity, null) is not ICodeEntity classPropertyValue)
                 {
                     _logger.Warning("Value of property {classPropertyName} is null. Skip setting {codePropertyName} in {dtoTypeName}.",
                         reflectionMappedInfo.EntityPropertyInfoClass.Name,
@@ -103,6 +104,9 @@ namespace GenericWorkflowAPI.AutoMapper
 
             // This mapping might not do anything at all actually for some TEntity
             var entity = _mapper.Map<TDto, TEntity>(dto);
+
+            if (MappingInfos == null)
+                return entity;
 
             // TEntity can only be filled by a proper load from database if needed (by code if the TDto has one)
 
@@ -151,8 +155,7 @@ namespace GenericWorkflowAPI.AutoMapper
                     }
 
                     var codeRepositoryType = typeof(GenericCodeRepository<,>).MakeGenericType(entityTypeFromProperty, applicationDbContextType);
-                    var codeRepositoryInstance = ActivatorUtilities.CreateInstance(_serviceProvider, codeRepositoryType) as IGenericCodeRepository;
-                    if (codeRepositoryInstance == null)
+                    if (ActivatorUtilities.CreateInstance(_serviceProvider, codeRepositoryType) is not IGenericCodeRepository codeRepositoryInstance)
                     {
                         _logger.Warning("{genericCodeReposistoryInterfaceName} instance of type {codeRepositoryTypeName} is null. Skip setting {idPropertyName} in {entityTypeName}.",
                             nameof(IGenericCodeRepository),

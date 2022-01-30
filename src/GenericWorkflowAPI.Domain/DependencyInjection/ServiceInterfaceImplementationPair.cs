@@ -13,13 +13,8 @@ namespace GenericWorkflowAPI.Domain
 
         public ServiceInterfaceImplementationPair(Type _interface, Type _implementation)
         {
-            if (_interface == null)
-                throw new ArgumentNullException(nameof(_interface));
-            if (_implementation == null)
-                throw new ArgumentNullException(nameof(_implementation));
-
-            Interface = _interface;
-            Implementation = _implementation;
+            Interface = _interface ?? throw new ArgumentNullException(nameof(_interface));
+            Implementation = _implementation ?? throw new ArgumentNullException(nameof(_implementation));
         }
 
         #region Comparison operators
@@ -36,8 +31,7 @@ namespace GenericWorkflowAPI.Domain
 
         public override bool Equals(object? obj)
         {
-            var other = obj as ServiceInterfaceImplementationPair;
-            if (other is null)
+            if (obj is not ServiceInterfaceImplementationPair other)
                 return false;
             return other == this;
         }

@@ -135,7 +135,7 @@ namespace GenericWorkflowAPI.Services
                 if (cancellationToken.IsCancellationRequested)
                     return;
                 if (entitiesList == null || entitiesList.Count == 0)
-                    throw new ArgumentException(nameof(entitiesList), $"Cannot update a null entity list or with count zero.");
+                    throw new ArgumentException($"Cannot update a null entity list or with count zero.", nameof(entitiesList));
                 if (user == null)
                     throw new ArgumentNullException(nameof(user), $"Cannot update an entity list with a null user.");
 
@@ -177,7 +177,7 @@ namespace GenericWorkflowAPI.Services
                 if (cancellationToken.IsCancellationRequested)
                     return;
                 if (string.IsNullOrWhiteSpace(code))
-                    throw new ArgumentException(nameof(code), $"Cannot delete an entity of type {typeof(TEntity).Name} with a null or whitespace code.");
+                    throw new ArgumentException($"Cannot delete an entity of type {typeof(TEntity).Name} with a null or whitespace code.", nameof(code));
                 if (user == null)
                     throw new ArgumentNullException(nameof(user), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null user.");
 
@@ -208,7 +208,7 @@ namespace GenericWorkflowAPI.Services
                 if (cancellationToken.IsCancellationRequested)
                     return;
                 if (codesList == null || codesList.Count == 0)
-                    throw new ArgumentException(nameof(codesList), $"Cannot delete an entity list of type {typeof(TEntity).Name} with a null or empty code list.");
+                    throw new ArgumentException($"Cannot delete an entity list of type {typeof(TEntity).Name} with a null or empty code list.", nameof(codesList));
                 if (user == null)
                     throw new ArgumentNullException(nameof(user), $"Cannot delete an entity of type {typeof(TEntity).Name} using a null user.");
 

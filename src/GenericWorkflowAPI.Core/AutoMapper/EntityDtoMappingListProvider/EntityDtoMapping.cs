@@ -15,10 +15,7 @@ namespace GenericWorkflowAPI.Core.AutoMapper
         /// </summary>
         public EntityDtoMapping(Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException(nameof(assembly));
-
-            Assembly = assembly;
+            Assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
             Mapping = new Dictionary<Type, Type>();
         }
 
@@ -31,15 +28,12 @@ namespace GenericWorkflowAPI.Core.AutoMapper
                 throw new ArgumentNullException(nameof(cache));
             if (assembly == null)
                 throw new ArgumentNullException(nameof(assembly));
-            if (cache.Count == 0)
-                throw new ArgumentException(nameof(cache), $"Empty cache passed to {nameof(EntityDtoMapping)}");
+            if (cache.IsEmpty)
+                throw new ArgumentException($"Empty cache passed to {nameof(EntityDtoMapping)}", nameof(cache));
             if (!cache.ContainsKey(assembly))
-                throw new ArgumentException(nameof(cache), $"Assembly {assembly.FullName} missing from cache argument passed to {nameof(EntityDtoMapping)}");
-
-            Dictionary<Type, Type>? mapping = null;
-            
-            if (!cache.TryGetValue(assembly, out mapping))
-                throw new ArgumentException(nameof(cache), $"Couldn't get value for assembly {assembly.FullName} out of cache argument passed to {nameof(EntityDtoMapping)}");
+                throw new ArgumentException($"Assembly {assembly.FullName} missing from cache argument passed to {nameof(EntityDtoMapping)}", nameof(cache));
+            if (!cache.TryGetValue(assembly, out Dictionary<Type, Type>? mapping))
+                throw new ArgumentException($"Couldn't get value for assembly {assembly.FullName} out of cache argument passed to {nameof(EntityDtoMapping)}", nameof(cache));
 
             Assembly = assembly;
             Mapping = mapping;

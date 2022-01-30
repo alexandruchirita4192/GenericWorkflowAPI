@@ -41,43 +41,18 @@ namespace GenericWorkflowAPI.Services
             IGenericCodeRepository<Domain.IdentityRole> identityRoleRepository,
             UserManager<Domain.IdentityUser> userManager)
         {
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
-            if (workflowRepository == null)
-                throw new ArgumentNullException(nameof(workflowRepository));
-            if (workflowInputCodeTypeRepository == null)
-                throw new ArgumentNullException(nameof(workflowInputCodeTypeRepository));
-            if (workflowStateRepository == null)
-                throw new ArgumentNullException(nameof(workflowStateRepository));
-            if (workflowStateInputCodeTypeRepository == null)
-                throw new ArgumentNullException(nameof(workflowStateInputCodeTypeRepository));
-            if (workflowTransitionRepository == null)
-                throw new ArgumentNullException(nameof(workflowTransitionRepository));
-            if (workflowInstanceRepository == null)
-                throw new ArgumentNullException(nameof(workflowInstanceRepository));
-            if (workflowInstanceInputCodeRepository == null)
-                throw new ArgumentNullException(nameof(workflowInstanceInputCodeRepository));
-            if (workflowInstanceHistoryRepository == null)
-                throw new ArgumentNullException(nameof(workflowInstanceHistoryRepository));
-            if (workflowInstanceHistoryInputCodeRepository == null)
-                throw new ArgumentNullException(nameof(workflowInstanceHistoryInputCodeRepository));
-            if (identityRoleRepository == null)
-                throw new ArgumentNullException(nameof(identityRoleRepository));
-            if (userManager == null)
-                throw new ArgumentNullException(nameof(userManager));
-
-            _logger = logger;
-            _workflowRepository = workflowRepository;
-            _workflowInputCodeTypeRepository = workflowInputCodeTypeRepository;
-            _workflowStateRepository = workflowStateRepository;
-            _workflowStateInputCodeTypeRepository = workflowStateInputCodeTypeRepository;
-            _workflowTransitionRepository = workflowTransitionRepository;
-            _workflowInstanceRepository = workflowInstanceRepository;
-            _workflowInstanceInputCodeRepository = workflowInstanceInputCodeRepository;
-            _workflowInstanceHistoryRepository = workflowInstanceHistoryRepository;
-            _workflowInstanceHistoryInputCodeRepository = workflowInstanceHistoryInputCodeRepository;
-            _identityRoleRepository = identityRoleRepository;
-            _userManager = userManager;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _workflowRepository = workflowRepository ?? throw new ArgumentNullException(nameof(workflowRepository));
+            _workflowInputCodeTypeRepository = workflowInputCodeTypeRepository ?? throw new ArgumentNullException(nameof(workflowInputCodeTypeRepository));
+            _workflowStateRepository = workflowStateRepository ?? throw new ArgumentNullException(nameof(workflowStateRepository));
+            _workflowStateInputCodeTypeRepository = workflowStateInputCodeTypeRepository ?? throw new ArgumentNullException(nameof(workflowStateInputCodeTypeRepository));
+            _workflowTransitionRepository = workflowTransitionRepository ?? throw new ArgumentNullException(nameof(workflowTransitionRepository));
+            _workflowInstanceRepository = workflowInstanceRepository ?? throw new ArgumentNullException(nameof(workflowInstanceRepository));
+            _workflowInstanceInputCodeRepository = workflowInstanceInputCodeRepository ?? throw new ArgumentNullException(nameof(workflowInstanceInputCodeRepository));
+            _workflowInstanceHistoryRepository = workflowInstanceHistoryRepository ?? throw new ArgumentNullException(nameof(workflowInstanceHistoryRepository));
+            _workflowInstanceHistoryInputCodeRepository = workflowInstanceHistoryInputCodeRepository ?? throw new ArgumentNullException(nameof(workflowInstanceHistoryInputCodeRepository));
+            _identityRoleRepository = identityRoleRepository ?? throw new ArgumentNullException(nameof(identityRoleRepository));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         public async Task Run(ExecuteWorkflowRequest executeWorkflowRequest, CancellationToken cancellationToken)

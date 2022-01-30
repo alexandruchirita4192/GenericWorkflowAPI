@@ -25,7 +25,7 @@ namespace GenericWorkflowAPI.IdentityServer4.Extensions
                 return false;
             }
             
-            return request.Headers != null ? string.Compare(request.Headers["X-Requested-With"], "XMLHttpRequest", true) == 0 : false;
+            return request.Headers != null && string.Compare(request.Headers["X-Requested-With"], "XMLHttpRequest", true) == 0;
         }
     }
 }

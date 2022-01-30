@@ -214,7 +214,7 @@ namespace GenericWorkflowAPI
             });
 
             // Run embedded resource SQL files
-            services.RunEmbeddedResourcesInCurrentAssembly(connectionString);
+            SeedDataExtension.RunEmbeddedResourcesInCurrentAssembly(connectionString);
 
             // Generate EdmModel containing DTOs because those are exposed by API (DTOs are derived from IBaseDto)
             var edmModel = EdmModelHelper.GetEdmModel();
