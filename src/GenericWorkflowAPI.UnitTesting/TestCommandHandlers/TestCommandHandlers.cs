@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace GenericWorkflowAPI.UnitTesting
 {
@@ -23,12 +22,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var response = await GenericGetListCommandHandlerExecute<Workflow, WorkflowDto>(includePathList, false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNotNull(response.Payload);
-            Assert.IsTrue((int)(response.Status ?? HttpStatusCode.OK) < 400); // 4xx-5xx are error statuses
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -42,12 +36,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var response = await GenericGetCommandHandlerExecute<Workflow, WorkflowDto>(includePathList, code, false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNotNull(response.Payload);
-            Assert.IsTrue((int)(response.Status ?? HttpStatusCode.OK) < 400); // 4xx-5xx are error statuses
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -73,12 +62,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNotNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.Created, response.Status, "HttpStatus was not Created.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.Created);
         }
 
         [TestMethod]
@@ -104,12 +88,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNotNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.Created, response.Status, "HttpStatus was not Created.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.Created);
         }
 
         [TestMethod]
@@ -135,12 +114,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -167,12 +141,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -189,12 +158,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 false);
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
 
         [TestMethod]
@@ -212,12 +176,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 );
 
             // 3. Assert:
-            Assert.IsNotNull(response);
-            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNull(response.Payload);
-            Assert.AreEqual(HttpStatusCode.OK, response.Status, "HttpStatus was not OK.");
-
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            AssertGenericApiResponse(response, HttpStatusCode.OK);
         }
     }
 }

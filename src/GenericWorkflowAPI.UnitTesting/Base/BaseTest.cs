@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace GenericWorkflowAPI.UnitTesting
@@ -111,6 +115,20 @@ namespace GenericWorkflowAPI.UnitTesting
                 entityService = GetEntityService<TEntity>();
 
             return new GenericCodeRepository<TEntity, ApplicationDbContext>(dbContext, logger, entityService);
+        }
+
+        public void AssertGenericApiResponse<T>(GenericApiResponse<T> response, HttpStatusCode? httpStatusCode = null)
+            where T : class
+        {
+            Assert.IsNotNull(response);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
+            Assert.IsNotNull(response.Payload);
+            Assert.IsTrue((int)(response.Status ?? HttpStatusCode.OK) < 400); // 4xx-5xx are error statuses
+
+            if (httpStatusCode != null)
+                Assert.AreEqual(httpStatusCode, response.Status, $"HttpStatus was not {httpStatusCode}.");
+
+            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
     }
 }
