@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.AutoMapper;
@@ -323,6 +324,28 @@ namespace GenericWorkflowAPI.UnitTesting
             var response = await handler.Handle(request, cancellationToken);
 
             return response;
+        }
+
+        public async Task GenericCreateCommandHandler_InMemory_WithSelfTest<TEntity, TDto>(
+            TDto dto,
+            List<Type> entityServiceExtraTypes,
+            ApplicationDbContext dbContext)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TDto : class, IBaseDto, ICodeDto, new()
+        {
+            // 1. Arrange:
+            var user = GetDefaultUser();
+
+            // 2. Act:
+            var response = await GenericCreateCommandHandlerExecute<TEntity, TDto>(
+                dto,
+                user,
+                entityServiceExtraTypes,
+               true,
+                dbContext);
+
+            // 3. Assert:
+            AssertGenericApiResponse(response, HttpStatusCode.Created);
         }
 
         private void FillEntityServiceForExtraTypes(ServiceCollection serviceCollection, List<Type> entityServiceExtraTypes)

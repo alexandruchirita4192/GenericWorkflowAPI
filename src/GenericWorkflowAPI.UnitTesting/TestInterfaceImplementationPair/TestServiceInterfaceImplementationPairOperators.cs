@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericWorkflowAPI.UnitTesting.TestInterfaceImplementationMapper
 {
     [TestClass]
-    public class TestInterfaceImplementationPairOperators
+    public class TestServiceInterfaceImplementationPairOperators
     {
         [TestMethod]
         public void Test_ServiceInterfaceImplementationPair_Equals_EqualObjects()

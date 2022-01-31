@@ -32,22 +32,24 @@ namespace GenericWorkflowAPI.UnitTesting
             return configuration;
         }
 
-        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration, bool? isInMemory = null)
+        public ApplicationDbContext GetSqlServerDbContext(IConfiguration? configuration = null, bool? isInMemory = null)
         {
-            if (configuration == null && !(isInMemory ?? false))
-                throw new ArgumentNullException(nameof(configuration));
-
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            // Testing requires errors detailed and filled with sensitive data
+            // Testing requires detailed errors and filled with sensitive data
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.EnableSensitiveDataLogging();
 
             if (isInMemory ?? false)
                 optionsBuilder.UseInMemoryDatabase("db");
             else
+            {
+                if (configuration == null)
+                    configuration = GetConfiguration();
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+
                 optionsBuilder.UseSqlServer(connectionString);
+            }
 
             var dbContext = new ApplicationDbContext(optionsBuilder.Options);
 
@@ -117,18 +119,24 @@ namespace GenericWorkflowAPI.UnitTesting
             return new GenericCodeRepository<TEntity, ApplicationDbContext>(dbContext, logger, entityService);
         }
 
-        public void AssertGenericApiResponse<T>(GenericApiResponse<T> response, HttpStatusCode? httpStatusCode = null)
+        public void AssertGenericApiResponse<T>(GenericApiResponse<T> response, HttpStatusCode? httpStatusCode = null, bool isPayloadNotNull = true)
             where T : class
         {
             Assert.IsNotNull(response);
             Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
-            Assert.IsNotNull(response.Payload);
+            if (isPayloadNotNull)
+                Assert.IsNotNull(response.Payload);
+            else
+                Assert.IsNull(response.Payload);
             Assert.IsTrue((int)(response.Status ?? HttpStatusCode.OK) < 400); // 4xx-5xx are error statuses
 
             if (httpStatusCode != null)
                 Assert.AreEqual(httpStatusCode, response.Status, $"HttpStatus was not {httpStatusCode}.");
 
-            Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+            if (response.Payload is string)
+                Console.WriteLine(response.Payload);
+            else
+                Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
         }
     }
 }
