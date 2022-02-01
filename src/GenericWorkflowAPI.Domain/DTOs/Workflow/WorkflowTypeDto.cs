@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GenericWorkflowAPI.Domain.DTOs.Extensions;
 using Microsoft.OData.ModelBuilder;
 
 namespace GenericWorkflowAPI.Domain.DTOs
@@ -10,6 +11,19 @@ namespace GenericWorkflowAPI.Domain.DTOs
     [OrderBy(nameof(Code), nameof(Name))]
     public class WorkflowTypeDto : IDescriptibleDto
     {
+        #region Constructors
+
+        public WorkflowTypeDto()
+        {
+        }
+
+        public WorkflowTypeDto(long? ticks, string? suffix = null)
+        {
+            this.FillDto(ticks, suffix);
+        }
+
+        #endregion Constructors
+
         [Required]
         public string? Code { get; set; }
 

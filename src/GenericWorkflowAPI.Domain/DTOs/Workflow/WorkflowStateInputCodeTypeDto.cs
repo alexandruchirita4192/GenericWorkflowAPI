@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GenericWorkflowAPI.Domain.DTOs.Extensions;
 using Microsoft.OData.ModelBuilder;
 using Newtonsoft.Json;
 
@@ -11,6 +12,19 @@ namespace GenericWorkflowAPI.Domain.DTOs
     [OrderBy(nameof(Code), nameof(StateCode), nameof(InputCodeTypeCode))]
     public class WorkflowStateInputCodeTypeDto : IWorkflowStateDto, ICodeDto
     {
+        #region Constructors
+
+        public WorkflowStateInputCodeTypeDto()
+        {
+        }
+
+        public WorkflowStateInputCodeTypeDto(long? ticks, string? suffix = null)
+        {
+            this.FillDto(ticks, suffix);
+        }
+
+        #endregion Constructors
+
         [Required]
         public string? Code { get; set; }
 

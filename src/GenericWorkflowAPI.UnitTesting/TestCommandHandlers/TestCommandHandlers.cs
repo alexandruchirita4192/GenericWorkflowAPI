@@ -18,22 +18,13 @@ namespace GenericWorkflowAPI.UnitTesting
             // 1. Arrange:
             var includePathList = new List<string> { nameof(Workflow.Type) };
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowDto = new WorkflowDto
-            {
-                Code = $"Code{uniqueId}Workflow",
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare database with a workflow type item and a workflow item
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
@@ -52,23 +43,15 @@ namespace GenericWorkflowAPI.UnitTesting
             // 1. Arrange:
             var includePathList = new List<string> { nameof(Workflow.Type) };
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowCode = $"Code{uniqueId}Workflow";
-            var workflowDto = new WorkflowDto
-            {
-                Code = workflowCode,
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+            var workflowCode = workflowDto.Code;
+            Assert.IsNotNull(workflowCode);
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare database with a workflow type item and a workflow item
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
@@ -86,23 +69,14 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowDto = new WorkflowDto
-            {
-                Code = $"Code{uniqueId}Workflow",
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+
             var user = GetDefaultUser();
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the databse with a workflow type item (it's code is required)
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
@@ -124,23 +98,14 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowDto = new WorkflowDto
-            {
-                Code = $"Code{uniqueId}Workflow",
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+
             var user = GetDefaultUser();
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the databse with a workflow type item (it's code is required)
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
@@ -163,37 +128,24 @@ namespace GenericWorkflowAPI.UnitTesting
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
             var user = GetDefaultUser();
-            var workflowTypeCodeOld = $"Code{uniqueId}WorkflowTypeOld";
-            var workflowTypeCodeNew = $"Code{uniqueId}WorkflowTypeNew";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCodeOld,
-                Name = $"Name{uniqueId}WorkflowTypeOld",
-                Description = $"Description{uniqueId}WorkflowTypeOld"
-            };
-            var workflowTypeDto2 = new WorkflowTypeDto
-            {
-                Code = workflowTypeCodeNew,
-                Name = $"Name{uniqueId}WorkflowTypeNew",
-                Description = $"Description{uniqueId}WorkflowTypeNew"
-            };
-            var workflowCode = $"Code{uniqueId}Workflow";
-            var workflowDto = new WorkflowDto
-            {
-                Code = workflowCode,
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCodeOld
-            };
+
+            var workflowTypeDtoOld = new WorkflowTypeDto(uniqueId, "Old");
+            var workflowTypeCodeOld = workflowTypeDtoOld.Code;
+            var workflowTypeDtoNew = new WorkflowTypeDto(uniqueId, "New");
+            var workflowTypeCodeNew = workflowTypeDtoNew.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCodeOld };
+            var workflowCode = workflowDto.Code;
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
             var includePathList_Workflow = new List<string> { nameof(Workflow.Type) };
 
             // Prepare database with a workflow type item and a workflow item
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto2, new List<Type>(), applicationDbContext);
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDtoOld, new List<Type>(), applicationDbContext);
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDtoNew, new List<Type>(), applicationDbContext);
             await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(workflowDto, workflow_entityServiceExtraTypes, applicationDbContext);
 
+            // Set the workflow entity item data as it would be updated
             workflowDto.Name += "Updated";
             workflowDto.Description += "Updated";
             workflowDto.TypeCode = workflowTypeCodeNew;
@@ -220,37 +172,24 @@ namespace GenericWorkflowAPI.UnitTesting
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
             var user = GetDefaultUser();
-            var workflowTypeCodeOld = $"Code{uniqueId}WorkflowTypeOld";
-            var workflowTypeCodeNew = $"Code{uniqueId}WorkflowTypeNew";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCodeOld,
-                Name = $"Name{uniqueId}WorkflowTypeOld",
-                Description = $"Description{uniqueId}WorkflowTypeOld"
-            };
-            var workflowTypeDto2 = new WorkflowTypeDto
-            {
-                Code = workflowTypeCodeNew,
-                Name = $"Name{uniqueId}WorkflowTypeNew",
-                Description = $"Description{uniqueId}WorkflowTypeNew"
-            };
-            var workflowCode = $"Code{uniqueId}Workflow";
-            var workflowDto = new WorkflowDto
-            {
-                Code = workflowCode,
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCodeOld
-            };
+
+            var workflowTypeDtoOld = new WorkflowTypeDto(uniqueId, "Old");
+            var workflowTypeCodeOld = workflowTypeDtoOld.Code;
+            var workflowTypeDtoNew = new WorkflowTypeDto(uniqueId, "New");
+            var workflowTypeCodeNew = workflowTypeDtoNew.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCodeOld };
+            var workflowCode = workflowDto.Code;
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
             var includePathList_Workflow = new List<string> { nameof(Workflow.Type) };
 
             // Prepare database with a workflow type item and a workflow item
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto, new List<Type>(), applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDto2, new List<Type>(), applicationDbContext);
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDtoOld, new List<Type>(), applicationDbContext);
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(workflowTypeDtoNew, new List<Type>(), applicationDbContext);
             await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(workflowDto, workflow_entityServiceExtraTypes, applicationDbContext);
 
+            // Set the workflow entity item data as it would be updated
             workflowDto.Name += "Updated";
             workflowDto.Description += "Updated";
             workflowDto.TypeCode = workflowTypeCodeNew;
@@ -276,23 +215,15 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowCode = $"Code{uniqueId}Workflow";
-            var workflowDto = new WorkflowDto
-            {
-                Code = workflowCode,
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+            var workflowCode = workflowDto.Code;
+            Assert.IsNotNull(workflowCode);
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
-            var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
+            var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
             var user = GetDefaultUser();
 
             // Prepare database with a workflow type item and a workflow item
@@ -315,24 +246,17 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             // 1. Arrange:
             var uniqueId = DateTime.Now.Ticks;
-            var workflowTypeCode = $"Code{uniqueId}WorkflowType";
-            var workflowTypeDto = new WorkflowTypeDto
-            {
-                Code = workflowTypeCode,
-                Name = $"Name{uniqueId}WorkflowType",
-                Description = $"Description{uniqueId}WorkflowType"
-            };
-            var workflowCode = $"Code{uniqueId}Workflow";
-            var workflowDto = new WorkflowDto
-            {
-                Code = workflowCode,
-                Name = $"Name{uniqueId}Workflow",
-                Description = $"Description{uniqueId}Workflow",
-                TypeCode = workflowTypeCode
-            };
+
+            var workflowTypeDto = new WorkflowTypeDto(uniqueId);
+            var workflowTypeCode = workflowTypeDto.Code;
+            var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeCode };
+            var workflowCode = workflowDto.Code;
+
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
             var applicationDbContext = GetSqlServerDbContext(isInMemory: true);
             var user = GetDefaultUser();
+
+            Assert.IsNotNull(workflowCode);
             var codes = new Collection<string> { workflowCode };
 
             // Prepare database with a workflow type item and a workflow item

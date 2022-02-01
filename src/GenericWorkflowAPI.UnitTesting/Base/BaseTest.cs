@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using AutoMapper;
 using GenericWorkflowAPI.AutoMapper;
@@ -32,8 +33,11 @@ namespace GenericWorkflowAPI.UnitTesting
             return configuration;
         }
 
-        public ApplicationDbContext GetSqlServerDbContext(IConfiguration? configuration = null, bool? isInMemory = null)
+        public ApplicationDbContext GetSqlServerDbContext(IConfiguration? configuration = null, bool? isInMemory = null, long? ticks = null)
         {
+            if (ticks == null)
+                ticks = DateTime.Now.Ticks;
+
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
             // Testing requires detailed errors and filled with sensitive data
@@ -41,7 +45,7 @@ namespace GenericWorkflowAPI.UnitTesting
             optionsBuilder.EnableSensitiveDataLogging();
 
             if (isInMemory ?? false)
-                optionsBuilder.UseInMemoryDatabase("db");
+                optionsBuilder.UseInMemoryDatabase($"db{ticks}");
             else
             {
                 if (configuration == null)
@@ -97,6 +101,26 @@ namespace GenericWorkflowAPI.UnitTesting
             where TEntity : class, IBaseEntity, ICodeEntity, new()
         {
             return new EntityService<TEntity>();
+        }
+
+        public GenericRepository<TEntity, ApplicationDbContext> GetGenericRepository<TEntity>(
+            bool? isInMemoryDbContext = null,
+            IConfiguration? configuration = null,
+            Serilog.Core.Logger? logger = null,
+            ApplicationDbContext? dbContext = null,
+            EntityService<TEntity>? entityService = null)
+            where TEntity : class, IBaseEntity, ICodeEntity, new()
+        {
+            if (configuration == null)
+                configuration = GetConfiguration();
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(configuration, isInMemoryDbContext);
+            if (logger == null)
+                logger = GetLogger();
+            if (entityService == null)
+                entityService = GetEntityService<TEntity>();
+
+            return new GenericRepository<TEntity, ApplicationDbContext>(dbContext, logger, entityService);
         }
 
         public GenericCodeRepository<TEntity, ApplicationDbContext> GetGenericCodeRepository<TEntity>(

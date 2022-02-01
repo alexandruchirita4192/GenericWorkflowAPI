@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace GenericWorkflowAPI.Domain.Entities
@@ -11,6 +12,19 @@ namespace GenericWorkflowAPI.Domain.Entities
     [Index(nameof(Code), IsUnique = true)]
     public class Workflow : BaseEntity, IDescriptibleEntity
     {
+        #region Constructors
+
+        public Workflow()
+        {
+        }
+
+        public Workflow(long? ticks, string? suffix = null)
+        {
+            this.FillEntity(ticks, suffix);
+        }
+
+        #endregion Constructors
+
         [Required]
         [StringLength(100)]
         public string? Code { get; set; }

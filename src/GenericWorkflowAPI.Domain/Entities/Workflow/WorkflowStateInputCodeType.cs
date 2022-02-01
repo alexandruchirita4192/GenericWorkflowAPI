@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 
 namespace GenericWorkflowAPI.Domain.Entities
 {
@@ -9,6 +10,19 @@ namespace GenericWorkflowAPI.Domain.Entities
     /// </summary>
     public class WorkflowStateInputCodeType : BaseEntity, IWorkflowStateEntity, ICodeEntity
     {
+        #region Constructors
+
+        public WorkflowStateInputCodeType()
+        {
+        }
+
+        public WorkflowStateInputCodeType(long? ticks, string? suffix = null)
+        {
+            this.FillEntity(ticks, suffix);
+        }
+
+        #endregion Constructors
+
         [Required]
         [StringLength(100)]
         public string? Code { get; set; }

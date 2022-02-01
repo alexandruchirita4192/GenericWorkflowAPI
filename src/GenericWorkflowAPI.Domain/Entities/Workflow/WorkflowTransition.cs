@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 
 namespace GenericWorkflowAPI.Domain.Entities
 {
@@ -8,6 +9,19 @@ namespace GenericWorkflowAPI.Domain.Entities
     /// </summary>
     public class WorkflowTransition : BaseEntity, IWorkflowEntity, ICodeEntity
     {
+        #region Constructors
+
+        public WorkflowTransition()
+        {
+        }
+
+        public WorkflowTransition(long? ticks, string? suffix = null)
+        {
+            this.FillEntity(ticks, suffix);
+        }
+
+        #endregion Constructors
+
         [Required]
         [StringLength(100)]
         public string? Code { get; set; }

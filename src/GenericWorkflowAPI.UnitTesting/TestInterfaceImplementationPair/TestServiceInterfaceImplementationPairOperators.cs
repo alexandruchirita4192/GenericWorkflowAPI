@@ -2,7 +2,7 @@
 using GenericWorkflowAPI.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GenericWorkflowAPI.UnitTesting.TestInterfaceImplementationMapper
+namespace GenericWorkflowAPI.UnitTesting
 {
     [TestClass]
     public class TestServiceInterfaceImplementationPairOperators

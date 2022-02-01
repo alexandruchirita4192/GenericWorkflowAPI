@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Core.Extensions;
-using GenericWorkflowAPI.Database;
-using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
-using GenericWorkflowAPI.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericWorkflowAPI.UnitTesting
@@ -15,11 +12,31 @@ namespace GenericWorkflowAPI.UnitTesting
     public class TestGenericRepository : BaseTest
     {
         [TestMethod]
+        public async Task TestGetAllWithData()
+        {
+            ServicesExtensions.RegisterEncodingProvider();
+            var cancellationToken = new CancellationToken();
+            var repository = GetGenericRepository<Workflow>(isInMemoryDbContext: true);
+
+            var user = GetDefaultUser();
+            var uniqueId = DateTime.Now.Ticks;
+            var entity = new Workflow(uniqueId);
+
+            await repository.AddAsync(entity, user, cancellationToken);
+
+            var oneItemList = await repository.GetAllAsync(new List<string>(), cancellationToken);
+
+            Assert.IsNotNull(oneItemList);
+            Assert.AreEqual(1, oneItemList.Count);
+            Assert.AreEqual(oneItemList[0], entity);
+        }
+
+        [TestMethod]
         public async Task TestGetAllWithoutData()
         {
             ServicesExtensions.RegisterEncodingProvider();
             var cancellationToken = new CancellationToken();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
+            var repository = GetGenericRepository<Workflow>(isInMemoryDbContext: true);
 
             var emptyList = await repository.GetAllAsync(new List<string>(), cancellationToken);
 
@@ -33,7 +50,7 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
 
             var cancellationToken = new CancellationToken();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
+            var repository = GetGenericRepository<Workflow>(isInMemoryDbContext: true);
 
             var entity = await repository.GetByIdAsync(-1, new List<string>(), cancellationToken);
 
@@ -46,34 +63,37 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
 
             var cancellationToken = new CancellationToken();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
+            var repository = GetGenericRepository<Workflow>(isInMemoryDbContext: true);
 
-            var user = new IdentityUser("admin") { Id = 1 };
-            var code = $"Test{DateTime.Now}";
-            var entity = new Workflow()
-            {
-                Code = code,
-                Description = string.Empty
-            };
+            var user = GetDefaultUser();
+            var uniqueId = DateTime.Now.Ticks;
+            var entity = new Workflow(uniqueId);
+            var code = entity.Code;
+            Assert.IsNotNull(code);
+            var description = entity.Description;
+            Assert.IsNotNull(description);
 
-            await repository.AddRangeAsync(new List<Workflow> { entity }, user, cancellationToken);
+            await repository.AddAsync(entity, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
             Assert.IsNotNull(entity);
             Assert.AreEqual(code, entity.Code);
-            Assert.AreEqual(string.Empty, entity.Description);
+            Assert.AreEqual(description, entity.Description);
             Assert.IsFalse(entity.IsDeleted);
+            var entityId = entity.Id;
+            Assert.AreNotEqual(0, entityId);
 
-            var description = $"Description{DateTime.Now}";
+            var newDescription = entity.Description + "Updated";
+            Assert.IsNotNull(newDescription);
+            entity.Description = newDescription;
 
-            entity.Description = description;
             await repository.UpdateLoadedAsync(entity, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
-            Assert.AreEqual(description, entity.Description);
+            Assert.AreEqual(newDescription, entity.Description);
             Assert.IsFalse(entity.IsDeleted);
 
-            await repository.DeleteAsync(code, user, cancellationToken);
+            await repository.DeleteAsync(entityId, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
             Assert.IsNull(entity);
@@ -85,34 +105,37 @@ namespace GenericWorkflowAPI.UnitTesting
             ServicesExtensions.RegisterEncodingProvider();
 
             var cancellationToken = new CancellationToken();
-            var repository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext: true);
+            var repository = GetGenericRepository<Workflow>(isInMemoryDbContext: true);
 
-            var user = new IdentityUser("admin") { Id = 1 };
-            var code = $"Test{DateTime.Now}";
-            var entity = new Workflow()
-            {
-                Code = code,
-                Description = string.Empty
-            };
+            var user = GetDefaultUser();
+            var uniqueId = DateTime.Now.Ticks;
+            var entity = new Workflow(uniqueId);
+            var code = entity.Code;
+            Assert.IsNotNull(code);
+            var description = entity.Description;
+            Assert.IsNotNull(description);
 
             await repository.AddRangeAsync(new List<Workflow> { entity }, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
             Assert.IsNotNull(entity);
             Assert.AreEqual(code, entity.Code);
-            Assert.AreEqual(string.Empty, entity.Description);
+            Assert.AreEqual(description, entity.Description);
             Assert.IsFalse(entity.IsDeleted);
+            var entityId = entity.Id;
+            Assert.AreNotEqual(0, entityId);
 
-            var description = $"Description{DateTime.Now}";
+            var newDescription = entity.Description + "Updated";
+            Assert.IsNotNull(newDescription);
+            entity.Description = newDescription;
 
-            entity.Description = description;
             await repository.UpdateLoadedAsync(entity, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
-            Assert.AreEqual(description, entity.Description);
+            Assert.AreEqual(newDescription, entity.Description);
             Assert.IsFalse(entity.IsDeleted);
 
-            await repository.DeleteAsync(code, user, cancellationToken);
+            await repository.DeleteAsync(entityId, user, cancellationToken);
 
             entity = await repository.GetByIdAsync(entity.Id, new List<string>(), cancellationToken);
             Assert.IsNull(entity);
