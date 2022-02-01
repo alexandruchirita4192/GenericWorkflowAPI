@@ -157,10 +157,20 @@ namespace GenericWorkflowAPI.UnitTesting
             if (httpStatusCode != null)
                 Assert.AreEqual(httpStatusCode, response.Status, $"HttpStatus was not {httpStatusCode}.");
 
-            if (response.Payload is string)
-                Console.WriteLine(response.Payload);
+            Print(response.Payload);
+        }
+
+        public void Print<T>(T? payload, string? context = null) where T : class
+        {
+            if (!string.IsNullOrWhiteSpace(context))
+                Console.Write(context + " ");
+
+            if (payload == null)
+                Console.WriteLine("Null payload");
+            else if (payload is string)
+                Console.WriteLine(payload);
             else
-                Console.WriteLine(JsonConvert.SerializeObject(response.Payload, Formatting.Indented));
+                Console.WriteLine(JsonConvert.SerializeObject(payload, Formatting.Indented));
         }
     }
 }
