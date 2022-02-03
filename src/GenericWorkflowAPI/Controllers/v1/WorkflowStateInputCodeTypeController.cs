@@ -21,9 +21,9 @@ namespace GenericWorkflowAPI.Controllers.v1
         public WorkflowStateInputCodeTypeController(ILogger loggerManager, IMediator mediator)
             : base(loggerManager, mediator,
                   new List<string> {
-                      $"{nameof(WorkflowStateInputCodeType.State)}",
-                      $"{nameof(WorkflowStateInputCodeType.InputCodeType)}",
-                      $"{nameof(WorkflowStateInputCodeType.ChangedByUser)}"
+                      nameof(WorkflowStateInputCodeType.State),
+                      nameof(WorkflowStateInputCodeType.InputCodeType),
+                      nameof(WorkflowStateInputCodeType.ChangedByUser)
                   })
         {
         }

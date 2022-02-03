@@ -20,9 +20,9 @@ namespace GenericWorkflowAPI.Controllers.v1
         public WorkflowInstanceController(ILogger loggerManager, IMediator mediator)
             : base(loggerManager, mediator,
                   new List<string> {
-                      $"{nameof(WorkflowInstance.Workflow)}",
-                      $"{nameof(WorkflowInstance.CurrentState)}",
-                      $"{nameof(WorkflowInstance.ChangedByUser)}"
+                      nameof(WorkflowInstance.Workflow),
+                      nameof(WorkflowInstance.CurrentState),
+                      nameof(WorkflowInstance.ChangedByUser)
                   })
         {
         }

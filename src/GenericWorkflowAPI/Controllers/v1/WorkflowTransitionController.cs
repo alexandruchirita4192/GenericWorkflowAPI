@@ -21,11 +21,11 @@ namespace GenericWorkflowAPI.Controllers.v1
         public WorkflowTransitionController(ILogger loggerManager, IMediator mediator)
             : base(loggerManager, mediator,
                   new List<string> {
-                      $"{nameof(WorkflowTransition.Workflow)}",
-                      $"{nameof(WorkflowTransition.CurrentState)}",
-                      $"{nameof(WorkflowTransition.NextState)}",
-                      $"{nameof(WorkflowTransition.ChangedByUser)}",
-                      $"{nameof(WorkflowTransition.Role)}"
+                      nameof(WorkflowTransition.Workflow),
+                      nameof(WorkflowTransition.CurrentState),
+                      nameof(WorkflowTransition.NextState),
+                      nameof(WorkflowTransition.ChangedByUser),
+                      nameof(WorkflowTransition.Role)
                   })
         {
         }

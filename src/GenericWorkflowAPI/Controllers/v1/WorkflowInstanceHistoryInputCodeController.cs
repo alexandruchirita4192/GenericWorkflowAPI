@@ -20,9 +20,9 @@ namespace GenericWorkflowAPI.Controllers.v1
         public WorkflowInstanceHistoryInputCodeController(ILogger loggerManager, IMediator mediator)
             : base(loggerManager, mediator,
                   new List<string> {
-                      $"{nameof(WorkflowInstanceHistoryInputCode.History)}",
-                      $"{nameof(WorkflowInstanceHistoryInputCode.InputCodeType)}",
-                      $"{nameof(WorkflowInstanceHistoryInputCode.ChangedByUser)}"
+                      nameof(WorkflowInstanceHistoryInputCode.History),
+                      nameof(WorkflowInstanceHistoryInputCode.InputCodeType),
+                      nameof(WorkflowInstanceHistoryInputCode.ChangedByUser)
                   })
         {
         }
