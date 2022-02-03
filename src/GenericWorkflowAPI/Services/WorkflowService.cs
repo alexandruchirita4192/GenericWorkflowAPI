@@ -97,7 +97,8 @@ namespace GenericWorkflowAPI.Services
             {
                 // Try to create a new instance if all input codes for the first state are provided
                 await CreateNewWorkflowInstance(
-                    user, 
+                    user,
+                    workflowInstanceCode,
                     workflowInputCodeTypeXvalue,
                     workflow,
                     cancellationToken);
@@ -185,6 +186,7 @@ namespace GenericWorkflowAPI.Services
 
         private async Task<WorkflowInstance> CreateNewWorkflowInstance(
             Domain.IdentityUser user,
+            string workflowInstanceCode,
             Dictionary<string, string>? workflowInputCodeTypeXvalue,
             Workflow? workflow,
             CancellationToken cancellationToken)
@@ -217,6 +219,7 @@ namespace GenericWorkflowAPI.Services
 
             var workflowInstance = new WorkflowInstance
             {
+                Code = workflowInstanceCode,
                 WorkflowId = workflow.Id,
                 CurrentStateId = firstWorkflowState.Id,
             };

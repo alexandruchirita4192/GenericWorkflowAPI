@@ -21,7 +21,13 @@ namespace GenericWorkflowAPI.UnitTesting
     {
         public Domain.IdentityUser GetDefaultUser()
         {
-            return new Domain.IdentityUser("admin") { Id = 1 }; // TODO: This shouldn't be hard-coded
+            // TODO: This shouldn't be hard-coded
+            return new Domain.IdentityUser("admin")
+            {
+                Id = 1,
+                UserName = "admin",
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
         }
 
         public IConfiguration GetConfiguration()
@@ -98,7 +104,7 @@ namespace GenericWorkflowAPI.UnitTesting
         }
 
         public EntityService<TEntity> GetEntityService<TEntity>()
-            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TEntity : class, IBaseEntity, new()
         {
             return new EntityService<TEntity>();
         }
@@ -109,7 +115,7 @@ namespace GenericWorkflowAPI.UnitTesting
             Serilog.Core.Logger? logger = null,
             ApplicationDbContext? dbContext = null,
             EntityService<TEntity>? entityService = null)
-            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TEntity : class, IBaseEntity, new()
         {
             if (configuration == null)
                 configuration = GetConfiguration();
@@ -147,6 +153,8 @@ namespace GenericWorkflowAPI.UnitTesting
             where T : class
         {
             Assert.IsNotNull(response);
+            if (!string.IsNullOrWhiteSpace(response.Message))
+                Console.WriteLine(response.Message);
             Assert.IsTrue(string.IsNullOrWhiteSpace(response.Message));
             if (isPayloadNotNull)
                 Assert.IsNotNull(response.Payload);

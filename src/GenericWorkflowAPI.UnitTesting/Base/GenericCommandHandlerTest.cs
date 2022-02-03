@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.CommandHandlers;
+using GenericWorkflowAPI.CommandHandlers.RequestHandlers;
 using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Database;
@@ -13,8 +15,13 @@ using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
+using GenericWorkflowAPI.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData.Edm.Validation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 
 namespace GenericWorkflowAPI.UnitTesting
@@ -25,7 +32,7 @@ namespace GenericWorkflowAPI.UnitTesting
             List<string> includePathList,
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
-            where TEntity : class, IBaseEntity, ICodeEntity, new()
+            where TEntity : class, IBaseEntity, new()
             where TDto : class, IBaseDto, new()
         {
             // Request setup:
@@ -36,7 +43,7 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // GenericCodeRepository<TEntity, ApplicationDbContext> setup:
             var logger = GetLogger();
-            var repository = GetGenericCodeRepository<TEntity>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var repository = GetGenericRepository<TEntity>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
 
             // GenericGetListCommandHandler<TEntity, TDto> setup:
             var mapper = GetMapper(logger);
@@ -346,6 +353,97 @@ namespace GenericWorkflowAPI.UnitTesting
 
             // 3. Assert:
             AssertGenericApiResponse(response, HttpStatusCode.Created);
+        }
+
+        public async Task<GenericApiResponse<string>> GenericExecuteWorkflowCommandHandlerExecute(
+            string workflowCode,
+            string workflowInstanceCode,
+            Dictionary<string, string> workflowInputCodeTypeXvalue,
+            List<string> roles,
+            bool isInMemoryDbContext,
+            ApplicationDbContext? dbContext = null)
+        {
+
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(null, isInMemoryDbContext);
+            // The user is the default one:
+            var user = GetDefaultUser();
+
+            // Request setup:
+            var request = new ExecuteWorkflowRequest
+            {
+                User = user,
+                WorkflowCode = workflowCode,
+                WorkflowInstanceCode = workflowInstanceCode,
+                WorkflowInputCodeTypeXvalue = workflowInputCodeTypeXvalue
+            };
+
+            var logger = GetLogger();
+            var workflowRepository = GetGenericCodeRepository<Workflow>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowInputCodeTypeRepository = GetGenericCodeRepository<WorkflowInputCodeType>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowStateRepository = GetGenericCodeRepository<WorkflowState>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowStateInputCodeTypeRepository = GetGenericCodeRepository<WorkflowStateInputCodeType>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowTransitionRepository = GetGenericCodeRepository<WorkflowTransition>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowInstanceRepository = GetGenericCodeRepository<WorkflowInstance>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowInstanceInputCodeRepository = GetGenericRepository<WorkflowInstanceInputCode>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowInstanceHistoryRepository = GetGenericRepository<WorkflowInstanceHistory>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var workflowInstanceHistoryInputCodeRepository = GetGenericRepository<WorkflowInstanceHistoryInputCode>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var identityRoleRepository = GetGenericCodeRepository<Domain.IdentityRole>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
+            var userManager = GetBasicUserManager();
+
+            if (roles.Count != 0)
+            {
+                // Add the user to the database
+                await dbContext.AddAsync(user);
+                dbContext.SaveChanges();
+
+                var loadedUser = await dbContext.Users.FindAsync(user.Id);
+
+                // Add required roles from list to user
+                var result = await userManager.AddToRolesAsync(loadedUser, roles); // TODO: Fix this somehow
+                Print(result, "AddToRolesAsync result:");
+                Assert.IsNotNull(result);
+                Assert.IsTrue(result.Succeeded);
+            }
+
+            var workflowService = new WorkflowService(
+                logger,
+                workflowRepository,
+                workflowInputCodeTypeRepository,
+                workflowStateRepository,
+                workflowStateInputCodeTypeRepository,
+                workflowTransitionRepository,
+                workflowInstanceRepository,
+                workflowInstanceInputCodeRepository,
+                workflowInstanceHistoryRepository,
+                workflowInstanceHistoryInputCodeRepository,
+                identityRoleRepository,
+                userManager
+                );
+            var handler = new ExecuteWorkflowCommandHandler(workflowService, logger);
+            var cancellationToken = new CancellationToken();
+
+            var response = await handler.Handle(request, cancellationToken);
+            return response;
+        }
+
+        protected UserManager<Domain.IdentityUser> GetBasicUserManager(ApplicationDbContext? dbContext = null, bool? isInMemoryDbContext = null)
+        {
+            if (dbContext == null)
+                dbContext = GetSqlServerDbContext(null, isInMemoryDbContext);
+            var store = new UserStore<Domain.IdentityUser, Domain.IdentityRole, ApplicationDbContext, long>(dbContext);
+            var microsoftLogger = new Microsoft.Extensions.Logging.Logger<UserManager<Domain.IdentityUser>>(new Microsoft.Extensions.Logging.LoggerFactory());
+            var userManager = new UserManager<Domain.IdentityUser>(
+                store,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                microsoftLogger);
+            return userManager;
         }
 
         private void FillEntityServiceForExtraTypes(ServiceCollection serviceCollection, List<Type> entityServiceExtraTypes)
