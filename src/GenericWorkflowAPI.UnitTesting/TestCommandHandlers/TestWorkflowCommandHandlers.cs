@@ -309,9 +309,10 @@ namespace GenericWorkflowAPI.UnitTesting
             var workflowDto = new WorkflowDto(uniqueId) { TypeCode = workflowTypeDto.Code };
             var workflowStateDtoCurrent = new WorkflowStateDto(uniqueId, "Current") { WorkflowCode = workflowDto.Code, IsFirstState = true };
             var workflowStateDtoNext = new WorkflowStateDto(uniqueId, "Next") { WorkflowCode = workflowDto.Code };
-            var identityRoleDto = new IdentityRole("TestRole");
+            var role = "TestRole";
+            var identityRole = new IdentityRole(role) { Id = 1 };
 
-            var transitionRoleCode = identityRoleDto.Code;
+            var transitionRoleCode = identityRole.Code;
             Assert.IsNotNull(transitionRoleCode);
 
             var workflowTransitionDto = new WorkflowTransitionDto(uniqueId)
@@ -350,13 +351,13 @@ namespace GenericWorkflowAPI.UnitTesting
             {
                 { workflowInputCodeTypeCurrentCode, $"InputData{uniqueId}Current" }
             };
-            //var workflowInputCodeTypeXvalue_ExecuteTransition = new Dictionary<string, string>
-            //{
-            //    { workflowInputCodeTypeNextCode, $"InputData{uniqueId}Next" }
-            //};
+            var workflowInputCodeTypeXvalue_ExecuteTransition = new Dictionary<string, string>
+            {
+                { workflowInputCodeTypeNextCode, $"InputData{uniqueId}Next" }
+            };
 
             var roles_InitializeWorkflowInstance = new List<string>();
-            //var roles_ExecuteTransition = new List<string> { transitionRoleCode };
+            var roles_ExecuteTransition = new List<string> { transitionRoleCode };
 
             var workflowType_entityServiceExtraTypes = new List<Type>();
             var workflow_entityServiceExtraTypes = new List<Type> { typeof(WorkflowType) };
@@ -366,6 +367,10 @@ namespace GenericWorkflowAPI.UnitTesting
             var workflowStateInputCodeType_entityServiceExtraTypes = new List<Type> { typeof(WorkflowState), typeof(WorkflowInputCodeType) };
             var workflowTransition_entityServiceExtraTypes = new List<Type> { typeof(Workflow), typeof(WorkflowState), typeof(IdentityRole) };
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
+
+            // Add the user to the database
+            await applicationDbContext.AddAsync(GetDefaultUser());
+            applicationDbContext.SaveChanges();
 
             // Prepare the database
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
@@ -385,7 +390,7 @@ namespace GenericWorkflowAPI.UnitTesting
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
             await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
-                identityRoleDto,
+                identityRole,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
             await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
@@ -420,17 +425,17 @@ namespace GenericWorkflowAPI.UnitTesting
                 applicationDbContext);
 
             //// Execute workflow transition
-            //var response_ExecuteWorkflowTransition = await GenericExecuteWorkflowCommandHandlerExecute(
-            //    workflowCode,
-            //    workflowInstanceCode,
-            //    workflowInputCodeTypeXvalue_ExecuteTransition,
-            //    roles_ExecuteTransition,
-            //    true,
-            //    applicationDbContext);
+            var response_ExecuteWorkflowTransition = await GenericExecuteWorkflowCommandHandlerExecute(
+                workflowCode,
+                workflowInstanceCode,
+                workflowInputCodeTypeXvalue_ExecuteTransition,
+                roles_ExecuteTransition,
+                true,
+                applicationDbContext);
 
             // 3. Assert:
             AssertGenericApiResponse(response_InitiateWorkflowInstance, HttpStatusCode.OK, false);
-            //AssertGenericApiResponse(response_ExecuteWorkflowTransition, HttpStatusCode.OK, false);
+            AssertGenericApiResponse(response_ExecuteWorkflowTransition, HttpStatusCode.OK, false);
 
             // Print resulted items
             var response_WorkflowInstance = await GenericGetCommandHandlerExecute<WorkflowInstance, WorkflowInstanceDto>(
@@ -445,21 +450,21 @@ namespace GenericWorkflowAPI.UnitTesting
                 true,
                 applicationDbContext);
             AssertGenericApiResponse(response_InstanceInputCodes, HttpStatusCode.OK);
-            Assert.AreEqual(response_InstanceInputCodes.Payload?.Count, 1); // 2
+            Assert.AreEqual(response_InstanceInputCodes.Payload?.Count, 2);
 
             var response_Histories = await GenericGetListCommandHandlerExecute<WorkflowInstanceHistory, WorkflowInstanceHistoryDto>(
                 workflowInstanceHistory_includePathList,
                 true,
                 applicationDbContext);
             AssertGenericApiResponse(response_Histories, HttpStatusCode.OK);
-            Assert.AreEqual(response_Histories.Payload?.Count, 1); // 2
+            Assert.AreEqual(response_Histories.Payload?.Count, 2);
 
             var response_HistorieInputCodes = await GenericGetListCommandHandlerExecute<WorkflowInstanceHistoryInputCode, WorkflowInstanceHistoryInputCodeDto>(
                 workflowInstanceHistoryInputCode_includePathList,
                 true,
                 applicationDbContext);
             AssertGenericApiResponse(response_HistorieInputCodes, HttpStatusCode.OK);
-            Assert.AreEqual(response_HistorieInputCodes.Payload?.Count, 1); // 2
+            Assert.AreEqual(response_HistorieInputCodes.Payload?.Count, 2);
         }
     }
 }

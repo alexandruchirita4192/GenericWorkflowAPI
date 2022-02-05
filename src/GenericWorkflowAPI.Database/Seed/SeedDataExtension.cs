@@ -19,10 +19,11 @@ namespace GenericWorkflowAPI.Database
 {
     public static class SeedDataExtension
     {
-        private const string AdministratorUserName = "admin";
+        public const string AdministratorUserName = "admin";
+        public const string AdministratorEmail = "test@test.test";
         private const string AdministratorPassword = "Pass123$";
-        private const string AdministratorRole = "Administrator";
-        private const string GenericUserRole = "GenericUser";
+        public const string AdministratorRole = "Administrator";
+        public const string GenericUserRole = "GenericUser";
 
         /// <summary>
         /// The way this data is added is not ok, but adding it anyway.
@@ -43,13 +44,15 @@ namespace GenericWorkflowAPI.Database
             var admin = await userMgr.FindByNameAsync(AdministratorUserName);
             if (admin == null)
             {
-                admin = new Domain.IdentityUser
+                admin = new Domain.IdentityUser(AdministratorUserName)
                 {
+                    Id = 1,
                     UserName = AdministratorUserName,
-                    Email = "test@test.test",
+                    Email = AdministratorEmail,
                     EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString()
                 };
-
+                
                 result = await userMgr.CreateAsync(admin, AdministratorPassword);
                 if (!result.Succeeded)
                 {

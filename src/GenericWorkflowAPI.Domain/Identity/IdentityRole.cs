@@ -21,6 +21,7 @@ namespace GenericWorkflowAPI.Domain
         public IdentityRole(string roleName)
             : base(roleName)
         {
+            NormalizedName = roleName;
         }
 
         #endregion Constructors

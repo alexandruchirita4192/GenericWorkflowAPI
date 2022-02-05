@@ -52,8 +52,12 @@ namespace GenericWorkflowAPI.IdentityServer4
                 .AddInMemoryClients(Config.Clients)
                 .AddAspNetIdentity<Domain.IdentityUser>();
 
-            // TODO: Fix for production: not recommended for production - you need to store your key material somewhere secure
-            builder.AddDeveloperSigningCredential();
+            if (Environment.IsDevelopment())
+                builder.AddDeveloperSigningCredential();
+            else
+            {
+                // TODO: Fix for production: not recommended for production - you need to store your key material somewhere secure
+            }
 
             services.AddAuthentication();
         }

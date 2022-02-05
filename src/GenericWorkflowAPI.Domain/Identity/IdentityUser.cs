@@ -22,6 +22,7 @@ namespace GenericWorkflowAPI.Domain
         public IdentityUser(string userName)
             : base(userName)
         {
+            NormalizedUserName = userName;
         }
 
         #endregion Constructors

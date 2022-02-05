@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,9 +17,9 @@ using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Edm.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
 
@@ -140,7 +139,6 @@ namespace GenericWorkflowAPI.UnitTesting
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
-
             // Request setup:
             var request = new GenericCreateListRequest<TDto>
             {
@@ -165,7 +163,7 @@ namespace GenericWorkflowAPI.UnitTesting
             serviceCollection.AddSingleton(dbContext);
             serviceCollection.AddSingleton<ILogger>(logger);
             serviceCollection.AddSingleton<IEntityService<TEntity>>(entityService);
-            
+
             FillEntityServiceForExtraTypes(serviceCollection, entityServiceExtraTypes);
 
             serviceCollection.AddSingleton<IGenericRepository<TEntity>>(repository);
@@ -175,7 +173,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
             var handler = new GenericCreateListCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
-            
+
             var cancellationToken = new CancellationToken();
             var response = await handler.Handle(request, cancellationToken);
             return response;
@@ -363,7 +361,6 @@ namespace GenericWorkflowAPI.UnitTesting
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
         {
-
             if (dbContext == null)
                 dbContext = GetSqlServerDbContext(null, isInMemoryDbContext);
             // The user is the default one:
@@ -389,19 +386,31 @@ namespace GenericWorkflowAPI.UnitTesting
             var workflowInstanceHistoryRepository = GetGenericRepository<WorkflowInstanceHistory>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
             var workflowInstanceHistoryInputCodeRepository = GetGenericRepository<WorkflowInstanceHistoryInputCode>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
             var identityRoleRepository = GetGenericCodeRepository<Domain.IdentityRole>(isInMemoryDbContext, dbContext: dbContext, logger: logger);
-            var userManager = GetBasicUserManager();
+            var userManager = GetBasicUserManager(dbContext, isInMemoryDbContext);
 
             if (roles.Count != 0)
             {
-                // Add the user to the database
-                await dbContext.AddAsync(user);
-                dbContext.SaveChanges();
-
+                // Assert user
                 var loadedUser = await dbContext.Users.FindAsync(user.Id);
+                Assert.IsNotNull(loadedUser);
+
+                // Assert roles
+                foreach(var role in roles)
+                {
+                    var loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r=>r.Code == role);
+                    Print(loadedRole, $"Role loaded with Code={role}");
+                    Assert.IsNotNull(loadedRole);
+                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role);
+                    Print(loadedRole, $"Role loaded with Name={role}");
+                    Assert.IsNotNull(loadedRole);
+                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.NormalizedName == role);
+                    Print(loadedRole, $"Role loaded with NormalizedName={role}");
+                    Assert.IsNotNull(loadedRole);
+                }
 
                 // Add required roles from list to user
-                var result = await userManager.AddToRolesAsync(loadedUser, roles); // TODO: Fix this somehow
-                Print(result, "AddToRolesAsync result:");
+                var result = await userManager.AddToRolesAsync(loadedUser, roles);
+                Print(result, "UserManager AddToRolesAsync result:");
                 Assert.IsNotNull(result);
                 Assert.IsTrue(result.Succeeded);
             }
@@ -431,6 +440,7 @@ namespace GenericWorkflowAPI.UnitTesting
         {
             if (dbContext == null)
                 dbContext = GetSqlServerDbContext(null, isInMemoryDbContext);
+
             var store = new UserStore<Domain.IdentityUser, Domain.IdentityRole, ApplicationDbContext, long>(dbContext);
             var microsoftLogger = new Microsoft.Extensions.Logging.Logger<UserManager<Domain.IdentityUser>>(new Microsoft.Extensions.Logging.LoggerFactory());
             var userManager = new UserManager<Domain.IdentityUser>(
