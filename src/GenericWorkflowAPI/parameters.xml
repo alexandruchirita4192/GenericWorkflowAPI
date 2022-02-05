@@ -1,0 +1,6 @@
+﻿<parameters>
+  <parameter name="IIS Web Application Name"
+             description="Specify the web application name in IIS"
+             defaultValue="Default Web Site/GenericWorkflowAPI">
+  </parameter>
+</parameters>
