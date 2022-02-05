@@ -391,19 +391,19 @@ namespace GenericWorkflowAPI.UnitTesting
             if (roles.Count != 0)
             {
                 // Assert user
-                var loadedUser = await dbContext.Users.FindAsync(user.Id);
+                var loadedUser = await dbContext.Users.FirstOrDefaultAsync(u=>u.Id == user.Id && !u.IsDeleted);
                 Assert.IsNotNull(loadedUser);
 
                 // Assert roles
                 foreach(var role in roles)
                 {
-                    var loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r=>r.Code == role);
+                    var loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r=>r.Code == role && !r.IsDeleted);
                     Print(loadedRole, $"Role loaded with Code={role}");
                     Assert.IsNotNull(loadedRole);
-                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role);
+                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role && !r.IsDeleted);
                     Print(loadedRole, $"Role loaded with Name={role}");
                     Assert.IsNotNull(loadedRole);
-                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.NormalizedName == role);
+                    loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.NormalizedName == role && !r.IsDeleted);
                     Print(loadedRole, $"Role loaded with NormalizedName={role}");
                     Assert.IsNotNull(loadedRole);
                 }
