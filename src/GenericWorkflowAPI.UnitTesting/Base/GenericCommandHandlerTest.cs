@@ -81,12 +81,13 @@ namespace GenericWorkflowAPI.UnitTesting
             return response;
         }
 
-        public async Task<GenericApiResponse<string>> GenericCreateCommandHandlerExecute<TEntity, TDto>(
+        public async Task<GenericApiResponse<string>> GenericCreateCommandHandlerExecute<TDbContext, TEntity, TDto>(
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
+            where TDbContext : DbContext
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -122,20 +123,21 @@ namespace GenericWorkflowAPI.UnitTesting
             serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
             serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericCreateCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var mappingHelper = new MappingHelper<TDbContext, TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericCreateCommandHandler<TDbContext, TEntity, TDto>(repository, logger, mappingHelper);
             var cancellationToken = new CancellationToken();
 
             var response = await handler.Handle(request, cancellationToken);
             return response;
         }
 
-        public async Task<GenericApiResponse<string>> GenericCreateListCommandHandlerExecute<TEntity, TDto>(
+        public async Task<GenericApiResponse<string>> GenericCreateListCommandHandlerExecute<TDbContext, TEntity, TDto>(
             Collection<TDto> dtoCollection,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
+            where TDbContext : DbContext
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -171,20 +173,21 @@ namespace GenericWorkflowAPI.UnitTesting
             serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
             serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericCreateListCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var mappingHelper = new MappingHelper<TDbContext, TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericCreateListCommandHandler<TDbContext, TEntity, TDto>(repository, logger, mappingHelper);
 
             var cancellationToken = new CancellationToken();
             var response = await handler.Handle(request, cancellationToken);
             return response;
         }
 
-        public async Task<GenericApiResponse<string>> GenericUpdateCommandHandlerExecute<TEntity, TDto>(
+        public async Task<GenericApiResponse<string>> GenericUpdateCommandHandlerExecute<TDbContext, TEntity, TDto>(
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
+            where TDbContext : DbContext
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -220,20 +223,21 @@ namespace GenericWorkflowAPI.UnitTesting
             serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
             serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericUpdateCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var mappingHelper = new MappingHelper<TDbContext, TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericUpdateCommandHandler<TDbContext, TEntity, TDto>(repository, logger, mappingHelper);
             var cancellationToken = new CancellationToken();
 
             var response = await handler.Handle(request, cancellationToken);
             return response;
         }
 
-        public async Task<GenericApiResponse<string>> GenericUpdateListCommandHandlerExecute<TEntity, TDto>(
+        public async Task<GenericApiResponse<string>> GenericUpdateListCommandHandlerExecute<TDbContext, TEntity, TDto>(
             TDto dto,
             Domain.IdentityUser user,
             List<Type> entityServiceExtraTypes,
             bool isInMemoryDbContext,
             ApplicationDbContext? dbContext = null)
+            where TDbContext : DbContext
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -269,8 +273,8 @@ namespace GenericWorkflowAPI.UnitTesting
             serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
             serviceCollection.AddSingleton<IReflectionMappingInfoProvider<TEntity, TDto>>(reflectionMappingInfoProvider);
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mappingHelper = new MappingHelper<TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
-            var handler = new GenericUpdateListCommandHandler<TEntity, TDto>(repository, logger, mappingHelper);
+            var mappingHelper = new MappingHelper<TDbContext, TEntity, TDto>(logger, mapper, reflectionMappingInfoProvider, serviceProvider);
+            var handler = new GenericUpdateListCommandHandler<TDbContext, TEntity, TDto>(repository, logger, mappingHelper);
             var cancellationToken = new CancellationToken();
 
             var response = await handler.Handle(request, cancellationToken);
@@ -331,10 +335,11 @@ namespace GenericWorkflowAPI.UnitTesting
             return response;
         }
 
-        public async Task GenericCreateCommandHandler_InMemory_WithSelfTest<TEntity, TDto>(
+        public async Task GenericCreateCommandHandler_InMemory_WithSelfTest<TDbContext, TEntity, TDto>(
             TDto dto,
             List<Type> entityServiceExtraTypes,
             ApplicationDbContext dbContext)
+            where TDbContext : DbContext
             where TEntity : class, IBaseEntity, ICodeEntity, new()
             where TDto : class, IBaseDto, ICodeDto, new()
         {
@@ -342,7 +347,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var user = GetDefaultUser();
 
             // 2. Act:
-            var response = await GenericCreateCommandHandlerExecute<TEntity, TDto>(
+            var response = await GenericCreateCommandHandlerExecute<TDbContext, TEntity, TDto>(
                 dto,
                 user,
                 entityServiceExtraTypes,
@@ -391,13 +396,13 @@ namespace GenericWorkflowAPI.UnitTesting
             if (roles.Count != 0)
             {
                 // Assert user
-                var loadedUser = await dbContext.Users.FirstOrDefaultAsync(u=>u.Id == user.Id && !u.IsDeleted);
+                var loadedUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id && !u.IsDeleted);
                 Assert.IsNotNull(loadedUser);
 
                 // Assert roles
-                foreach(var role in roles)
+                foreach (var role in roles)
                 {
-                    var loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r=>r.Code == role && !r.IsDeleted);
+                    var loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Code == role && !r.IsDeleted);
                     Print(loadedRole, $"Role loaded with Code={role}");
                     Assert.IsNotNull(loadedRole);
                     loadedRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role && !r.IsDeleted);

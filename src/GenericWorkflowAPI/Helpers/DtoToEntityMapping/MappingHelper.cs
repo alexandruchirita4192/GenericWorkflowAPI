@@ -6,16 +6,17 @@ using AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper.Helpers;
 using GenericWorkflowAPI.Core.Services;
-using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace GenericWorkflowAPI.AutoMapper
 {
-    public partial class MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
+    public partial class MappingHelper<TDbContext, TEntity, TDto> : IMappingHelper<TDbContext, TEntity, TDto>
+        where TDbContext : DbContext
         where TEntity : class, IBaseEntity, new()
         where TDto : class, IBaseDto, new()
     {
@@ -110,7 +111,7 @@ namespace GenericWorkflowAPI.AutoMapper
 
             // TEntity can only be filled by a proper load from database if needed (by code if the TDto has one)
 
-            var applicationDbContextType = typeof(ApplicationDbContext);
+            var dbContextType = typeof(TDbContext);
 
             // Parse all reflection property infos
             foreach (var reflectionMappedInfo in MappingInfos)
@@ -154,7 +155,7 @@ namespace GenericWorkflowAPI.AutoMapper
                         continue;
                     }
 
-                    var codeRepositoryType = typeof(GenericCodeRepository<,>).MakeGenericType(entityTypeFromProperty, applicationDbContextType);
+                    var codeRepositoryType = typeof(GenericCodeRepository<,>).MakeGenericType(entityTypeFromProperty, dbContextType);
                     if (ActivatorUtilities.CreateInstance(_serviceProvider, codeRepositoryType) is not IGenericCodeRepository codeRepositoryInstance)
                     {
                         _logger.Warning("{genericCodeReposistoryInterfaceName} instance of type {codeRepositoryTypeName} is null. Skip setting {idPropertyName} in {entityTypeName}.",

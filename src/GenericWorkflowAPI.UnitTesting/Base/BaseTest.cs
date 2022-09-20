@@ -7,6 +7,7 @@ using GenericWorkflowAPI.AutoMapper;
 using GenericWorkflowAPI.Core.AutoMapper;
 using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -59,9 +60,12 @@ namespace GenericWorkflowAPI.UnitTesting
             {
                 if (configuration == null)
                     configuration = GetConfiguration();
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-                optionsBuilder.UseSqlServer(connectionString);
+                var connectionString = configuration.GetConnectionString();
+                if (configuration.UseSqlServer())
+                    optionsBuilder.UseSqlServer(connectionString);
+                else if (configuration.UseSqlite())
+                    optionsBuilder.UseSqlite(connectionString);
             }
 
             var dbContext = new ApplicationDbContext(optionsBuilder.Options);

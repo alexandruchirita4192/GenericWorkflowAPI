@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Threading.Tasks;
+using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
@@ -46,27 +47,27 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);
@@ -118,27 +119,27 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);
@@ -182,29 +183,29 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
 
             // 2. Act:
-            var response = await GenericCreateCommandHandlerExecute<WorkflowTransition, WorkflowTransitionDto>(
+            var response = await GenericCreateCommandHandlerExecute<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 user,
                 workflowTransition_entityServiceExtraTypes,
@@ -243,23 +244,23 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
@@ -267,7 +268,7 @@ namespace GenericWorkflowAPI.UnitTesting
             var workflowTransitionCollection = new Collection<WorkflowTransitionDto> { workflowTransitionDto };
 
             // 2. Act:
-            var response = await GenericCreateListCommandHandlerExecute<WorkflowTransition, WorkflowTransitionDto>(
+            var response = await GenericCreateListCommandHandlerExecute<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionCollection,
                 user,
                 workflowTransition_entityServiceExtraTypes,
@@ -319,43 +320,43 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDtoOld,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDtoNew,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrentOld,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrentNew,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNextOld,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNextNew,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDtoOld,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDtoNew,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);
@@ -367,7 +368,7 @@ namespace GenericWorkflowAPI.UnitTesting
             workflowTransitionDto.RoleCode = identityRoleDtoNew.Code;
 
             // 2. Act:
-            var response = await GenericUpdateCommandHandlerExecute<WorkflowTransition, WorkflowTransitionDto>(
+            var response = await GenericUpdateCommandHandlerExecute<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 user,
                 workflowTransition_entityServiceExtraTypes,
@@ -427,43 +428,43 @@ namespace GenericWorkflowAPI.UnitTesting
             var applicationDbContext = GetSqlServerDbContext(null, true, uniqueId);
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDtoOld,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDtoNew,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrentOld,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrentNew,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNextOld,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNextNew,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDtoOld,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDtoNew,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);
@@ -475,7 +476,7 @@ namespace GenericWorkflowAPI.UnitTesting
             workflowTransitionDto.RoleCode = identityRoleDtoNew.Code;
 
             // 2. Act:
-            var response = await GenericUpdateListCommandHandlerExecute<WorkflowTransition, WorkflowTransitionDto>(
+            var response = await GenericUpdateListCommandHandlerExecute<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 user,
                 workflowTransition_entityServiceExtraTypes,
@@ -525,27 +526,27 @@ namespace GenericWorkflowAPI.UnitTesting
             var user = GetDefaultUser();
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);
@@ -592,27 +593,28 @@ namespace GenericWorkflowAPI.UnitTesting
             var user = GetDefaultUser();
 
             // Prepare the database
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowType, WorkflowTypeDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowType, WorkflowTypeDto>(
                 workflowTypeDto,
                 workflowType_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<Workflow, WorkflowDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, Workflow, WorkflowDto>(
                 workflowDto,
                 workflow_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoCurrent,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowState, WorkflowStateDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowState, WorkflowStateDto>(
                 workflowStateDtoNext,
                 workflowState_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<IdentityRole, IdentityRole>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, 
+            IdentityRole, IdentityRole>(
                 identityRoleDto,
                 identityRole_entityServiceExtraTypes,
                 applicationDbContext);
-            await GenericCreateCommandHandler_InMemory_WithSelfTest<WorkflowTransition, WorkflowTransitionDto>(
+            await GenericCreateCommandHandler_InMemory_WithSelfTest<ApplicationDbContext, WorkflowTransition, WorkflowTransitionDto>(
                 workflowTransitionDto,
                 workflowTransition_entityServiceExtraTypes,
                 applicationDbContext);

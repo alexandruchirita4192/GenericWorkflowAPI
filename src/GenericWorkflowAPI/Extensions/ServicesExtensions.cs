@@ -32,7 +32,7 @@ namespace GenericWorkflowAPI.Extensions
 
                 // GenericCodeRepository<Workflow, ApplicationDbContext>
                 (map) => typeof(GenericCodeRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
-                
+
                 nameof(AddDatabaseGenericCodeRepositories),
                 ServiceLifetime.Singleton);
         }
@@ -54,7 +54,7 @@ namespace GenericWorkflowAPI.Extensions
 
                 // GenericRepository<Workflow, ApplicationDbContext>
                 (map) => typeof(GenericRepository<,>).MakeGenericType(map.Key, typeof(TDbContext)),
-                
+
                 nameof(AddDatabaseGenericRepositories),
                 ServiceLifetime.Singleton);
         }
@@ -74,7 +74,7 @@ namespace GenericWorkflowAPI.Extensions
 
                 // EntityService<Workflow>
                 (mapping) => typeof(EntityService<>).MakeGenericType(mapping.Key),
-                
+
                 nameof(AddEntityService),
                 ServiceLifetime.Singleton);
         }
@@ -82,18 +82,21 @@ namespace GenericWorkflowAPI.Extensions
         /// <summary>
         /// Add mapping-related services as singletons (<see cref="IMappingHelper{TEntity, TDto}"/> implemented as <see cref="MappingHelper{TEntity, TDto}"/>).
         /// </summary>
-        public static IServiceCollection AddMappingHelpers(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+        public static IServiceCollection AddMappingHelpers<TDbContext>(this IServiceCollection services, Dictionary<Type, Type> mappings, ILogger logger)
+            where TDbContext : DbContext
         {
             // Mapping Example:
             //services.AddSingleton(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
 
+            var dbContextType = typeof(TDbContext);
+
             return services.AddServices<IBaseEntity, IBaseDto>(mappings, logger,
 
-                // IMappingHelper<Workflow, WorkflowDto>
-                (mapping) => typeof(IMappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+                // IMappingHelper<ApplicationDbContext, Workflow, WorkflowDto>
+                (mapping) => typeof(IMappingHelper<,,>).MakeGenericType(dbContextType, mapping.Key, mapping.Value),
 
-                // MappingHelper<Workflow, WorkflowDto>
-                (mapping) => typeof(MappingHelper<,>).MakeGenericType(mapping.Key, mapping.Value),
+                // MappingHelper<ApplicationDbContext, Workflow, WorkflowDto>
+                (mapping) => typeof(MappingHelper<,,>).MakeGenericType(dbContextType, mapping.Key, mapping.Value),
 
                 nameof(AddMappingHelpers),
                 ServiceLifetime.Singleton);

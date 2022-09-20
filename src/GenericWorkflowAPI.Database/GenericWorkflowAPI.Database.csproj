@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Seed\vwLogs.sql" />
+    <None Remove="Seed\vwLogs.Sqlite.sql" />
+    <None Remove="Seed\vwLogs.SqlServer.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Seed\vwLogs.sql" />
+    <EmbeddedResource Include="Seed\vwLogs.Sqlite.sql" />
+    <EmbeddedResource Include="Seed\vwLogs.SqlServer.sql" />
   </ItemGroup>
 
   <ItemGroup>

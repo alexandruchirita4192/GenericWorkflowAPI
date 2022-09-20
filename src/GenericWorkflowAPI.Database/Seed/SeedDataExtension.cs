@@ -9,10 +9,11 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using IdentityModel;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GenericWorkflowAPI.Database
@@ -28,12 +29,21 @@ namespace GenericWorkflowAPI.Database
         /// <summary>
         /// The way this data is added is not ok, but adding it anyway.
         /// </summary>
-        public static async Task EnsureSeedAdminUserData(this IServiceCollection services)
+        public static async Task EnsureSeedAdminUserData(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             using var serviceProvider = services.BuildServiceProvider(); // TODO: Migrate data and seed without "BuildServiceProvider"
             using var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            using var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
-            
+            using var context =
+                configuration.UseSqlServer()
+                ? scope.ServiceProvider.GetService<ApplicationDbContext>()
+                : (
+                    configuration.UseSqlite()
+                    ? scope.ServiceProvider.GetService<SqliteApplicationDbContext>()
+                    : null
+                );
+
             context?.Database.Migrate();
 
             var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<Domain.IdentityRole>>();
@@ -52,7 +62,7 @@ namespace GenericWorkflowAPI.Database
                     EmailConfirmed = true,
                     SecurityStamp = Guid.NewGuid().ToString()
                 };
-                
+
                 result = await userMgr.CreateAsync(admin, AdministratorPassword);
                 if (!result.Succeeded)
                 {
@@ -105,13 +115,21 @@ namespace GenericWorkflowAPI.Database
             }
         }
 
-        public static void RunEmbeddedResourcesInCurrentAssembly(string connectionString)
+        public static void RunEmbeddedResourcesInCurrentAssembly(string connectionString, IConfiguration configuration)
         {
+            var sqlType = configuration.GetSqlType();
+            if (sqlType == null)
+                return;
+
+            using var connection = configuration.GetDbConnection();
+            if (connection == null)
+                return;
+
             var assembly = Assembly.GetExecutingAssembly();
 
             var separators = new string[] { "\r\nGO\r\n" };
 
-            foreach (var resourceName in assembly.GetManifestResourceNames().Where(m => m.EndsWith(".sql")))
+            foreach (var resourceName in assembly.GetManifestResourceNames().Where(m => m.EndsWith($".{sqlType.ToString()}.sql")))
             {
                 using var stream = assembly.GetManifestResourceStream(resourceName);
                 if (stream == null)
@@ -123,10 +141,6 @@ namespace GenericWorkflowAPI.Database
 
                 var script = reader.ReadToEnd();
                 if (string.IsNullOrWhiteSpace(script)) // Skip empty scripts
-                    continue;
-
-                using var connection = new SqlConnection(connectionString);
-                if (connection == null)
                     continue;
 
                 connection.Open();

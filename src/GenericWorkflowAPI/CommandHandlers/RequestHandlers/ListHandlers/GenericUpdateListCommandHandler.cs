@@ -13,20 +13,22 @@ using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 
 namespace GenericWorkflowAPI.CommandHandlers
 {
-    public class GenericUpdateListCommandHandler<TEntity, TDto> : IRequestHandler<GenericUpdateListRequest<TDto>, GenericApiResponse<string>>
+    public class GenericUpdateListCommandHandler<TDbContext, TEntity, TDto> : IRequestHandler<GenericUpdateListRequest<TDto>, GenericApiResponse<string>>
+        where TDbContext : DbContext
         where TDto : class, IBaseDto, ICodeDto, new()
         where TEntity : class, IBaseEntity, ICodeEntity, new()
     {
         private readonly IGenericCodeRepository<TEntity> _repository;
         private readonly ILogger _logger;
-        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
+        private readonly IMappingHelper<TDbContext, TEntity, TDto> _mappingHelper;
 
-        public GenericUpdateListCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
+        public GenericUpdateListCommandHandler(IGenericCodeRepository<TEntity> repository, ILogger logger, IMappingHelper<TDbContext, TEntity, TDto> mappingHelper)
         {
             _repository = repository;
             _logger = logger;
@@ -66,7 +68,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             catch (Exception ex)
             {
                 _logger.ErrorEx(ex,
-                    typeof(GenericUpdateListCommandHandler<TEntity, TDto>).FullName,
+                    typeof(GenericUpdateListCommandHandler<TDbContext, TEntity, TDto>).FullName,
                     nameof(Handle),
                     JsonConvert.SerializeObject(request.Collection),
                     request.User);

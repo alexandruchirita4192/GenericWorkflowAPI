@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using GenericWorkflowAPI.Database;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 
 namespace GenericWorkflowAPI.IdentityServer4
 {
@@ -28,14 +29,33 @@ namespace GenericWorkflowAPI.IdentityServer4
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            var connectionString = Configuration.GetConnectionString();
+            var useSqlite = Configuration.UseSqlite();
+            var useSqlServer = Configuration.UseSqlServer();
+
+            if (useSqlite)
+            {
+                services.AddDbContext<SqliteApplicationDbContext>(options =>
+                {
+                    options.UseSqlite(connectionString);
+                });
+            }
+            else if (useSqlServer)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    options.UseSqlServer(connectionString);
+                });
+            }
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddIdentity<Domain.IdentityUser, Domain.IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            var identityBuilder = services.AddIdentity<Domain.IdentityUser, Domain.IdentityRole>();
+            if (useSqlite)
+                identityBuilder = identityBuilder.AddEntityFrameworkStores<SqliteApplicationDbContext>();
+            else if (useSqlServer)
+                identityBuilder = identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
+            identityBuilder.AddDefaultTokenProviders();
 
             var builder = services.AddIdentityServer(options =>
             {

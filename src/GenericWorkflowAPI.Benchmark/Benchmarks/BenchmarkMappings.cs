@@ -14,6 +14,7 @@ using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using GenericWorkflowAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -37,7 +38,7 @@ namespace GenericWorkflowAPI.Benchmark
         private readonly EntityService<WorkflowType> _entityServiceWorkflowType;
         private readonly GenericCodeRepository<Workflow, ApplicationDbContext> _repository;
         private readonly IMapper _mapper;
-        private readonly MappingHelper<Workflow, WorkflowDto> _mappingHelper;
+        private readonly MappingHelper<ApplicationDbContext, Workflow, WorkflowDto> _mappingHelper;
         private readonly List<Workflow> _entities;
         private readonly List<WorkflowDto> _dtos;
 
@@ -49,7 +50,7 @@ namespace GenericWorkflowAPI.Benchmark
         {
             ServicesExtensions.RegisterEncodingProvider();
             var configuration = GetConfiguration();
-            var dbContext = GetSqlServerDbContext(configuration);
+            var dbContext = GetDbContext(configuration, BenchmarkDatabaseContextType.SqlServer);
             _logger = GetLogger();
 
             _entityService = new EntityService<Workflow>();
@@ -71,7 +72,7 @@ namespace GenericWorkflowAPI.Benchmark
             serviceCollection.AddSingleton<IMemoryCache>(memoryCache);
             serviceCollection.AddSingleton<IReflectionMappingInfoProvider<Workflow, WorkflowDto>>(reflectionMappingInfoProvider);
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            _mappingHelper = new MappingHelper<Workflow, WorkflowDto>(_logger, _mapper, reflectionMappingInfoProvider, serviceProvider);
+            _mappingHelper = new MappingHelper<ApplicationDbContext, Workflow, WorkflowDto>(_logger, _mapper, reflectionMappingInfoProvider, serviceProvider);
 
             _entities = _repository.DbSet.Include(w => w.Type).AsNoTracking().ToList();
 
@@ -128,16 +129,26 @@ namespace GenericWorkflowAPI.Benchmark
             return configuration;
         }
 
-        public ApplicationDbContext GetSqlServerDbContext(IConfiguration configuration)
+        public enum BenchmarkDatabaseContextType
+        {
+            SqlServer,
+            Sqlite
+        }
+
+        public ApplicationDbContext GetDbContext(IConfiguration configuration, BenchmarkDatabaseContextType dbContextType)
         {
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer(connectionString)
-                .Options;
-            var dbContext = new ApplicationDbContext(options);
+            var connectionString = configuration.GetConnectionString();
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>();
+
+            if (dbContextType == BenchmarkDatabaseContextType.SqlServer)
+                options.UseSqlServer(connectionString);
+            else if (dbContextType == BenchmarkDatabaseContextType.Sqlite)
+                options.UseSqlite(connectionString);
+
+            var dbContext = new ApplicationDbContext(options.Options);
 
             return dbContext;
         }

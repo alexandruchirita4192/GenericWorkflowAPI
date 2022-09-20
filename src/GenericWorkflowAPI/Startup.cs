@@ -13,6 +13,7 @@ using GenericWorkflowAPI.Core.Services;
 using GenericWorkflowAPI.Database;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Extensions;
@@ -30,7 +31,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,8 +38,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Serilog;
 
 namespace GenericWorkflowAPI
@@ -189,32 +187,62 @@ namespace GenericWorkflowAPI
             // Add the memory cache services.
             services.AddMemoryCache();
 
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = Configuration.GetConnectionString();
 
             // Add SQL Server services and exception page
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            var useSqlServer = Configuration.UseSqlServer();
+            var useSqlite = Configuration.UseSqlite();
+
+            if (useSqlServer)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+            }
+            else if (useSqlite)
+            {
+                services.AddDbContext<SqliteApplicationDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+            }
+
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddSingleton<ApplicationDbContext>();
+
+            if (useSqlServer)
+            {
+                services.AddSingleton<ApplicationDbContext>();
+            }
+            else if (useSqlite)
+            {
+                services.AddSingleton<SqliteApplicationDbContext>();
+            }
 
             // Add Identity
-            services.AddIdentityCore<Domain.IdentityUser>(options =>
+            var identityBuilder =
+                services.AddIdentityCore<Domain.IdentityUser>(options =>
+                {
+                    options.Tokens.AuthenticatorIssuer = Configuration["Authentication:Issuer"];
+                    options.User.RequireUniqueEmail = true;
+                })
+                    .AddRoles<Domain.IdentityRole>();
+
+            if (useSqlServer)
             {
-                options.Tokens.AuthenticatorIssuer = Configuration["Authentication:Issuer"];
-                options.User.RequireUniqueEmail = true;
-            })
-                .AddRoles<Domain.IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                identityBuilder = identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
+            }
+            else if (useSqlite)
+            {
+                identityBuilder = identityBuilder.AddEntityFrameworkStores<SqliteApplicationDbContext>();
+            }
+
+            identityBuilder.AddDefaultTokenProviders();
 
             // Seed admin user data
             Task.Run(async () =>
             {
-                await services.EnsureSeedAdminUserData();
+                await services.EnsureSeedAdminUserData(Configuration);
             });
 
             // Run embedded resource SQL files
-            SeedDataExtension.RunEmbeddedResourcesInCurrentAssembly(connectionString);
+            SeedDataExtension.RunEmbeddedResourcesInCurrentAssembly(connectionString, Configuration);
 
             // Generate EdmModel containing DTOs because those are exposed by API (DTOs are derived from IBaseDto)
             var edmModel = EdmModelHelper.GetEdmModel();
@@ -251,7 +279,10 @@ namespace GenericWorkflowAPI
                 });
 
             // Add MediatR
-            services.AddMediatR(typeof(Workflow).Assembly, typeof(GenericCreateCommandHandler<Workflow, WorkflowDto>).Assembly);
+            services.AddMediatR(
+                typeof(Workflow).Assembly,
+                typeof(GenericCreateCommandHandler<ApplicationDbContext, Workflow, WorkflowDto>).Assembly
+            );
 
             // Add entities to dtos mapper
             services.AddSingleton(typeof(IEntityDtoMappingProvider), typeof(EntityDtoMappingProvider));
@@ -271,13 +302,34 @@ namespace GenericWorkflowAPI
                 services.AddEntityService(assemblyMapping.Mapping, Log.Logger);
 
                 // Database-related services: GenericRepository<TEntity, TDbContext> : IGenericRepository<TEntity>
-                services.AddDatabaseGenericRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                if (useSqlServer)
+                {
+                    services.AddDatabaseGenericRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
+                else if (useSqlite)
+                {
+                    services.AddDatabaseGenericRepositories<SqliteApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
 
                 // Database-related services: GenericCodeRepository<TEntity, TDbContext> : IGenericCodeRepository<TEntity>
-                services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                if (useSqlServer)
+                {
+                    services.AddDatabaseGenericCodeRepositories<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
+                else if (useSqlite)
+                {
+                    services.AddDatabaseGenericCodeRepositories<SqliteApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
 
                 // Mapping-related services: MappingHelper<TEntity, TDto> : IMappingHelper<TEntity, TDto>
-                services.AddMappingHelpers(assemblyMapping.Mapping, Log.Logger);
+                if (useSqlServer)
+                {
+                    services.AddMappingHelpers<ApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
+                else if (useSqlite)
+                {
+                    services.AddMappingHelpers<SqliteApplicationDbContext>(assemblyMapping.Mapping, Log.Logger);
+                }
 
                 // Mapping-related providers: ReflectionMappingInfoProvider<TEntity, TDto> : IReflectionMappingInfoProvider<TEntity, TDto>
                 services.AddReflectionMappingInfoProvider(assemblyMapping.Mapping, Log.Logger);
@@ -302,14 +354,21 @@ namespace GenericWorkflowAPI
             Core.Extensions.ServicesExtensions.RegisterEncodingProvider();
 
             // Add MediatR Handlers based on controllers (and log which handlers fail because entities or dtos do not implement what they should)
-            var servicePairs = MediatorHelper.GetServicePairs(Log.Logger);
+            var servicePairs =
+                useSqlServer
+                ? MediatorHelper.GetServicePairs<ApplicationDbContext>(Log.Logger)
+                : (
+                    useSqlite
+                    ? MediatorHelper.GetServicePairs<SqliteApplicationDbContext>(Log.Logger)
+                    : new List<Domain.ServiceInterfaceImplementationPair>()
+                );
             services.AddMediatRHandlersToServices(servicePairs, Log.Logger);
 
             // Add workflow service
-            services.AddSingleton<IWorkflowService, WorkflowService>();
+            services.AddScoped<IWorkflowService, WorkflowService>();
 
             // Add workflow command handler
-            services.AddSingleton<IRequestHandler<ExecuteWorkflowRequest, GenericApiResponse<string>>, ExecuteWorkflowCommandHandler>();
+            services.AddScoped<IRequestHandler<ExecuteWorkflowRequest, GenericApiResponse<string>>, ExecuteWorkflowCommandHandler>();
 
             // Swagger/OpenAPI ( https://aka.ms/aspnetcore/swashbuckle ):
             services.AddSwaggerGen(c =>

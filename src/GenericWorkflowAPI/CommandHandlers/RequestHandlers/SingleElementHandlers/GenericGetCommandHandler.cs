@@ -64,7 +64,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCreateCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({request.Code}) exception");
+                _logger.Error(ex, $"{typeof(GenericGetCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({request.Code}) exception");
                 return GenericApiResponse<TDto>.Problem(ValidationConstants.GenericValidationMessage, HttpStatusCode.InternalServerError);
             }
         }

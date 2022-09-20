@@ -11,20 +11,22 @@ using GenericWorkflowAPI.Domain.Entities;
 using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 
 namespace GenericWorkflowAPI.CommandHandlers
 {
-    public class GenericCreateCommandHandler<TEntity, TDto> : IRequestHandler<GenericCreateRequest<TDto>, GenericApiResponse<string>>
+    public class GenericCreateCommandHandler<TDbContext, TEntity, TDto> : IRequestHandler<GenericCreateRequest<TDto>, GenericApiResponse<string>>
+        where TDbContext : DbContext
         where TDto : class, IBaseDto, new()
         where TEntity : class, IBaseEntity, new()
     {
         private readonly IGenericRepository<TEntity> _repository;
         private readonly ILogger _logger;
-        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
+        private readonly IMappingHelper<TDbContext, TEntity, TDto> _mappingHelper;
 
-        public GenericCreateCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
+        public GenericCreateCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMappingHelper<TDbContext, TEntity, TDto> mappingHelper)
         {
             _repository = repository;
             _logger = logger;
@@ -63,7 +65,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"{typeof(GenericCreateCommandHandler<TEntity, TDto>).FullName}.{nameof(Handle)}({JsonConvert.SerializeObject(request.Item)}) exception");
+                _logger.Error(ex, $"{typeof(GenericCreateCommandHandler<TDbContext, TEntity, TDto>).FullName}.{nameof(Handle)}({JsonConvert.SerializeObject(request.Item)}) exception");
                 return GenericApiResponse<string>.Problem(ValidationConstants.GenericValidationMessage, HttpStatusCode.InternalServerError);
             }
         }

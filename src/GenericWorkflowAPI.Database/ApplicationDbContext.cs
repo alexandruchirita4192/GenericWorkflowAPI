@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using GenericWorkflowAPI.Domain;
 using GenericWorkflowAPI.Domain.Entities;
+using GenericWorkflowAPI.Domain.Entities.Extensions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -51,7 +52,7 @@ namespace GenericWorkflowAPI.Database
                    .AddJsonFile("appsettings.json")
                    .Build();
 
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                var connectionString = configuration.GetConnectionString();
                 optionsBuilder.UseSqlServer(connectionString);
             }
         }

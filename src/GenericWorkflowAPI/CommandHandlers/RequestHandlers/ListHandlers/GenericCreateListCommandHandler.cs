@@ -13,20 +13,22 @@ using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
 using GenericWorkflowAPI.Extensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 
 namespace GenericWorkflowAPI.CommandHandlers
 {
-    public class GenericCreateListCommandHandler<TEntity, TDto> : IRequestHandler<GenericCreateListRequest<TDto>, GenericApiResponse<string>>
+    public class GenericCreateListCommandHandler<TDbContext, TEntity, TDto> : IRequestHandler<GenericCreateListRequest<TDto>, GenericApiResponse<string>>
+        where TDbContext : DbContext
         where TDto : class, IBaseDto, new()
         where TEntity : class, IBaseEntity, new()
     {
         private readonly IGenericRepository<TEntity> _repository;
         private readonly ILogger _logger;
-        private readonly IMappingHelper<TEntity, TDto> _mappingHelper;
+        private readonly IMappingHelper<TDbContext, TEntity, TDto> _mappingHelper;
 
-        public GenericCreateListCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMappingHelper<TEntity, TDto> mappingHelper)
+        public GenericCreateListCommandHandler(IGenericRepository<TEntity> repository, ILogger logger, IMappingHelper<TDbContext, TEntity, TDto> mappingHelper)
         {
             _repository = repository;
             _logger = logger;
@@ -66,7 +68,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             catch (Exception ex)
             {
                 _logger.ErrorEx(ex,
-                    typeof(GenericCreateListCommandHandler<TEntity, TDto>).FullName,
+                    typeof(GenericCreateListCommandHandler<TDbContext, TEntity, TDto>).FullName,
                     nameof(Handle),
                     JsonConvert.SerializeObject(request.Collection),
                     request.User);

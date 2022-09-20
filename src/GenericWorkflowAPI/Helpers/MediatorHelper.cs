@@ -9,6 +9,7 @@ using GenericWorkflowAPI.Domain.Requests;
 using GenericWorkflowAPI.Domain.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -19,13 +20,16 @@ namespace GenericWorkflowAPI.Helpers
         /// <summary>
         /// Gets MediatR handlers based on controllers with their generic arguments
         /// </summary>
-        public static List<ServiceInterfaceImplementationPair> GetServicePairs(ILogger logger)
+        public static List<ServiceInterfaceImplementationPair> GetServicePairs<TDbContext>(ILogger logger)
+            where TDbContext : DbContext
         {
             var mappings = new List<ServiceInterfaceImplementationPair>();
 
             var types = GetControllerTypes();
             if (types == null || types.Count == 0)
                 return mappings;
+
+            var dbContextType = typeof(TDbContext);
 
             foreach (var type in types)
             {
@@ -56,7 +60,7 @@ namespace GenericWorkflowAPI.Helpers
                         (entityType, dtoType) => typeof(GenericCreateListRequest<>).MakeGenericType(dtoType),
                         (entityType, dtoType) => typeof(GenericApiResponse<string>),
                         (requestType, responseType, entityType, dtoType) => typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType),
-                        (requestType, responseType, entityType, dtoType) => typeof(GenericCreateListCommandHandler<,>).MakeGenericType(entityType, dtoType),
+                        (requestType, responseType, entityType, dtoType) => typeof(GenericCreateListCommandHandler<,,>).MakeGenericType(dbContextType, entityType, dtoType),
                         mappings, entityType, dtoType, logger);
 
                     // Example handling input GenericCreateRequest:
@@ -68,7 +72,7 @@ namespace GenericWorkflowAPI.Helpers
                         (entityType, dtoType) => typeof(GenericCreateRequest<>).MakeGenericType(dtoType),
                         (entityType, dtoType) => typeof(GenericApiResponse<string>),
                         (requestType, responseType, entityType, dtoType) => typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType),
-                        (requestType, responseType, entityType, dtoType) => typeof(GenericCreateCommandHandler<,>).MakeGenericType(entityType, dtoType),
+                        (requestType, responseType, entityType, dtoType) => typeof(GenericCreateCommandHandler<,,>).MakeGenericType(dbContextType, entityType, dtoType),
                         mappings, entityType, dtoType, logger);
 
                     // Example handling input GenericDeleteListRequest:
@@ -104,7 +108,7 @@ namespace GenericWorkflowAPI.Helpers
                         (entityType, dtoType) => typeof(GenericUpdateListRequest<>).MakeGenericType(dtoType),
                         (entityType, dtoType) => typeof(GenericApiResponse<string>),
                         (requestType, responseType, entityType, dtoType) => typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType),
-                        (requestType, responseType, entityType, dtoType) => typeof(GenericUpdateListCommandHandler<,>).MakeGenericType(entityType, dtoType),
+                        (requestType, responseType, entityType, dtoType) => typeof(GenericUpdateListCommandHandler<,,>).MakeGenericType(dbContextType, entityType, dtoType),
                         mappings, entityType, dtoType, logger);
 
                     // Example handling input GenericUpdateRequest:
@@ -116,7 +120,7 @@ namespace GenericWorkflowAPI.Helpers
                         (entityType, dtoType) => typeof(GenericUpdateRequest<>).MakeGenericType(dtoType),
                         (entityType, dtoType) => typeof(GenericApiResponse<string>),
                         (requestType, responseType, entityType, dtoType) => typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType),
-                        (requestType, responseType, entityType, dtoType) => typeof(GenericUpdateCommandHandler<,>).MakeGenericType(entityType, dtoType),
+                        (requestType, responseType, entityType, dtoType) => typeof(GenericUpdateCommandHandler<,,>).MakeGenericType(dbContextType, entityType, dtoType),
                         mappings, entityType, dtoType, logger);
                 }
 

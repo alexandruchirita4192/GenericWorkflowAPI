@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GenericWorkflowAPI.Domain.DTOs;
 using GenericWorkflowAPI.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace GenericWorkflowAPI.AutoMapper
 {
@@ -10,7 +11,8 @@ namespace GenericWorkflowAPI.AutoMapper
     /// Helper used for mapping <typeparamref name="TDto"/> to <typeparamref name="TEntity"/> and <see cref="List{TDto}"/> to <see cref="List{TEntity}"/>
     ///  (bi-directional mapping, using reflection and sometimes getting extra data from database creating <see cref="IGenericCodeRepository"/>).
     /// </summary>
-    public interface IMappingHelper<TEntity, TDto>
+    public interface IMappingHelper<TDbContext, TEntity, TDto>
+        where TDbContext : DbContext
         where TEntity : class, IBaseEntity, new()
         where TDto : class, IBaseDto, new()
     {
