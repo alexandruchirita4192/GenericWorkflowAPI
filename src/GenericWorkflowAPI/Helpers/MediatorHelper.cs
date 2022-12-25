@@ -33,10 +33,14 @@ namespace GenericWorkflowAPI.Helpers
 
             foreach (var type in types)
             {
+                // Type example: WorkflowController with base type GenericCRUDController<Workflow, WorkflowDto>
+
                 if (type.BaseType?.GetGenericArguments()?.Length != 2)
                     continue;
 
+                // Entity example: Workflow
                 var entityType = type.BaseType.GetGenericArguments()[0];
+                // Dto example: WorkflowDto
                 var dtoType = type.BaseType.GetGenericArguments()[1];
 
                 // Example: WorkflowController : GenericCRUDController<Workflow, WorkflowDto>
@@ -53,7 +57,7 @@ namespace GenericWorkflowAPI.Helpers
 
                     // Example handling input GenericCreateListRequest:
                     //services.AddScoped(typeof(IRequestHandler<GenericCreateListRequest<WorkflowDto>, GenericApiResponse<string>>),
-                    //    typeof(GenericCreateListCommandHandler<Workflow, WorkflowDto>));
+                    //    typeof(GenericCreateListCommandHandler<TDbContext, Workflow, WorkflowDto>));
 
                     // GenericCreateListRequest<TDto>:
                     MediatorHelperSetupTypeWrapInTryCatch(
@@ -65,7 +69,7 @@ namespace GenericWorkflowAPI.Helpers
 
                     // Example handling input GenericCreateRequest:
                     //services.AddScoped(typeof(IRequestHandler<GenericCreateRequest<WorkflowDto>, GenericApiResponse<string>>),
-                    //    typeof(GenericCreateCommandHandler<Workflow, WorkflowDto>));
+                    //    typeof(GenericCreateCommandHandler<TDbContext, Workflow, WorkflowDto>));
 
                     // GenericCreateRequest<TDto>:
                     MediatorHelperSetupTypeWrapInTryCatch(
@@ -101,7 +105,7 @@ namespace GenericWorkflowAPI.Helpers
 
                     // Example handling input GenericUpdateListRequest:
                     //services.AddScoped(typeof(IRequestHandler<GenericUpdateListRequest<WorkflowDto>, GenericApiResponse<string>>),
-                    //    typeof(GenericUpdateListCommandHandler<Workflow, WorkflowDto>));
+                    //    typeof(GenericUpdateListCommandHandler<TDbContext, Workflow, WorkflowDto>));
 
                     // GenericUpdateListRequest<TDto>:
                     MediatorHelperSetupTypeWrapInTryCatch(
@@ -113,7 +117,7 @@ namespace GenericWorkflowAPI.Helpers
 
                     // Example handling input GenericUpdateRequest:
                     //services.AddScoped(typeof(IRequestHandler<GenericUpdateRequest<WorkflowDto>, GenericApiResponse<string>>),
-                    //    typeof(GenericUpdateCommandHandler<Workflow, WorkflowDto>));
+                    //    typeof(GenericUpdateCommandHandler<TDbContext, Workflow, WorkflowDto>));
 
                     // GenericUpdateRequest<TDto>:
                     MediatorHelperSetupTypeWrapInTryCatch(

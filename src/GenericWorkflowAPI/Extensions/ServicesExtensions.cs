@@ -86,7 +86,7 @@ namespace GenericWorkflowAPI.Extensions
             where TDbContext : DbContext
         {
             // Mapping Example:
-            //services.AddSingleton(typeof(IMappingHelper<Workflow, WorkflowDto>), typeof(MappingHelper<Workflow, WorkflowDto>));
+            //services.AddSingleton(typeof(IMappingHelper<ApplicationDbContext, Workflow, WorkflowDto>), typeof(MappingHelper<ApplicationDbContext, Workflow, WorkflowDto>));
 
             var dbContextType = typeof(TDbContext);
 

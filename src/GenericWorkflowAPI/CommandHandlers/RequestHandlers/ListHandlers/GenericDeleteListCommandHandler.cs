@@ -61,7 +61,7 @@ namespace GenericWorkflowAPI.CommandHandlers
             catch (Exception ex)
             {
                 _logger.ErrorEx(ex,
-                    typeof(GenericDeleteCommandHandler<TEntity, TDto>).FullName,
+                    typeof(GenericDeleteListCommandHandler<TEntity, TDto>).FullName,
                     nameof(Handle),
                     JsonConvert.SerializeObject(request.Codes),
                     request.User);
