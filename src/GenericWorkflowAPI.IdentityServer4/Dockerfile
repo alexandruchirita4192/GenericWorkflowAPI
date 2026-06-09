@@ -1,13 +1,13 @@
 # Build from the repository root:
 #   docker build -f src/GenericWorkflowAPI.IdentityServer4/Dockerfile -t genericworkflowapi-identityserver4 .
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 ENV ASPNETCORE_URLS=http://+:80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY ["src/GenericWorkflowAPI.IdentityServer4/GenericWorkflowAPI.IdentityServer4.csproj", "GenericWorkflowAPI.IdentityServer4/"]
