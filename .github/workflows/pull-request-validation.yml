@@ -1,0 +1,32 @@
+name: Pull Request Validation
+
+"on":
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET 5 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Restore solution packages
+        run: dotnet restore src/GenericWorkflowAPI.sln
+
+      - name: Build all projects
+        run: dotnet build src/GenericWorkflowAPI.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test src/GenericWorkflowAPI.UnitTesting/GenericWorkflowAPI.UnitTesting.csproj --configuration Release --no-build --logger trx
