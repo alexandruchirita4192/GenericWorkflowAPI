@@ -1,6 +1,6 @@
 # GenericWorkflowAPI
 
-GenericWorkflowAPI is a .NET 5 solution for defining and running configurable state-machine workflows through a versioned REST API. The application lets clients maintain workflow metadata (types, workflows, states, transitions, input-code definitions), execute workflow instances, and inspect runtime instance data and history. The solution also includes an IdentityServer4 host for authentication flows, an Entity Framework Core persistence layer, unit tests, and mapping/benchmark projects.
+GenericWorkflowAPI is a .NET 10 solution for defining and running configurable state-machine workflows through a versioned REST API. The application lets clients maintain workflow metadata (types, workflows, states, transitions, input-code definitions), execute workflow instances, and inspect runtime instance data and history. The solution also includes an IdentityServer4 host for authentication flows, an Entity Framework Core persistence layer, unit tests, and mapping/benchmark projects.
 
 ## Solution layout
 
@@ -155,7 +155,7 @@ EF Core contexts expose DbSets for all workflow resources plus ASP.NET Identity 
 
 Prerequisites:
 
-- .NET 5 SDK/runtime compatible with the solution target framework.
+- .NET 10 SDK/runtime compatible with the solution target framework.
 - SQL Server or SQLite, depending on `SqlType` and connection-string settings.
 
 Common commands:
